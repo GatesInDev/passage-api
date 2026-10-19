@@ -3,7 +3,7 @@ package br.com.passage.api.ticket.internal.web;
 import br.com.passage.api.ticket.internal.dto.CreateTicketRequest;
 import br.com.passage.api.ticket.internal.dto.TicketResponse;
 import br.com.passage.api.ticket.internal.service.CreateTicketService;
-import br.com.passage.api.ticket.internal.service.FindTicketService;
+import br.com.passage.api.ticket.internal.service.FindByIdTicketService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -15,6 +15,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -26,7 +27,7 @@ import java.util.UUID;
 public class TicketController {
 
     private final CreateTicketService createTicketService;
-    private final FindTicketService findTicketService;
+    private final FindByIdTicketService findByIdTicketService;
 
     @Operation(
             summary = "Cadastrar nova passagem",
@@ -49,6 +50,7 @@ public class TicketController {
                     content = @Content
             )
     })
+    @PreAuthorize("hasAnyRole('ADMIN', 'TICKET_SELLER')")
     @PostMapping
     public ResponseEntity<TicketResponse> create(@Valid @RequestBody CreateTicketRequest request) {
         TicketResponse response = createTicketService.execute(request);
@@ -76,6 +78,7 @@ public class TicketController {
                     content = @Content
             )
     })
+    @PreAuthorize("hasAnyRole('ADMIN', 'TICKET_SELLER', 'INSPECTOR')")
     @GetMapping("/{id}")
     public ResponseEntity<TicketResponse> findById(
             @Parameter(
@@ -85,6 +88,6 @@ public class TicketController {
             )
             @PathVariable UUID id
     ) {
-        return ResponseEntity.ok(findTicketService.execute(id));
+        return ResponseEntity.ok(findByIdTicketService.execute(id));
     }
 }

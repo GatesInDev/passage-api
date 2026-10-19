@@ -1,6 +1,5 @@
 package br.com.passage.api.ticket.internal.dto;
 
-import br.com.passage.api.ticket.internal.domain.enums.TicketScope;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.math.BigDecimal;
@@ -42,9 +41,9 @@ public record TicketResponse(
                 example = "12345678909")
         String passengerDocument,
 
-        @Schema(description = "Número do assento reservado",
-                example = "12")
-        String seatNumber,
+        @Schema(description = "Identificador UUID do assento reservado",
+                example = "b1ffcd88-8d1c-4fa7-aa5e-5cc8ac291b22")
+        UUID seatId,
 
         @Schema(description = "Valor da passagem em reais",
                 example = "189.90")
@@ -56,9 +55,5 @@ public record TicketResponse(
 
         @Schema(description = "Identificador UUID da rota associada",
                 example = "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11")
-        UUID routeId,
-
-        @Schema(description = "Classe do serviço da passagem",
-                example = "EXECUTIVO")
-        TicketScope scope
+        UUID routeId
 ) {}

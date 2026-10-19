@@ -1,6 +1,5 @@
 package br.com.passage.api.ticket.internal.dto;
 
-import br.com.passage.api.ticket.internal.domain.enums.TicketScope;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.*;
 import org.hibernate.validator.constraints.br.CPF;
@@ -43,14 +42,12 @@ public record CreateTicketRequest(
         String passengerDocument,
 
         @Schema(
-                description = "Número do assento reservado",
-                example = "12",
-                requiredMode = Schema.RequiredMode.REQUIRED,
-                maxLength = 8
+                description = "Identificador UUID do assento reservado",
+                example = "b1ffcd88-8d1c-4fa7-aa5e-5cc8ac291b22",
+                requiredMode = Schema.RequiredMode.REQUIRED
         )
-        @NotBlank(message = "O número do assento é obrigatório.")
-        @Size(max = 8, message = "O número do assento deve ter no máximo 8 caracteres.")
-        String seatNumber,
+        @NotNull(message = "O identificador do assento é obrigatório.")
+        UUID seatId,
 
         @Schema(
                 description = "Valor da passagem em reais",
@@ -76,13 +73,5 @@ public record CreateTicketRequest(
                 requiredMode = Schema.RequiredMode.REQUIRED
         )
         @NotNull(message = "O identificador da rota é obrigatório.")
-        UUID routeId,
-
-        @Schema(
-                description = "Classe do serviço da passagem",
-                example = "EXECUTIVO",
-                requiredMode = Schema.RequiredMode.REQUIRED
-        )
-        @NotNull(message = "O escopo da passagem é obrigatório.")
-        TicketScope scope
+        UUID routeId
 ) {}

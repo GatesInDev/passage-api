@@ -26,11 +26,10 @@ public class CreateTicketService {
                 .code(request.code())
                 .passengerName(request.passengerName())
                 .passengerDocument(request.passengerDocument())
-                .seatNumber(request.seatNumber())
+                .seatId(request.seatId())
                 .price(request.price())
                 .departureDateTime(request.departureDateTime())
                 .routeId(request.routeId())
-                .scope(request.scope())
                 .build();
 
         Ticket saved = ticketRepository.save(ticket);
@@ -44,11 +43,10 @@ public class CreateTicketService {
                 saved.getCode(),
                 saved.getPassengerName(),
                 saved.getPassengerDocument(),
-                saved.getSeatNumber(),
+                saved.getSeatId(),
                 saved.getPrice(),
                 saved.getDepartureDateTime(),
-                saved.getRouteId(),
-                saved.getScope()
+                saved.getRouteId()
         );
     }
 }

@@ -12,7 +12,7 @@ import java.util.UUID;
 
 @Service
 @AllArgsConstructor
-public class FindTicketService {
+public class FindByIdTicketService {
 
     private final TicketRepository ticketRepository;
 
@@ -31,11 +31,10 @@ public class FindTicketService {
                 ticket.getCode(),
                 ticket.getPassengerName(),
                 ticket.getPassengerDocument(),
-                ticket.getSeatNumber(),
+                ticket.getSeatId(),
                 ticket.getPrice(),
                 ticket.getDepartureDateTime(),
-                ticket.getRouteId(),
-                ticket.getScope()
+                ticket.getRouteId()
         );
     }
 }

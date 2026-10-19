@@ -1,7 +1,6 @@
 package br.com.passage.api.ticket.internal.domain.entities;
 
 import br.com.passage.api.shared.domain.entities.EntityBase;
-import br.com.passage.api.ticket.internal.domain.enums.TicketScope;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
@@ -42,10 +41,16 @@ public class Ticket extends EntityBase {
     private String passengerDocument;
 
     /**
-     * Número do assento reservado.
+     * Identificador do assento reservado para a passagem.
+     *
+     * <p>Referenciado por UUID para manter o desacoplamento entre módulos.</p>
+     *
+     * <p>A classe do serviço da viagem não é armazenada aqui: ela é determinada
+     * pela qualidade do assento reservado, evitando manter o mesmo dado em dois
+     * lugares com risco de divergência.</p>
      */
-    @Column(name = "seat_number", nullable = false, length = 8)
-    private String seatNumber;
+    @Column(name = "seat_id", nullable = false)
+    private UUID seatId;
 
     /**
      * Valor da passagem em reais.
@@ -66,11 +71,4 @@ public class Ticket extends EntityBase {
      */
     @Column(name = "route_id", nullable = false)
     private UUID routeId;
-
-    /**
-     * Escopo da passagem (ex: ida simples, ida e volta).
-     */
-    @Enumerated(EnumType.STRING)
-    @Column(name = "scope", nullable = false, length = 20)
-    private TicketScope scope;
 }
