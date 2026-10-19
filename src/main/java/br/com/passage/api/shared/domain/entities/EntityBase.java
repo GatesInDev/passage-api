@@ -1,10 +1,7 @@
 package br.com.passage.api.shared.domain.entities;
 
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -132,6 +129,7 @@ public abstract class EntityBase {
      * <p>Por padrão, representa o estado de disponibilidade do registro
      * para utilização pelas regras de negócio.</p>
      */
+    @Setter
     @Column(name = "is_active", nullable = false)
     protected boolean isActive = true;
 
@@ -141,6 +139,7 @@ public abstract class EntityBase {
      * <p>Quando {@code true}, o registro permanece fisicamente armazenado
      * no banco de dados, mas é considerado excluído pela aplicação.</p>
      */
+    @Setter
     @Column(name = "is_deleted", nullable = false)
     protected boolean isDeleted = false;
 

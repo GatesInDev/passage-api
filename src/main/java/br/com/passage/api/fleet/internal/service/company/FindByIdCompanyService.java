@@ -5,16 +5,14 @@ import br.com.passage.api.fleet.internal.dto.company.CompanyResponse;
 import br.com.passage.api.fleet.internal.repository.CompanyRepository;
 import br.com.passage.api.shared.domain.exceptions.BusinessException;
 import jakarta.transaction.Transactional;
-import jakarta.validation.constraints.Null;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
 import java.util.UUID;
 
 @Service
 @AllArgsConstructor
-public class FindCompanyService
+public class FindByIdCompanyService
 {
     private final CompanyRepository companyRepository;
 

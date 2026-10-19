@@ -3,7 +3,7 @@ package br.com.passage.api.fleet.internal.web;
 import br.com.passage.api.fleet.internal.dto.company.CompanyResponse;
 import br.com.passage.api.fleet.internal.dto.company.CreateCompanyRequest;
 import br.com.passage.api.fleet.internal.service.company.CreateCompanyService;
-import br.com.passage.api.fleet.internal.service.company.FindCompanyService;
+import br.com.passage.api.fleet.internal.service.company.FindByIdCompanyService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -15,6 +15,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -26,7 +27,7 @@ import java.util.UUID;
 public class CompanyController {
 
     private final CreateCompanyService createCompanyService;
-    private final FindCompanyService findCompanyService;
+    private final FindByIdCompanyService findByIdCompanyService;
 
     @Operation(
             summary = "Cadastrar nova empresa",
@@ -49,6 +50,7 @@ public class CompanyController {
                     content = @Content
             )
     })
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     public ResponseEntity<CompanyResponse> create(@Valid @RequestBody CreateCompanyRequest request) {
         CompanyResponse response = createCompanyService.execute(request);
@@ -79,6 +81,7 @@ public class CompanyController {
                     content = @Content
             )
     })
+    @PreAuthorize("hasAnyRole('ADMIN', 'FLEET_MANAGER')")
     @GetMapping("/{id}")
     public ResponseEntity<CompanyResponse> findById(
             @Parameter(
@@ -88,6 +91,6 @@ public class CompanyController {
             )
             @PathVariable UUID id
     ) {
-        return ResponseEntity.ok(findCompanyService.execute(id));
+        return ResponseEntity.ok(findByIdCompanyService.execute(id));
     }
 }
