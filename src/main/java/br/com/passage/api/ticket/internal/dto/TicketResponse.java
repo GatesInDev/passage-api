@@ -1,5 +1,6 @@
 package br.com.passage.api.ticket.internal.dto;
 
+import br.com.passage.api.ticket.internal.domain.entities.Ticket;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.math.BigDecimal;
@@ -56,4 +57,28 @@ public record TicketResponse(
         @Schema(description = "Identificador UUID da rota associada",
                 example = "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11")
         UUID routeId
-) {}
+) {
+
+    /**
+     * Converte uma passagem persistida em sua representação de resposta.
+     *
+     * @param ticket passagem de origem
+     * @return representação de resposta correspondente
+     */
+    public static TicketResponse from(Ticket ticket) {
+        return new TicketResponse(
+                ticket.getId(),
+                ticket.getCreatedAt(),
+                ticket.getUpdatedAt(),
+                ticket.isActive(),
+                ticket.isDeleted(),
+                ticket.getCode(),
+                ticket.getPassengerName(),
+                ticket.getPassengerDocument(),
+                ticket.getSeatId(),
+                ticket.getPrice(),
+                ticket.getDepartureDateTime(),
+                ticket.getRouteId()
+        );
+    }
+}

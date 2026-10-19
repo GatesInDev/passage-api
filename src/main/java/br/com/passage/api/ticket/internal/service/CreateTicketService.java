@@ -30,23 +30,13 @@ public class CreateTicketService {
                 .price(request.price())
                 .departureDateTime(request.departureDateTime())
                 .routeId(request.routeId())
+                // @SuperBuilder ignora o valor inicial de isActive em EntityBase,
+                // por isso a passagem precisa nascer ativa explicitamente.
+                .isActive(true)
                 .build();
 
         Ticket saved = ticketRepository.save(ticket);
 
-        return new TicketResponse(
-                saved.getId(),
-                saved.getCreatedAt(),
-                saved.getUpdatedAt(),
-                saved.isActive(),
-                saved.isDeleted(),
-                saved.getCode(),
-                saved.getPassengerName(),
-                saved.getPassengerDocument(),
-                saved.getSeatId(),
-                saved.getPrice(),
-                saved.getDepartureDateTime(),
-                saved.getRouteId()
-        );
+        return TicketResponse.from(saved);
     }
 }

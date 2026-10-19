@@ -22,19 +22,6 @@ public class FindByIdTicketService {
         Ticket ticket = ticketRepository.findById(id)
                 .orElseThrow(() -> new BusinessException("Não foi possível encontrar uma passagem com o identificador: " + id));
 
-        return new TicketResponse(
-                ticket.getId(),
-                ticket.getCreatedAt(),
-                ticket.getUpdatedAt(),
-                ticket.isActive(),
-                ticket.isDeleted(),
-                ticket.getCode(),
-                ticket.getPassengerName(),
-                ticket.getPassengerDocument(),
-                ticket.getSeatId(),
-                ticket.getPrice(),
-                ticket.getDepartureDateTime(),
-                ticket.getRouteId()
-        );
+        return TicketResponse.from(ticket);
     }
 }
