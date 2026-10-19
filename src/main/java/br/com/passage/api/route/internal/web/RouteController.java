@@ -6,6 +6,7 @@ import java.util.UUID;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import br.com.passage.api.route.internal.dto.CreateRouteRequest;
 import br.com.passage.api.route.internal.dto.RouteResponse;
 import br.com.passage.api.route.internal.service.CreateRouteService;
+import br.com.passage.api.route.internal.service.DeleteRouteService;
 import br.com.passage.api.route.internal.service.FindRouteService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -36,6 +38,7 @@ public class RouteController {
 
     private final CreateRouteService createRouteService;
     private final FindRouteService findRouteService;
+    private final DeleteRouteService deleteRouteService;
 
     @Operation(
             summary = "Cadastrar nova rota",
@@ -90,16 +93,41 @@ public class RouteController {
     }
 
     @Operation(
-        summary = "Listar todas as rotas",
-        description = "Retorna a listagem completa das rotas cadastradas no sistema, excluindo as que foram marcadas como deletadas."
+            summary = "Listar todas as rotas",
+            description = "Retorna a listagem completa das rotas cadastradas no sistema, excluindo as que foram marcadas como deletadas."
     )
     @ApiResponse(
-        responseCode = "200",
-        description = "Lista de rotas recuperada com sucesso",
-        content = @Content(mediaType = "application/json", array = @ArraySchema (schema = @Schema(implementation = RouteResponse.class)))
+            responseCode = "200",
+            description = "Lista de rotas recuperada com sucesso",
+            content = @Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = RouteResponse.class)))
     )
     @GetMapping
-        public ResponseEntity<List<RouteResponse>> findAll() {
-                return ResponseEntity.ok(findRouteService.executeAll());
-        }
+    public ResponseEntity<List<RouteResponse>> findAll() {
+        return ResponseEntity.ok(findRouteService.executeAll());
+    }
+
+    @Operation(
+            summary = "Remover Rota (exclusão Lógica)",
+            description = "Marca uma rota como deletada, removendo-a da listagem de rotas."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "204",
+                    description = "Rota removida com sucesso"
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Rota não encontrada com o identificador fornecido",
+                    content = @Content
+            )
+    })
+    @PreAuthorize("hasAnyRole('ADMIN', 'FLEET_MANAGER')")
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(
+            @Parameter(description = "UUID público da rota", example = "e9235aa8-262f-446f-b6fb-e8cce4c8e8f0", required = true)
+            @PathVariable UUID id
+    ) {
+        deleteRouteService.execute(id);
+        return ResponseEntity.noContent().build();
+    }
 }
