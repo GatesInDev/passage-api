@@ -10,15 +10,18 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import br.com.passage.api.route.internal.dto.CreateRouteRequest;
 import br.com.passage.api.route.internal.dto.RouteResponse;
+import br.com.passage.api.route.internal.dto.UpdateRouteRequest;
 import br.com.passage.api.route.internal.service.CreateRouteService;
 import br.com.passage.api.route.internal.service.DeleteRouteService;
 import br.com.passage.api.route.internal.service.FindRouteService;
+import br.com.passage.api.route.internal.service.UpdateRouteService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -39,6 +42,7 @@ public class RouteController {
     private final CreateRouteService createRouteService;
     private final FindRouteService findRouteService;
     private final DeleteRouteService deleteRouteService;
+    private final UpdateRouteService updateRouteService;
 
     @Operation(
             summary = "Cadastrar nova rota",
@@ -104,6 +108,37 @@ public class RouteController {
     @GetMapping
     public ResponseEntity<List<RouteResponse>> findAll() {
         return ResponseEntity.ok(findRouteService.executeAll());
+    }
+
+    @Operation(
+            summary = "Atualizar rota",
+            description = "Atualiza os dados de uma rota existente, incluindo nome, cidades de origem e destino, estados, distância, duração estimada, escopo de serviço e órgão regulador."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Rota atualizada com sucesso",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = RouteResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Payload inválido (erro de validação dos campos do payload)",
+                    content = @Content
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Rota não encontrada com o identificador fornecido",
+                    content = @Content
+            )
+    })
+    @PreAuthorize("hasAnyRole('ADMIN', 'FLEET_MANAGER')")
+    @PutMapping("/{id}")
+    public ResponseEntity<RouteResponse> update(
+            @Parameter(description = "UUID público da rota", example = "e9235aa8-262f-446f-b6fb-e8cce4c8e8f0", required = true)
+            @PathVariable UUID id,
+            @Valid @RequestBody UpdateRouteRequest request
+    ) {
+        return ResponseEntity.ok(updateRouteService.execute(id, request));
     }
 
     @Operation(
