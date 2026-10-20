@@ -37,22 +37,6 @@ public class UpdateRouteService {
 
         Route updateRoute = routeRepository.save(route);
 
-        return new RouteResponse(
-            updateRoute.getId(),
-            updateRoute.getCreatedAt(),
-            updateRoute.getUpdatedAt(),
-            updateRoute.isActive(),
-            updateRoute.isDeleted(),
-            updateRoute.getCode(),
-            updateRoute.getName(),
-            updateRoute.getOriginCity(),
-            updateRoute.getOriginState(),
-            updateRoute.getDestinationCity(),
-            updateRoute.getDestinationState(),
-            updateRoute.getDistanceKm(),
-            updateRoute.getEstimatedDurationMinutes(),
-            updateRoute.getServiceScope(),
-            updateRoute.getRegulatoryAgency()
-        );
+        return RouteResponse.from(updateRoute);
     }
 }

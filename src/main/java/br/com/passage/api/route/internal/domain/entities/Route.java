@@ -1,6 +1,7 @@
 package br.com.passage.api.route.internal.domain.entities;
 
 import java.math.BigDecimal;
+import java.util.UUID;
 
 import br.com.passage.api.route.internal.domain.enums.RouteScope;
 import br.com.passage.api.shared.domain.entities.EntityBase;
@@ -35,6 +36,14 @@ public class Route extends EntityBase {
      */
     @Column(name = "code", nullable = false, length = 64, unique = true)
     private String code;
+
+    /**
+     * Identificador da empresa associada à rota.
+     *
+     * <p>Representa o UUID da empresa que possui ou opera a rota.</p>
+     */
+    @Column(name = "company_uuid", nullable = false)
+    private UUID companyUuid;
 
     /**
      * Nome da rota.
@@ -109,4 +118,20 @@ public class Route extends EntityBase {
     @Column(name = "regulatory_agency", nullable = false, length = 64)
     private String regulatoryAgency;
 
+    /**
+     * Indica se a rota pertence à empresa informada.
+     *
+     * <p>Utilizado para restringir alterações às rotas da própria empresa
+     * do usuário. Retorna {@code false} quando o identificador informado é
+     * nulo, como no caso de usuários sem empresa vinculada.</p>
+     *
+     * @param companyUuid UUID da empresa a ser verificada
+     * @return {@code true} se a rota pertence à empresa informada
+     */
+    public boolean belongsTo(UUID companyUuid){
+        if (companyUuid == null){
+            return false;
+        }
+        return companyUuid.equals(this.companyUuid);
+    }
 }

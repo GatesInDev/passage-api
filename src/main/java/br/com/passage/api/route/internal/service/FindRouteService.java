@@ -23,34 +23,14 @@ public class FindRouteService {
         Route route = routeRepository.findById(id)
                 .filter(found -> !found.isDeleted())
                 .orElseThrow(() -> new BusinessException("Rota não encontrada com o identificador: " + id));
-        return toResponse(route);
+        return RouteResponse.from(route);
     }
 
     @Transactional(readOnly = true)
     public List<RouteResponse> executeAll(){
         return routeRepository.findAll().stream()
                 .filter(route -> !route.isDeleted())
-                .map(this::toResponse)
+                .map(RouteResponse::from)
                 .toList();
-    }
-
-    private RouteResponse toResponse(Route route){
-        return new RouteResponse(
-            route.getId(),
-            route.getCreatedAt(),
-            route.getUpdatedAt(),
-            route.isActive(),
-            route.isDeleted(),
-            route.getCode(),
-            route.getName(),
-            route.getOriginCity(),
-            route.getOriginState(),
-            route.getDestinationCity(),
-            route.getDestinationState(),
-            route.getDistanceKm(),
-            route.getEstimatedDurationMinutes(),
-            route.getServiceScope(),
-            route.getRegulatoryAgency() 
-        );
     }
 }

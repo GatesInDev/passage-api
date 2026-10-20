@@ -25,6 +25,7 @@ public class CreateRouteService {
 
         Route route = new Route(
             request.code(),
+            request.companyUuid(),
             request.name(),
             request.originCity(),
             request.originState(), 
@@ -38,22 +39,6 @@ public class CreateRouteService {
 
         Route savedRoute = routeRepository.save(route);
 
-        return new RouteResponse(
-            savedRoute.getId(),
-            savedRoute.getCreatedAt(),
-            savedRoute.getUpdatedAt(),
-            savedRoute.isActive(),
-            savedRoute.isDeleted(),
-            savedRoute.getCode(),
-            savedRoute.getName(),
-            savedRoute.getOriginCity(),
-            savedRoute.getOriginState(),
-            savedRoute.getDestinationCity(),
-            savedRoute.getDestinationState(),
-            savedRoute.getDistanceKm(),
-            savedRoute.getEstimatedDurationMinutes(),
-            savedRoute.getServiceScope(),
-            savedRoute.getRegulatoryAgency()
-        );
+        return RouteResponse.from(savedRoute);
     }
 }
