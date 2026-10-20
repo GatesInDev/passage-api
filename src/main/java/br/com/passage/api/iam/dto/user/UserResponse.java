@@ -1,6 +1,6 @@
 package br.com.passage.api.iam.dto.user;
 
-import br.com.passage.api.iam.internal.domain.enums.UserRole;
+import br.com.passage.api.iam.enums.UserRole;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.time.Instant;

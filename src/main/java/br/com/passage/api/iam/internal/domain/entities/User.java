@@ -1,6 +1,6 @@
 package br.com.passage.api.iam.internal.domain.entities;
 
-import br.com.passage.api.iam.internal.domain.enums.UserRole;
+import br.com.passage.api.iam.enums.UserRole;
 import br.com.passage.api.shared.domain.entities.EntityBase;
 import jakarta.persistence.*;
 import lombok.*;
