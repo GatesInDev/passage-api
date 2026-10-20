@@ -1,4 +1,4 @@
-package br.com.passage.api.iam.internal.domain.enums;
+package br.com.passage.api.iam.enums;
 
 /**
  * Define os papéis e níveis de autoridade de acesso dos usuários no sistema Passage API.
