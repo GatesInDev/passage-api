@@ -1,6 +1,7 @@
 package br.com.passage.api.route.internal.dto;
 
 import java.math.BigDecimal;
+import java.util.UUID;
 
 import br.com.passage.api.route.internal.domain.enums.RouteScope;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -22,6 +23,12 @@ public record CreateRouteRequest
         @NotBlank(message = "O código da rota é obrigatório.")
         @Size(max = 64, message = "O código da rota deve ter no máximo 64 caracteres.")
         String code,
+
+        @Schema(
+                description = "UUID da empresa dona da rota. Obrigatório apenas para ADMIN; para FLEET_MANAGER é ignorado, e a empresa vem do usuário logado.",
+                example = "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11"
+        )
+        UUID companyUuid,
 
         @Schema(
                 description = "Nome descritivo da linha/rota",
