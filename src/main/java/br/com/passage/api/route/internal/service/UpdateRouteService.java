@@ -2,9 +2,13 @@ package br.com.passage.api.route.internal.service;
 
 import java.util.UUID;
 
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import br.com.passage.api.iam.CurrentUser;
+import br.com.passage.api.iam.IamApi;
+import br.com.passage.api.iam.enums.UserRole;
 import br.com.passage.api.route.internal.domain.entities.Route;
 import br.com.passage.api.route.internal.dto.RouteResponse;
 import br.com.passage.api.route.internal.dto.UpdateRouteRequest;
@@ -17,6 +21,7 @@ import lombok.RequiredArgsConstructor;
 public class UpdateRouteService {
     
     private final RouteRepository routeRepository;
+    private final IamApi iamApi;
 
     @Transactional 
     public RouteResponse execute(UUID id, UpdateRouteRequest request){
@@ -24,6 +29,12 @@ public class UpdateRouteService {
              .filter(found -> !found.isDeleted())
              .orElseThrow(() -> new BusinessException("Rota não encontrada com o identificador: " + id));
         
+        CurrentUser user = iamApi.currentUser();
+
+        if(user.role() != UserRole.ADMIN && !route.belongsTo(user.companyUuid())){
+            throw new AccessDeniedException("Usuário não tem permissão para atualizar esta rota.");
+        }
+
         route.setName(request.name());
         route.setOriginCity(request.originCity());
         route.setOriginState(request.originState());
