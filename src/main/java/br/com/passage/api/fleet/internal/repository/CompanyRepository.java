@@ -9,5 +9,6 @@ import java.util.UUID;
 public interface CompanyRepository extends JpaRepository<Company, UUID>
 {
     boolean existsByDocumentId(String documentId);
+    boolean existsByDocumentIdAndIdNot(String documentId, UUID id);
     Optional<Company> findById(UUID id);
 }

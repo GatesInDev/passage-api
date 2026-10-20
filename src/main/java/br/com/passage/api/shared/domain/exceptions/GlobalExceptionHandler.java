@@ -10,6 +10,17 @@ import java.time.Instant;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ProblemDetail handleResourceNotFoundException(ResourceNotFoundException e) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, e.getMessage());
+    }
+
+    @ExceptionHandler(org.springframework.dao.DataIntegrityViolationException.class)
+    public ProblemDetail handleDataIntegrityViolationException(org.springframework.dao.DataIntegrityViolationException e) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT,
+                "Os dados informados conflitam com um registro existente ou violam uma restrição de integridade.");
+    }
+
     @ExceptionHandler(BusinessException.class)
     public ProblemDetail handleBusinessException(BusinessException e) {
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, e.getMessage());
