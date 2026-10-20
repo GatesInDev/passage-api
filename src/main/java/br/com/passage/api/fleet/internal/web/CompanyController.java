@@ -1,9 +1,7 @@
 package br.com.passage.api.fleet.internal.web;
 
-import br.com.passage.api.fleet.internal.dto.company.CompanyResponse;
-import br.com.passage.api.fleet.internal.dto.company.CreateCompanyRequest;
-import br.com.passage.api.fleet.internal.service.company.CreateCompanyService;
-import br.com.passage.api.fleet.internal.service.company.FindByIdCompanyService;
+import br.com.passage.api.fleet.internal.dto.company.*;
+import br.com.passage.api.fleet.internal.service.company.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -28,6 +26,7 @@ public class CompanyController {
 
     private final CreateCompanyService createCompanyService;
     private final FindByIdCompanyService findByIdCompanyService;
+    private final UpdateCompanyService updateCompanyService;
 
     @Operation(
             summary = "Cadastrar nova empresa",
@@ -92,5 +91,43 @@ public class CompanyController {
             @PathVariable UUID id
     ) {
         return ResponseEntity.ok(findByIdCompanyService.execute(id));
+    }
+
+    @Operation(
+            summary = "Atualizar empresa por UUID",
+            description = "Atualiza os detalhes cadastrais de uma empresa transportadora a partir do seu identificador público (UUID)."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Empresa atualizada com sucesso",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = CompanyResponse.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Nenhuma empresa atualizada para o UUID informado",
+                    content = @Content
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Formato de UUID inválido na URL",
+                    content = @Content
+            )
+    })
+    @PreAuthorize("hasAnyRole('ADMIN', 'FLEET_MANAGER')")
+    @PatchMapping("/{id}")
+    public ResponseEntity<CompanyResponse> update(
+            @Parameter(
+                    description = "UUID público da empresa transportadora",
+                    example = "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11",
+                    required = true
+            )
+            @PathVariable UUID id,
+            @Valid @RequestBody UpdateCompanyRequest request
+    ) {
+        return ResponseEntity.ok(updateCompanyService.execute(id, request));
     }
 }
