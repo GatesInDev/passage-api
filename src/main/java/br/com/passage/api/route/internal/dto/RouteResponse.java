@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.UUID;
 
+import br.com.passage.api.route.internal.domain.entities.Route;
 import br.com.passage.api.route.internal.domain.enums.RouteScope;
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -45,6 +46,12 @@ public record RouteResponse(
                 example = "1234-56"
         )
         String code,
+
+        @Schema(
+                description = "UUID da empresa dona da rota",
+                example = "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11"
+        )
+        UUID companyUuid,
 
         @Schema(
                 description = "Nome descritivo da linha/rota",
@@ -99,4 +106,26 @@ public record RouteResponse(
                 example = "ANTT"
         )
         String regulatoryAgency
-) {}
+
+) {
+        public static RouteResponse from(Route route){
+                return new RouteResponse(
+            route.getId(),
+            route.getCreatedAt(),
+            route.getUpdatedAt(),
+            route.isActive(),
+            route.isDeleted(),
+            route.getCode(),
+            route.getCompanyUuid(),
+            route.getName(),
+            route.getOriginCity(),
+            route.getOriginState(),
+            route.getDestinationCity(),
+            route.getDestinationState(),
+            route.getDistanceKm(),
+            route.getEstimatedDurationMinutes(),
+            route.getServiceScope(),
+            route.getRegulatoryAgency() 
+        );
+        }
+}
