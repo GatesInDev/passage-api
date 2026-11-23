@@ -9,7 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import br.com.passage.api.route.internal.domain.entities.Route;
 import br.com.passage.api.route.internal.dto.RouteResponse;
 import br.com.passage.api.route.internal.repository.RouteRepository;
-import br.com.passage.api.shared.domain.exceptions.BusinessException;
+import br.com.passage.api.shared.domain.exceptions.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 
 @Service 
@@ -22,7 +22,7 @@ public class FindRouteService {
     public RouteResponse execute(UUID id){
         Route route = routeRepository.findById(id)
                 .filter(found -> !found.isDeleted())
-                .orElseThrow(() -> new BusinessException("Rota não encontrada com o identificador: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Rota não encontrada com o identificador: " + id));
         return RouteResponse.from(route);
     }
 

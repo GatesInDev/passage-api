@@ -13,7 +13,7 @@ import br.com.passage.api.route.internal.domain.entities.Route;
 import br.com.passage.api.route.internal.dto.RouteResponse;
 import br.com.passage.api.route.internal.dto.UpdateRouteRequest;
 import br.com.passage.api.route.internal.repository.RouteRepository;
-import br.com.passage.api.shared.domain.exceptions.BusinessException;
+import br.com.passage.api.shared.domain.exceptions.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -27,7 +27,7 @@ public class UpdateRouteService {
     public RouteResponse execute(UUID id, UpdateRouteRequest request){
         Route route = routeRepository.findById(id)
              .filter(found -> !found.isDeleted())
-             .orElseThrow(() -> new BusinessException("Rota não encontrada com o identificador: " + id));
+             .orElseThrow(() -> new ResourceNotFoundException("Rota não encontrada com o identificador: " + id));
         
         CurrentUser user = iamApi.currentUser();
 
