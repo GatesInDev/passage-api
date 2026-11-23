@@ -11,7 +11,7 @@ import br.com.passage.api.iam.IamApi;
 import br.com.passage.api.iam.enums.UserRole;
 import br.com.passage.api.route.internal.domain.entities.Route;
 import br.com.passage.api.route.internal.repository.RouteRepository;
-import br.com.passage.api.shared.domain.exceptions.BusinessException;
+import br.com.passage.api.shared.domain.exceptions.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -25,7 +25,7 @@ public class DeleteRouteService {
     public void execute(UUID id){
         Route route = routeRepository.findById(id)
                 .filter(found -> !found.isDeleted())
-                .orElseThrow(() -> new BusinessException("Rota não encontrada com o identificador: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Rota não encontrada com o identificador: " + id));
 
         CurrentUser user = iamApi.currentUser();
 

@@ -1,6 +1,6 @@
 # Passage API
 
-Backend de ERP e bilhetagem eletrônica para transporte rodoviário de passageiros: cadastro de empresas e frota, linhas e rotas, venda de passagens e controle de acesso por perfil.
+Backend de ERP e bilhetagem eletrônica para transporte rodoviário de passageiros: cadastro de empresas e frota, linhas e rotas, viagens agendadas, venda de passagens e controle de acesso por perfil.
 
 ![Java](https://img.shields.io/badge/Java-21-orange)
 ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.1-6DB33F)
@@ -31,7 +31,7 @@ Backend de ERP e bilhetagem eletrônica para transporte rodoviário de passageir
 | `fleet` | Empresas transportadoras; ônibus, assentos e motoristas | Empresas com API; frota modelada, sem endpoints |
 | `route` | Linhas e rotas, vinculadas à empresa operadora | Implementado |
 | `ticket` | Passagens vendidas | Implementado |
-| `trip` | Viagens agendadas, horários e alocação de veículos | Planejado |
+| `trip` | Viagens agendadas de uma rota: horários, ônibus, motorista, preço e situação | Implementado |
 | `integration` | Integrações assíncronas (SEFAZ/BP-e, ANTT/Monitriip, notificações) | Planejado |
 
 ## Stack
@@ -130,10 +130,10 @@ Todas têm valor padrão para desenvolvimento local.
 | Perfil | Descrição |
 |---|---|
 | `ADMIN` | Acesso irrestrito a todos os módulos |
-| `FLEET_MANAGER` | Gestão de empresas, frota e linhas (rotas restritas à própria empresa) |
+| `FLEET_MANAGER` | Gestão de empresas, frota, rotas e viagens (rotas e viagens restritas à própria empresa) |
 | `TICKET_SELLER` | Venda, alteração e consulta de passagens |
 | `INSPECTOR` | Consulta de passagens para validação de embarque |
-| `CUSTOMER` | Passageiro: consulta de rotas |
+| `CUSTOMER` | Passageiro: consulta de rotas e viagens |
 
 ## Endpoints
 
@@ -173,6 +173,25 @@ Todos os endpoints, exceto o login e o Swagger, exigem token.
 
 ¹ Cada rota pertence a uma empresa. O FLEET_MANAGER cria rotas sempre na própria empresa e só altera ou exclui rotas dela; o ADMIN informa a empresa no cadastro (`companyUuid`) e pode atuar em qualquer rota.
 
+### Viagens — `/api/v1/trips`
+
+| Método | Rota | Acesso |
+|---|---|---|
+| `POST` | `/` | ADMIN, FLEET_MANAGER² |
+| `GET` | `/` e `/{id}` | Qualquer usuário autenticado |
+| `PUT` | `/{id}` | ADMIN, FLEET_MANAGER² |
+| `DELETE` | `/{id}` (exclusão lógica) | ADMIN, FLEET_MANAGER² |
+
+² A viagem é uma saída de uma rota em data e hora definidas, e herda a empresa da rota (`routeId`). O FLEET_MANAGER só cria viagens em rotas da própria empresa e só altera ou exclui viagens dela. Toda viagem nasce com situação `SCHEDULED`; a chegada deve ser posterior à partida, e o código e a rota não mudam depois do cadastro.
+
+| Situação (`status`) | Significado |
+|---|---|
+| `SCHEDULED` | Agendada, ainda não iniciada |
+| `BOARDING` | Embarque em andamento |
+| `IN_PROGRESS` | Em viagem |
+| `COMPLETED` | Concluída |
+| `CANCELED` | Cancelada |
+
 ### Passagens — `/api/v1/tickets`
 
 | Método | Rota | Acesso |
@@ -195,7 +214,9 @@ br.com.passage.api
 │   └── internal            # autenticação, JWT, usuários
 ├── fleet                   # FleetApi
 │   └── internal
-├── route                   # RouteApi
+├── route                   # RouteApi (consulta da empresa de uma rota)
+│   └── internal
+├── trip                    # TripApi
 │   └── internal
 └── ticket                  # TicketApi
     └── internal
@@ -223,8 +244,9 @@ internal
    @org.springframework.modulith.NamedInterface("domain-exceptions")
    package br.com.passage.api.shared.domain.exceptions;
    ```
-4. **Relacionamentos entre módulos são feitos por UUID**, não por `@ManyToOne` (ex.: `User.companyUuid`, `Route.companyUuid`, `Ticket.routeId`).
+4. **Relacionamentos entre módulos são feitos por UUID**, não por `@ManyToOne` (ex.: `User.companyUuid`, `Route.companyUuid`, `Trip.routeId`, `Ticket.routeId`).
 5. **Usuário logado:** use `IamApi.currentUser()`, que devolve id, perfil e empresa. Nunca confie em empresa ou usuário enviados no corpo da requisição.
+6. **Dados de outro módulo** são obtidos pela API pública dele, sem expor entidades internas. Ex.: a `trip` descobre a empresa de uma rota com `RouteApi.findCompanyUuid(routeId)`, que devolve só o UUID (ou 404 se a rota não existir).
 
 ## Convenções de código
 
@@ -241,7 +263,7 @@ Toda entidade herda de `EntityBase` (`shared`), que fornece:
 | `version` | Controle de concorrência otimista (`@Version`) |
 
 - Não use `@Data` do Lombok em entidades: `equals` e `hashCode` usam apenas o `id`.
-- Regras de negócio e validações de estado ficam na entidade (ex.: `Route.belongsTo(companyUuid)`); os services só orquestram.
+- Regras de negócio e validações de estado ficam na entidade (ex.: `Route.belongsTo(companyUuid)`, `Trip.belongsTo(companyUuid)`); os services só orquestram.
 
 ### Exclusão lógica
 
@@ -263,7 +285,9 @@ As respostas de erro seguem o formato `ProblemDetail` (RFC 7807), via `GlobalExc
 
 | Situação | Como sinalizar | HTTP |
 |---|---|---|
-| Regra de negócio violada (ex.: código duplicado) | `throw new BusinessException("...")` | 409 |
+| Regra de negócio violada (ex.: código duplicado, chegada antes da partida) | `throw new BusinessException("...")` | 409 |
+| Recurso não encontrado (ou excluído) | `throw new ResourceNotFoundException("...")` | 404 |
+| Violação de restrição no banco (ex.: valor único repetido) | tratada automaticamente | 409 |
 | Dados de entrada inválidos | `@Valid` no controller | 400 |
 | Usuário sem permissão | `@PreAuthorize` ou `AccessDeniedException` | 403 |
 
@@ -278,7 +302,20 @@ As respostas de erro seguem o formato `ProblemDetail` (RFC 7807), via `GlobalExc
 ./mvnw test
 ```
 
-Executa a inicialização completa da aplicação (`ApiApplicationTests`) e os testes da API pública do `iam` (`IamApiTests`). A infraestrutura do Docker precisa estar no ar.
+A infraestrutura do Docker precisa estar no ar.
+
+| Teste | O que verifica |
+|---|---|
+| `ApiApplicationTests` | A aplicação inicia por completo |
+| `ModularityTests` | As fronteiras entre módulos do Spring Modulith (`ApplicationModules.verify()`) |
+| `IamApiTests` | A API pública do usuário logado |
+| `UserSoftDeleteTests` | Exclusão lógica de usuários |
+| `UpdateCompanyServiceTests` | Regras de atualização de empresas |
+| `GlobalExceptionHandlerTests` | Mapeamento de exceções para códigos HTTP |
+
+### Integração contínua
+
+O GitHub Actions (`.github/workflows/ci.yml`) roda `./mvnw test` em todo pull request e push para `develop` e `master`, com PostgreSQL, Redis e RabbitMQ como serviços. O resultado aparece como o check **CI / Testes** no pull request.
 
 ## Fluxo de contribuição
 
@@ -293,7 +330,11 @@ Executa a inicialização completa da aplicação (`ApiApplicationTests`) e os t
 
 - **Migrações:** as tabelas ainda são criadas pelo Hibernate (`ddl-auto=update`); o Flyway está configurado, mas sem migrations.
 - **Usuário inicial:** não há seed de ADMIN (ver [passo 3](#3-criar-o-primeiro-usuário-admin)).
-- **Códigos HTTP:** recurso não encontrado retorna 409 (via `BusinessException`) em vez de 404, e requisições sem token retornam 403 em vez de 401.
-- **Verificação de módulos:** os testes ainda não executam `ApplicationModules.verify()` do Spring Modulith. O pacote `iam.enums` precisa de `@NamedInterface` para que o `UserRole` seja considerado público.
+- **Códigos HTTP:**
+  - Empresas e passagens ainda usam `BusinessException` para "não encontrado", retornando 409 em vez de 404 (usuários, rotas e viagens já retornam 404).
+  - Requisições sem token retornam 403 em vez de 401.
+  - JSON malformado ou valor de enum inválido retornam 403 em vez de 400, porque a página de erro padrão (`/error`) é bloqueada pela segurança.
+- **Viagens:** `busId` e `driverId` ainda não são validados (o `fleet` não expõe ônibus e motoristas), e as transições de situação ainda não são restritas (ex.: uma viagem cancelada pode voltar a `SCHEDULED`).
+- **Passagens:** ainda referenciam a rota (`routeId`); o próximo passo é referenciar a viagem (`tripId`).
 - **Infraestrutura:** Redis e RabbitMQ já estão provisionados, mas ainda não são usados no código.
-- **Módulos planejados:** `trip` e `integration`.
+- **Módulo planejado:** `integration`.
