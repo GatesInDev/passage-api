@@ -44,6 +44,7 @@ public record CreateCompanyRequest
                         example = "251234567",
                         maxLength = 15
                 )
+                @NotBlank(message = "State registration is required.")
                 @Size(max = 15, message = "A Inscrição Estadual deve ter no máximo 15 dígitos.")
                 @Pattern(regexp = "(?i)^[0-9]{2,14}$|^ISENTO$", message = "Inscrição Estadual inválida.")
                 String stateRegistration,

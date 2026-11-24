@@ -78,7 +78,7 @@ class UpdateCompanyServiceTests {
 
     private Company existingCompany() {
         Company company = Company.builder().corporateName("Original").documentId(request.documentId()).build();
-        when(repository.findById(companyId)).thenReturn(Optional.of(company));
+        when(repository.findByIdAndIsDeletedFalse(companyId)).thenReturn(Optional.of(company));
         return company;
     }
 }

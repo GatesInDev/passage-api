@@ -1,6 +1,7 @@
 package br.com.passage.api.fleet.internal.dto.company;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import br.com.passage.api.fleet.internal.domain.entities.Company;
 import java.time.Instant;
 import java.util.UUID;
 
@@ -66,4 +67,13 @@ public record CompanyResponse(
                 example = "DETER-SC"
         )
         String stateRegulatoryAgency
-) {}
+) {
+    public static CompanyResponse from(Company company) {
+        return new CompanyResponse(
+                company.getId(), company.getCreatedAt(), company.getUpdatedAt(),
+                company.isActive(), company.isDeleted(), company.getCorporateName(),
+                company.getTradeName(), company.getDocumentId(),
+                company.getStateRegistration(), company.getStateRegulatoryAgency()
+        );
+    }
+}

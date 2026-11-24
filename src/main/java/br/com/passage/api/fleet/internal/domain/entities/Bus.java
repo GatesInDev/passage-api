@@ -4,6 +4,9 @@ import br.com.passage.api.shared.domain.entities.EntityBase;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.*;
@@ -70,6 +73,12 @@ import java.util.List;
 @EqualsAndHashCode(callSuper = true)
 public class Bus extends EntityBase {
 
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "company_id", nullable = false)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    private Company company;
+
     /**
      * Identificação ou código interno do ônibus.
      *
@@ -123,7 +132,7 @@ public class Bus extends EntityBase {
      */
     public int getCapacity() {
         return (int) seats.stream()
-                .filter(Seat::isActive)
+                .filter(seat -> seat.isActive() && !seat.isDeleted())
                 .count();
     }
 }

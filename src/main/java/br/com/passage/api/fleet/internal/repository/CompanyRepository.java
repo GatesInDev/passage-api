@@ -4,11 +4,14 @@ import br.com.passage.api.fleet.internal.domain.entities.Company;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
+import java.util.List;
 import java.util.UUID;
 
 public interface CompanyRepository extends JpaRepository<Company, UUID>
 {
     boolean existsByDocumentId(String documentId);
     boolean existsByDocumentIdAndIdNot(String documentId, UUID id);
-    Optional<Company> findById(UUID id);
+    Optional<Company> findByIdAndIsDeletedFalse(UUID id);
+    List<Company> findAllByIsDeletedFalse();
+    List<Company> findAllByIdAndIsDeletedFalse(UUID id);
 }
