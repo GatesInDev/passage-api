@@ -17,6 +17,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
+import java.util.List;
 
 @Tag(name = "Empresas", description = "Endpoints para gestão de empresas transportadoras no módulo de Frota")
 @RestController
@@ -27,6 +28,23 @@ public class CompanyController {
     private final CreateCompanyService createCompanyService;
     private final FindByIdCompanyService findByIdCompanyService;
     private final UpdateCompanyService updateCompanyService;
+    private final FindAllCompanyService findAllCompanyService;
+    private final DeleteCompanyService deleteCompanyService;
+
+    @Operation(summary = "List accessible companies")
+    @PreAuthorize("hasAnyRole('ADMIN', 'FLEET_MANAGER')")
+    @GetMapping
+    public ResponseEntity<List<CompanyResponse>> findAll() {
+        return ResponseEntity.ok(findAllCompanyService.execute());
+    }
+
+    @Operation(summary = "Soft delete a company")
+    @PreAuthorize("hasRole('ADMIN')")
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable UUID id) {
+        deleteCompanyService.execute(id);
+        return ResponseEntity.noContent().build();
+    }
 
     @Operation(
             summary = "Cadastrar nova empresa",

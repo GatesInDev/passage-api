@@ -8,7 +8,8 @@ import br.com.passage.api.shared.domain.exceptions.BusinessException;
 import br.com.passage.api.iam.IamApi;
 import br.com.passage.api.iam.enums.UserRole;
 import org.springframework.security.access.AccessDeniedException;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
+import br.com.passage.api.shared.domain.exceptions.ResourceNotFoundException;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -30,8 +31,8 @@ public class UpdateCompanyService
             throw new AccessDeniedException("Você não tem permissão para atualizar esta empresa");
         }
 
-        Company savedCompany = companyRepository.findById(id)
-                .orElseThrow(() -> new BusinessException("Não foi possível encontrar uma companhia com o identificador: " + id));
+        Company savedCompany = companyRepository.findByIdAndIsDeletedFalse(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Company not found: " + id));
 
         if (companyRepository.existsByDocumentIdAndIdNot(request.documentId(), id)) {
             throw new BusinessException("Já existe uma empresa cadastrada com o CNPJ " + request.documentId());
@@ -45,17 +46,6 @@ public class UpdateCompanyService
 
         companyRepository.save(savedCompany);
 
-        return new CompanyResponse(
-                savedCompany.getId(),
-                savedCompany.getCreatedAt(),
-                savedCompany.getUpdatedAt(),
-                savedCompany.isActive(),
-                savedCompany.isDeleted(),
-                savedCompany.getCorporateName(),
-                savedCompany.getTradeName(),
-                savedCompany.getDocumentId(),
-                savedCompany.getStateRegistration(),
-                savedCompany.getStateRegulatoryAgency()
-        );
+        return CompanyResponse.from(savedCompany);
     }
 }

@@ -28,7 +28,7 @@ Backend de ERP e bilhetagem eletrônica para transporte rodoviário de passageir
 |---|---|---|
 | `shared` | `EntityBase`, exceções de negócio e tratamento global de erros | Implementado |
 | `iam` | Autenticação JWT, usuários e perfis de acesso (RBAC) | Implementado |
-| `fleet` | Empresas transportadoras; ônibus, assentos e motoristas | Empresas com API; frota modelada, sem endpoints |
+| `fleet` | Empresas transportadoras, ônibus, assentos e motoristas, com isolamento por empresa | CRUDs implementados |
 | `route` | Linhas e rotas, vinculadas à empresa operadora | Implementado |
 | `ticket` | Passagens vendidas | Implementado |
 | `trip` | Viagens agendadas de uma rota: horários, ônibus, motorista, preço e situação | Implementado |
@@ -130,7 +130,7 @@ Todas têm valor padrão para desenvolvimento local.
 | Perfil | Descrição |
 |---|---|
 | `ADMIN` | Acesso irrestrito a todos os módulos |
-| `FLEET_MANAGER` | Gestão de empresas, frota, rotas e viagens (rotas e viagens restritas à própria empresa) |
+| `FLEET_MANAGER` | Consulta e gestão da própria empresa e frota; criação, alteração e exclusão de rotas e viagens da própria empresa |
 | `TICKET_SELLER` | Venda, alteração e consulta de passagens |
 | `INSPECTOR` | Consulta de passagens para validação de embarque |
 | `CUSTOMER` | Passageiro: consulta de rotas e viagens |
@@ -159,8 +159,51 @@ Todos os endpoints, exceto o login e o Swagger, exigem token.
 | Método | Rota | Acesso |
 |---|---|---|
 | `POST` | `/` | ADMIN |
-| `GET` | `/{id}` | ADMIN, FLEET_MANAGER |
+| `GET` | `/` e `/{id}` | ADMIN, FLEET_MANAGER (somente a própria empresa) |
 | `PATCH` | `/{id}` | ADMIN, FLEET_MANAGER |
+| `DELETE` | `/{id}` (exclusão lógica) | ADMIN |
+
+### Ônibus — `/api/v1/buses`
+
+| Método | Rota | Acesso |
+|---|---|---|
+| `POST` | `/` | ADMIN, FLEET_MANAGER |
+| `GET` | `/` e `/{id}` | ADMIN, FLEET_MANAGER |
+| `PUT` | `/{id}` | ADMIN, FLEET_MANAGER |
+| `DELETE` | `/{id}` (exclusão lógica) | ADMIN, FLEET_MANAGER |
+
+O cadastro recebe `code`, `model`, `manufacturer`, `licensePlate` e `companyUuid`. O ADMIN deve informar uma empresa existente e não excluída; para o gerente, a empresa vem do usuário autenticado, independentemente do valor enviado. A atualização recebe os campos cadastrais e `isActive`, sem transferir a empresa. A capacidade é calculada pelos assentos ativos e não excluídos.
+
+### Motoristas — `/api/v1/drivers`
+
+| Método | Rota | Acesso |
+|---|---|---|
+| `POST` | `/` | ADMIN, FLEET_MANAGER |
+| `GET` | `/` e `/{id}` | ADMIN, FLEET_MANAGER |
+| `PUT` | `/{id}` | ADMIN, FLEET_MANAGER |
+| `DELETE` | `/{id}` (exclusão lógica) | ADMIN, FLEET_MANAGER |
+
+O cadastro recebe `name`, `licenseNumber`, `licenseCategory` (opcional) e `companyUuid`, com a mesma regra de empresa dos ônibus. A atualização recebe os dados cadastrais e `isActive`, sem transferir a empresa.
+
+### Assentos — `/api/v1/buses/{busId}/seats`
+
+| Método | Rota | Acesso |
+|---|---|---|
+| `POST` | `/` | ADMIN, FLEET_MANAGER |
+| `GET` | `/` e `/{id}` | ADMIN, FLEET_MANAGER |
+| `PUT` | `/{id}` | ADMIN, FLEET_MANAGER |
+| `DELETE` | `/{id}` (exclusão lógica) | ADMIN, FLEET_MANAGER |
+
+O cadastro recebe `seatNumber`, `row`, `column`, `position`, `quality` e `isAccessible`; a atualização também exige `isActive`. Fileira e coluna devem ser positivas. `position` aceita `WINDOW`, `AISLE` ou `MIDDLE`; `quality` aceita `STANDARD`, `COMFORT` ou `PREMIUM`. O número e a combinação de fileira e coluna são únicos dentro do ônibus.
+
+### Isolamento e exclusão no fleet
+
+- O gerente só lista, consulta, altera ou exclui ônibus, motoristas e assentos da própria empresa. As consultas de ônibus e motoristas aplicam o tenant no banco; assentos exigem acesso ao ônibus da URL e pertencimento a esse mesmo ônibus.
+- Um gerente sem empresa é recusado com 403; outros perfis também não acessam os CRUDs de fleet. O ADMIN pode operar entre empresas.
+- Buscar ou alterar ônibus, motorista ou assento fora do escopo retorna 404. Acesso direto a outra empresa retorna 403, preservando a regra de autorização de empresas.
+- Registros excluídos não retornam nas consultas. Excluir uma empresa oculta sua frota; excluir um ônibus oculta seus assentos. Os filhos permanecem armazenados.
+- CNPJ, placa e CNH continuam únicos no sistema; número e posição do assento continuam reservados no ônibus após exclusão lógica, conforme as restrições existentes no banco.
+- A consulta pública de rotas e viagens continua disponível aos usuários autenticados, conforme seus contratos próprios; o isolamento acima se refere aos CRUDs de fleet.
 
 ### Rotas — `/api/v1/routes`
 
@@ -311,7 +354,13 @@ A infraestrutura do Docker precisa estar no ar.
 | `IamApiTests` | A API pública do usuário logado |
 | `UserSoftDeleteTests` | Exclusão lógica de usuários |
 | `UpdateCompanyServiceTests` | Regras de atualização de empresas |
+| `CompanyCrudIntegrationTests` | CRUD de empresas, acesso do gerente e ocultação da frota de empresas excluídas |
+| `BusCrudIntegrationTests` / `DriverCrudIntegrationTests` | CRUDs com dois tenants, payload de empresa alheia, validações e exclusão lógica |
+| `SeatCrudIntegrationTests` | Isolamento por ônibus, layout, capacidade e exclusão lógica de assentos |
+| `FleetAuthorizationIntegrationTests` | Bloqueio dos demais perfis nos endpoints de fleet |
 | `GlobalExceptionHandlerTests` | Mapeamento de exceções para códigos HTTP |
+
+Os testes de integração de fleet usam a aplicação, segurança e consultas JPA reais, com dados revertidos ao fim de cada teste. Execute-os em um banco de testes separado, usando as variáveis `DB_*`; não use um banco com dados de produção.
 
 ### Integração contínua
 
@@ -331,10 +380,11 @@ O GitHub Actions (`.github/workflows/ci.yml`) roda `./mvnw test` em todo pull re
 - **Migrações:** as tabelas ainda são criadas pelo Hibernate (`ddl-auto=update`); o Flyway está configurado, mas sem migrations.
 - **Usuário inicial:** não há seed de ADMIN (ver [passo 3](#3-criar-o-primeiro-usuário-admin)).
 - **Códigos HTTP:**
-  - Empresas e passagens ainda usam `BusinessException` para "não encontrado", retornando 409 em vez de 404 (usuários, rotas e viagens já retornam 404).
+  - Passagens ainda usam `BusinessException` para "não encontrado", retornando 409 em vez de 404.
   - Requisições sem token retornam 403 em vez de 401.
   - JSON malformado ou valor de enum inválido retornam 403 em vez de 400, porque a página de erro padrão (`/error`) é bloqueada pela segurança.
-- **Viagens:** `busId` e `driverId` ainda não são validados (o `fleet` não expõe ônibus e motoristas), e as transições de situação ainda não são restritas (ex.: uma viagem cancelada pode voltar a `SCHEDULED`).
+- **Viagens:** `busId` e `driverId` ainda não são validados pela API pública entre módulos (`FleetApi`), e as transições de situação ainda não são restritas (ex.: uma viagem cancelada pode voltar a `SCHEDULED`).
+- **Empresa do ônibus:** `bus.company_id` é obrigatório. A implantação pressupõe frota inicialmente vazia; bancos com ônibus legados precisam de associação explícita à empresa antes de aplicar essa restrição.
 - **Passagens:** ainda referenciam a rota (`routeId`); o próximo passo é referenciar a viagem (`tripId`).
 - **Infraestrutura:** Redis e RabbitMQ já estão provisionados, mas ainda não são usados no código.
 - **Módulo planejado:** `integration`.

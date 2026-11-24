@@ -24,6 +24,7 @@ public class CreateCompanyService
         }
 
         Company company = Company.builder()
+                .isActive(true)
                 .corporateName(request.corporateName())
                 .tradeName(request.tradeName())
                 .documentId(request.documentId())
@@ -33,17 +34,6 @@ public class CreateCompanyService
 
         Company savedCompany = companyRepository.save(company);
 
-        return new CompanyResponse(
-                savedCompany.getId(),
-                savedCompany.getCreatedAt(),
-                savedCompany.getUpdatedAt(),
-                savedCompany.isActive(),
-                savedCompany.isDeleted(),
-                savedCompany.getCorporateName(),
-                savedCompany.getTradeName(),
-                savedCompany.getDocumentId(),
-                savedCompany.getStateRegistration(),
-                savedCompany.getStateRegulatoryAgency()
-        );
+        return CompanyResponse.from(savedCompany);
     }
 }

@@ -46,6 +46,7 @@ public record UpdateCompanyRequest(
                 example = "251234567",
                 maxLength = 14
         )
+        @NotBlank(message = "State registration is required.")
         @Size(max = 14, message = "A Inscrição Estadual deve ter no máximo 14 caracteres.")
         @Pattern(
                 regexp = "(?i)^(?:[0-9]{2,14}|ISENTO)$",
