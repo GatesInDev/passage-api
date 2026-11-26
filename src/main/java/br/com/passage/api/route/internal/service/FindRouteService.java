@@ -17,19 +17,19 @@ import lombok.RequiredArgsConstructor;
 public class FindRouteService {
     
     private final RouteRepository routeRepository;
+    private final RouteAccessService routeAccessService;
 
     @Transactional(readOnly = true)
     public RouteResponse execute(UUID id){
-        Route route = routeRepository.findById(id)
-                .filter(found -> !found.isDeleted())
+        Route route = routeRepository.findVisibleById(id, routeAccessService.visibleCompanyUuid())
                 .orElseThrow(() -> new ResourceNotFoundException("Rota não encontrada com o identificador: " + id));
         return RouteResponse.from(route);
     }
 
     @Transactional(readOnly = true)
     public List<RouteResponse> executeAll(){
-        return routeRepository.findAll().stream()
-                .filter(route -> !route.isDeleted())
+        return routeRepository.findAllVisible(routeAccessService.visibleCompanyUuid())
+                .stream()
                 .map(RouteResponse::from)
                 .toList();
     }
