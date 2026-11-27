@@ -61,7 +61,7 @@ abstract class TicketIntegrationTestSupport {
                 .seatId(UUID.randomUUID())
                 .price(new BigDecimal("150.00"))
                 .departureDateTime(departure)
-                .routeId(UUID.randomUUID())
+                .tripId(UUID.randomUUID())
                 .isActive(true)
                 .build());
 
@@ -72,14 +72,14 @@ abstract class TicketIntegrationTestSupport {
     protected String createPayload(String code) {
         return """
                 {"code":"%s","passengerName":"João da Silva","passengerDocument":"12345678909",
-                 "seatId":"%s","price":189.90,"departureDateTime":"%s","routeId":"%s"}
+                 "seatId":"%s","price":189.90,"departureDateTime":"%s","tripId":"%s"}
                 """.formatted(code, UUID.randomUUID(), departure, UUID.randomUUID());
     }
 
     protected String updatePayload(String passengerName, boolean isActive) {
         return """
                 {"passengerName":"%s","passengerDocument":"12345678909","seatId":"%s",
-                 "price":210.50,"departureDateTime":"%s","routeId":"%s","isActive":%s}
+                 "price":210.50,"departureDateTime":"%s","tripId":"%s","isActive":%s}
                 """.formatted(passengerName, UUID.randomUUID(), departure, UUID.randomUUID(), isActive);
     }
 

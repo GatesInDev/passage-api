@@ -29,7 +29,7 @@ public class UpdateTicketService {
         ticket.setSeatId(request.seatId());
         ticket.setPrice(request.price());
         ticket.setDepartureDateTime(request.departureDateTime());
-        ticket.setRouteId(request.routeId());
+        ticket.setTripId(request.tripId());
         ticket.setActive(request.isActive());
 
         Ticket updated = ticketRepository.save(ticket);

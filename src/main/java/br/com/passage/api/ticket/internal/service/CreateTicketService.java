@@ -29,7 +29,7 @@ public class CreateTicketService {
                 .seatId(request.seatId())
                 .price(request.price())
                 .departureDateTime(request.departureDateTime())
-                .routeId(request.routeId())
+                .tripId(request.tripId())
                 // @SuperBuilder ignora o valor inicial de isActive em EntityBase,
                 // por isso a passagem precisa nascer ativa explicitamente.
                 .isActive(true)

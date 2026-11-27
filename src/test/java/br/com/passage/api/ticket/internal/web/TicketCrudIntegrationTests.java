@@ -80,7 +80,7 @@ class TicketCrudIntegrationTests extends TicketIntegrationTestSupport {
     void invalidPayloadIsRejectedWithFieldDetails() throws Exception {
         String invalid = """
                 {"code":"","passengerName":"Jo","passengerDocument":"00000000000",
-                 "seatId":"%s","price":-50,"departureDateTime":"2020-01-01T08:00:00Z","routeId":"%s"}
+                 "seatId":"%s","price":-50,"departureDateTime":"2020-01-01T08:00:00Z","tripId":"%s"}
                 """.formatted(UUID.randomUUID(), UUID.randomUUID());
 
         seller(post(PATH).content(invalid))
