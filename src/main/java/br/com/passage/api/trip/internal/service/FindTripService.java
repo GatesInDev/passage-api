@@ -17,19 +17,18 @@ import lombok.RequiredArgsConstructor;
 public class FindTripService {
     
     private final TripRepository tripRepository;
+    private final TripAccessService tripAccessService;
 
     @Transactional(readOnly = true)
     public TripResponse execute(UUID id){
-        Trip trip = tripRepository.findById(id)
-                .filter(found -> !found.isDeleted())
+        Trip trip = tripRepository.findVisibleById(id, tripAccessService.visibleCompanyUuid())
                 .orElseThrow(() -> new ResourceNotFoundException("Viagem não encontrada com o identificador: " + id));
         return TripResponse.from(trip);
     }
 
     @Transactional(readOnly = true)
     public List<TripResponse> executeAll(){
-        return tripRepository.findAll().stream()
-                .filter(trip -> !trip.isDeleted())
+        return tripRepository.findAllVisible(tripAccessService.visibleCompanyUuid()).stream()
                 .map(TripResponse::from)
                 .toList();
     }

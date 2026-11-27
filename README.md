@@ -203,29 +203,29 @@ O cadastro recebe `seatNumber`, `row`, `column`, `position`, `quality` e `isAcce
 - Buscar ou alterar ônibus, motorista ou assento fora do escopo retorna 404. Acesso direto a outra empresa retorna 403, preservando a regra de autorização de empresas.
 - Registros excluídos não retornam nas consultas. Excluir uma empresa oculta sua frota; excluir um ônibus oculta seus assentos. Os filhos permanecem armazenados.
 - CNPJ, placa e CNH continuam únicos no sistema; número e posição do assento continuam reservados no ônibus após exclusão lógica, conforme as restrições existentes no banco.
-- A consulta pública de rotas e viagens continua disponível aos usuários autenticados, conforme seus contratos próprios; o isolamento acima se refere aos CRUDs de fleet.
+- Rotas e viagens seguem o mesmo isolamento para o FLEET_MANAGER, mas continuam visíveis a todos os demais perfis autenticados (ver abaixo).
 
 ### Rotas — `/api/v1/routes`
 
 | Método | Rota | Acesso |
 |---|---|---|
 | `POST` | `/` | ADMIN, FLEET_MANAGER¹ |
-| `GET` | `/` e `/{id}` | Qualquer usuário autenticado |
+| `GET` | `/` e `/{id}` | Qualquer usuário autenticado¹ |
 | `PUT` | `/{id}` | ADMIN, FLEET_MANAGER¹ |
 | `DELETE` | `/{id}` (exclusão lógica) | ADMIN, FLEET_MANAGER¹ |
 
-¹ Cada rota pertence a uma empresa. O FLEET_MANAGER cria rotas sempre na própria empresa e só altera ou exclui rotas dela; o ADMIN informa a empresa no cadastro (`companyUuid`) e pode atuar em qualquer rota.
+¹ Cada rota pertence a uma empresa. O FLEET_MANAGER cria rotas sempre na própria empresa e só lista, consulta, altera ou exclui rotas dela: rotas de outra empresa retornam 404. O ADMIN informa a empresa no cadastro (`companyUuid`) e atua em qualquer rota. Os demais perfis consultam as rotas de todas as empresas.
 
 ### Viagens — `/api/v1/trips`
 
 | Método | Rota | Acesso |
 |---|---|---|
 | `POST` | `/` | ADMIN, FLEET_MANAGER² |
-| `GET` | `/` e `/{id}` | Qualquer usuário autenticado |
+| `GET` | `/` e `/{id}` | Qualquer usuário autenticado² |
 | `PUT` | `/{id}` | ADMIN, FLEET_MANAGER² |
 | `DELETE` | `/{id}` (exclusão lógica) | ADMIN, FLEET_MANAGER² |
 
-² A viagem é uma saída de uma rota em data e hora definidas, e herda a empresa da rota (`routeId`). O FLEET_MANAGER só cria viagens em rotas da própria empresa e só altera ou exclui viagens dela. Toda viagem nasce com situação `SCHEDULED`; a chegada deve ser posterior à partida, e o código e a rota não mudam depois do cadastro.
+² A viagem é uma saída de uma rota em data e hora definidas, e herda a empresa da rota (`routeId`). O FLEET_MANAGER só cria viagens em rotas da própria empresa (403 em rota de outra) e só lista, consulta, altera ou exclui viagens dela: viagens de outra empresa retornam 404. Os demais perfis consultam as viagens de todas as empresas. Toda viagem nasce com situação `SCHEDULED`; a chegada deve ser posterior à partida, e o código e a rota não mudam depois do cadastro.
 
 | Situação (`status`) | Significado |
 |---|---|
@@ -306,7 +306,7 @@ Toda entidade herda de `EntityBase` (`shared`), que fornece:
 | `version` | Controle de concorrência otimista (`@Version`) |
 
 - Não use `@Data` do Lombok em entidades: `equals` e `hashCode` usam apenas o `id`.
-- Regras de negócio e validações de estado ficam na entidade (ex.: `Route.belongsTo(companyUuid)`, `Trip.belongsTo(companyUuid)`); os services só orquestram.
+- Regras de negócio e validações de estado ficam na entidade; os services só orquestram.
 
 ### Exclusão lógica
 
@@ -337,7 +337,9 @@ As respostas de erro seguem o formato `ProblemDetail` (RFC 7807), via `GlobalExc
 ### Permissões
 
 - Declare o acesso em cada endpoint com `@PreAuthorize("hasAnyRole('ADMIN', 'FLEET_MANAGER')")`. Use o nome do perfil sem o prefixo `ROLE_`.
-- Restrições que dependem do dado (ex.: "só a própria empresa") ficam no service, lançando `AccessDeniedException`.
+- **Isolamento por empresa (multi-tenant):** é aplicado na consulta ao banco, e não depois de buscar. Os repositórios expõem `findVisibleById(id, companyUuid)` e `findAllVisible(companyUuid)`, que desconsideram excluídos e, quando `companyUuid` não é nulo, restringem à empresa. Assim, um registro de outra empresa simplesmente não é encontrado (404).
+- **Qual empresa filtrar:** cada módulo tem um service de acesso (`FleetAccessService`, `RouteAccessService`, `TripAccessService`) que devolve `null` (sem restrição) ou a empresa do usuário logado. O FLEET_MANAGER sem empresa vinculada recebe 403.
+- Outras restrições que dependem do dado (ex.: criar viagem em rota de outra empresa) ficam no service, lançando `AccessDeniedException`.
 
 ## Testes
 

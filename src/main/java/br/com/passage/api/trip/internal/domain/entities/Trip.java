@@ -118,20 +118,4 @@ public class Trip extends EntityBase {
     @Column(name = "price", nullable = false, precision = 10, scale = 2)
     private BigDecimal price;
 
-    /**
-     * Indica se a viagem pertence à empresa informada.
-     *
-     * <p>Utilizado para restringir alterações às viagens da própria empresa
-     * do usuário. Retorna {@code false} quando o identificador informado é
-     * nulo, como no caso de usuários sem empresa vinculada.</p>
-     *
-     * @param companyUuid UUID da empresa a ser verificada
-     * @return {@code true} se a viagem pertence à empresa informada
-     */
-    public boolean belongsTo(UUID companyUuid) {
-        if (companyUuid == null) {
-            return false;
-        }
-        return companyUuid.equals(this.companyUuid);
-    }
 }
