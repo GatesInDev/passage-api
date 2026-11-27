@@ -69,6 +69,16 @@ public class Ticket extends EntityBase {
     private Instant departureDateTime;
 
     /**
+     * Empresa dona da passagem.
+     *
+     * <p>Define o isolamento entre transportadoras: cada operador só
+     * enxerga as passagens da própria empresa. Deriva da viagem, nunca
+     * do que o cliente envia.</p>
+     */
+    @Column(name = "company_uuid", nullable = false)
+    private UUID companyUuid;
+
+    /**
      * Identificador da viagem para a qual a passagem foi vendida.
      *
      * <p>Referenciado por UUID para manter o desacoplamento entre módulos.</p>

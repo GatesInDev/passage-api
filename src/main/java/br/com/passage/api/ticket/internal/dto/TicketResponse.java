@@ -56,7 +56,11 @@ public record TicketResponse(
 
         @Schema(description = "Identificador UUID da viagem da passagem",
                 example = "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11")
-        UUID tripId
+        UUID tripId,
+
+        @Schema(description = "Identificador UUID da empresa dona da passagem",
+                example = "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11")
+        UUID companyUuid
 ) {
 
     /**
@@ -78,7 +82,8 @@ public record TicketResponse(
                 ticket.getSeatId(),
                 ticket.getPrice(),
                 ticket.getDepartureDateTime(),
-                ticket.getTripId()
+                ticket.getTripId(),
+                ticket.getCompanyUuid()
         );
     }
 }

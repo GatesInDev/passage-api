@@ -58,6 +58,55 @@ class TicketCrudIntegrationTests extends TicketIntegrationTestSupport {
     }
 
     @Test
+    void sellerNeverReachesAnotherCompanyTickets() throws Exception {
+        UUID foreign = otherCompanyTicket.getId();
+
+        // A listagem traz apenas a própria empresa.
+        seller(get(PATH)).andExpect(status().isOk())
+                .andExpect(jsonPath("$[?(@.id == '%s')]".formatted(existingTicket.getId())).exists())
+                .andExpect(jsonPath("$[?(@.id == '%s')]".formatted(foreign)).doesNotExist());
+
+        // A passagem alheia se comporta como inexistente.
+        seller(get(PATH + "/{id}", foreign)).andExpect(status().isNotFound());
+        seller(put(PATH + "/{id}", foreign).content(updatePayload("Invasor", true)))
+                .andExpect(status().isNotFound());
+        admin(delete(PATH + "/{id}", foreign)).andExpect(status().isNoContent());
+
+        assertEquals("Carlos Rival", tickets.findById(foreign).orElseThrow().getPassengerName());
+    }
+
+    @Test
+    void administratorReachesEveryCompany() throws Exception {
+        admin(get(PATH)).andExpect(status().isOk())
+                .andExpect(jsonPath("$[?(@.id == '%s')]".formatted(existingTicket.getId())).exists())
+                .andExpect(jsonPath("$[?(@.id == '%s')]".formatted(otherCompanyTicket.getId())).exists());
+
+        admin(get(PATH + "/{id}", otherCompanyTicket.getId())).andExpect(status().isOk());
+    }
+
+    @Test
+    void sellerCompanyWinsOverPayloadAndSeatIsSoldOnlyOnce() throws Exception {
+        // Mesmo informando outra empresa, a venda fica na empresa do vendedor.
+        String spoofed = createPayload("PASS-SPOOF")
+                .replaceFirst("\\{", "{\"companyUuid\":\"" + otherCompany + "\",");
+
+        var created = seller(post(PATH).content(spoofed))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("companyUuid").value(ownCompany.toString()));
+
+        UUID id = responseId(created);
+        var sold = tickets.findById(id).orElseThrow();
+
+        // O mesmo assento na mesma viagem não pode ser vendido de novo.
+        String sameSeat = """
+                {"code":"PASS-OTHER","passengerName":"Outro Passageiro","passengerDocument":"12345678909",
+                 "seatId":"%s","price":189.90,"departureDateTime":"%s","tripId":"%s"}
+                """.formatted(sold.getSeatId(), departure, sold.getTripId());
+
+        seller(post(PATH).content(sameSeat)).andExpect(status().isConflict());
+    }
+
+    @Test
     void unknownIdentifierIsReportedAsNotFound() throws Exception {
         UUID unknown = UUID.randomUUID();
 
