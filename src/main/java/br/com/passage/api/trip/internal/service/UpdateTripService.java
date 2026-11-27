@@ -29,12 +29,12 @@ public class UpdateTripService {
             throw new BusinessException("O horário de chegada deve ser posterior ao horário de partida.");
         }
 
+        trip.changeStatus(request.status());
         trip.setBusId(request.busId());
         trip.setDriverId(request.driverId());
         trip.setDepartureTime(request.departureTime());
         trip.setArrivalTime(request.arrivalTime());
         trip.setPrice(request.price());
-        trip.setStatus(request.status());
 
         Trip updatedTrip = tripRepository.save(trip);
 
