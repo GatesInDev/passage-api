@@ -5,12 +5,12 @@ import br.com.passage.api.ticket.internal.domain.entities.Ticket;
 import br.com.passage.api.ticket.internal.dto.CreateTicketRequest;
 import br.com.passage.api.ticket.internal.dto.TicketResponse;
 import br.com.passage.api.ticket.internal.repository.TicketRepository;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class CreateTicketService {
 
     private final TicketRepository ticketRepository;
