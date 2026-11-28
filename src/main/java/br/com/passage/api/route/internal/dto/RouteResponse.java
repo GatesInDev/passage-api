@@ -8,106 +8,115 @@ import br.com.passage.api.route.internal.domain.entities.Route;
 import br.com.passage.api.route.internal.domain.enums.RouteScope;
 import io.swagger.v3.oas.annotations.media.Schema;
 
-@Schema(description = "Representação detalhada dos dados de resposta de uma rota")
+/**
+ * Representa os dados de uma rota retornados pela API.
+ */
+@Schema(description = "Dados de uma rota")
 public record RouteResponse(
 
         @Schema(
-                description = "Identificador único (UUID) público da rota",
+                description = "Identificador público (UUID) da rota",
                 example = "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11"
         )
         UUID id,
 
         @Schema(
-                description = "Data e hora de criação do registro (UTC)",
+                description = "Data e hora de criação (UTC)",
                 example = "2026-08-13T19:20:15Z"
         )
         Instant createdAt,
 
         @Schema(
-                description = "Data e hora da última atualização do registro (UTC)",
+                description = "Data e hora da última alteração (UTC)",
                 example = "2026-08-13T19:25:00Z"
         )
         Instant updatedAt,
 
         @Schema(
-                description = "Indica se a rota está ativa para operação no sistema",
+                description = "Se a rota está ativa; rotas inativas não recebem novas viagens",
                 example = "true"
         )
         boolean isActive,
 
         @Schema(
-                description = "Indica se o registro passou por exclusão lógica (soft delete)",
+                description = "Se a rota foi excluída logicamente",
                 example = "false"
         )
         boolean isDeleted,
 
         @Schema(
-                description = "Código ou prefixo da linha registrado no órgão regulador",
+                description = "Prefixo da linha no órgão regulador",
                 example = "1234-56"
         )
         String code,
 
         @Schema(
-                description = "UUID da empresa dona da rota",
+                description = "Empresa operadora",
                 example = "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11"
         )
         UUID companyUuid,
 
         @Schema(
-                description = "Nome descritivo da linha/rota",
+                description = "Nome da linha",
                 example = "Florianópolis - São Paulo via BR-101"
         )
         String name,
 
         @Schema(
-                description = "Cidade de origem da rota",
+                description = "Cidade de origem",
                 example = "Florianópolis"
         )
         String originCity,
 
         @Schema(
-                description = "Unidade Federativa (UF) de origem",
+                description = "UF de origem",
                 example = "SC"
         )
         String originState,
 
         @Schema(
-                description = "Cidade de destino da rota",
+                description = "Cidade de destino",
                 example = "São Paulo"
         )
         String destinationCity,
 
         @Schema(
-                description = "Unidade Federativa (UF) de destino",
+                description = "UF de destino",
                 example = "SP"
         )
         String destinationState,
 
         @Schema(
-                description = "Distância total da rota em quilômetros",
+                description = "Distância total, em quilômetros",
                 example = "705.40"
         )
         BigDecimal distanceKm,
 
         @Schema(
-                description = "Tempo estimado de viagem, em minutos",
+                description = "Duração estimada do trajeto, em minutos",
                 example = "720"
         )
         Integer estimatedDurationMinutes,
 
         @Schema(
-                description = "Abrangência do serviço da linha, que determina o órgão regulador",
+                description = "Abrangência da linha",
                 example = "INTERSTATE"
         )
         RouteScope serviceScope,
 
         @Schema(
-                description = "Órgão regulador ou concedente da linha (ex.: ANTT, DETER-SC)",
+                description = "Órgão regulador da linha",
                 example = "ANTT"
         )
         String regulatoryAgency
 
 ) {
+        /**
+         * Converte a rota persistida em sua representação de resposta.
+         *
+         * @param route rota de origem
+         * @return representação de resposta correspondente
+         */
         public static RouteResponse from(Route route){
                 return new RouteResponse(
             route.getId(),

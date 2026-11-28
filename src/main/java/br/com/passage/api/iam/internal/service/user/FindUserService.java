@@ -11,12 +11,24 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * Serviço responsável pela consulta de usuários.
+ *
+ * <p>Usuários excluídos logicamente não são retornados.</p>
+ */
 @Service
 @RequiredArgsConstructor
 public class FindUserService {
 
     private final UserRepository userRepository;
 
+    /**
+     * Busca um usuário pelo identificador.
+     *
+     * @param id identificador do usuário
+     * @return usuário encontrado
+     * @throws ResourceNotFoundException se o usuário não existir ou estiver excluído
+     */
     @Transactional(readOnly = true)
     public UserResponse execute(UUID id) {
         User user = userRepository.findById(id)
@@ -26,6 +38,11 @@ public class FindUserService {
         return toResponse(user);
     }
 
+    /**
+     * Lista os usuários não excluídos.
+     *
+     * @return usuários cadastrados
+     */
     @Transactional(readOnly = true)
     public List<UserResponse> executeAll() {
         return userRepository.findAll().stream()

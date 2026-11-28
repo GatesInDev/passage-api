@@ -7,12 +7,12 @@ import org.hibernate.validator.constraints.br.CPF;
 import java.util.UUID;
 
 /**
- * Dados alteráveis de uma passagem.
+ * Representa os dados de entrada para a atualização de uma passagem.
  *
- * <p>Preço e horário de partida não constam aqui: vêm da viagem, como na
- * emissão, para que não possam ser escolhidos por quem altera o bilhete.</p>
+ * <p>O código não é alterado. O preço, a data de partida e a empresa não
+ * constam aqui: são obtidos da viagem, como na venda.</p>
  */
-@Schema(description = "Payload com os dados atualizáveis de uma passagem já cadastrada")
+@Schema(description = "Dados para atualizar uma passagem; preço, partida e empresa vêm da viagem")
 public record UpdateTicketRequest(
 
         @Schema(
@@ -27,7 +27,7 @@ public record UpdateTicketRequest(
         String passengerName,
 
         @Schema(
-                description = "CPF do passageiro (somente números, 11 dígitos)",
+                description = "CPF do passageiro, sem pontuação",
                 example = "12345678909",
                 requiredMode = Schema.RequiredMode.REQUIRED
         )
@@ -36,7 +36,7 @@ public record UpdateTicketRequest(
         String passengerDocument,
 
         @Schema(
-                description = "Identificador UUID do assento reservado",
+                description = "Assento",
                 example = "b1ffcd88-8d1c-4fa7-aa5e-5cc8ac291b22",
                 requiredMode = Schema.RequiredMode.REQUIRED
         )
@@ -44,7 +44,7 @@ public record UpdateTicketRequest(
         UUID seatId,
 
         @Schema(
-                description = "Identificador UUID da viagem da passagem",
+                description = "Viagem",
                 example = "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11",
                 requiredMode = Schema.RequiredMode.REQUIRED
         )
@@ -52,7 +52,7 @@ public record UpdateTicketRequest(
         UUID tripId,
 
         @Schema(
-                description = "Define se a passagem está ativa no sistema",
+                description = "Se a passagem está ativa",
                 example = "true",
                 requiredMode = Schema.RequiredMode.REQUIRED
         )

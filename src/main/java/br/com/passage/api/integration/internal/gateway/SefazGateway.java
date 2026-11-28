@@ -5,8 +5,7 @@ import br.com.passage.api.integration.internal.domain.entities.FiscalDocument;
 /**
  * Canal de comunicação com a SEFAZ.
  *
- * <p>Existe como interface para que a troca do emissor simulado por uma
- * integração real não afete o restante do módulo.</p>
+ * <p>Nesta versão, a implementação utilizada é o {@link MockSefazGateway}.</p>
  */
 public interface SefazGateway {
 

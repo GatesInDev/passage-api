@@ -24,6 +24,14 @@ public class CancelFiscalDocumentService {
     private final FiscalDocumentRepository fiscalDocumentRepository;
     private final FindFiscalDocumentService findFiscalDocumentService;
 
+    /**
+     * Cancela um documento fiscal autorizado.
+     *
+     * @param id identificador do documento
+     * @return documento cancelado
+     * @throws ResourceNotFoundException se o documento não existir, estiver excluído ou pertencer a outra empresa
+     * @throws BusinessException         se o documento não estiver autorizado
+     */
     @Transactional
     public FiscalDocumentResponse execute(UUID id) {
         FiscalDocument document = findFiscalDocumentService.findEntity(id);

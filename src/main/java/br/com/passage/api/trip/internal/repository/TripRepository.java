@@ -16,6 +16,15 @@ import br.com.passage.api.trip.internal.domain.entities.Trip;
  */
 public interface TripRepository extends JpaRepository<Trip, UUID> {
 
+    /**
+     * Busca uma viagem visível.
+     *
+     * <p>Viagens excluídas são desconsideradas.</p>
+     *
+     * @param id          identificador da viagem
+     * @param companyUuid empresa à qual a busca é restrita, ou {@code null} para todas
+     * @return viagem encontrada, se existir
+     */
     @Query("""
         select t from Trip t
         where t.id = :id and t.isDeleted = false
@@ -23,6 +32,14 @@ public interface TripRepository extends JpaRepository<Trip, UUID> {
         """)
     Optional<Trip> findVisibleById(@Param("id") UUID id, @Param("companyUuid") UUID companyUuid);
 
+    /**
+     * Lista as viagens visíveis.
+     *
+     * <p>Viagens excluídas são desconsideradas.</p>
+     *
+     * @param companyUuid empresa à qual a listagem é restrita, ou {@code null} para todas
+     * @return viagens encontradas
+     */
     @Query("""
         select t from Trip t
         where t.isDeleted = false
@@ -30,6 +47,18 @@ public interface TripRepository extends JpaRepository<Trip, UUID> {
         """)
     List<Trip> findAllVisible(@Param("companyUuid") UUID companyUuid);
 
+    /**
+     * Verifica se o ônibus possui outra viagem que se sobrepõe ao período informado.
+     *
+     * <p>Viagens canceladas ou excluídas não são consideradas. Viagens em sequência, em que uma
+     * começa quando a outra termina, não configuram conflito.</p>
+     *
+     * @param busId         identificador do ônibus
+     * @param departureTime início do período
+     * @param arrivalTime   fim do período
+     * @param excludedId    viagem desconsiderada na verificação, ou {@code null}
+     * @return {@code true} se houver conflito de agenda
+     */
     @Query("""
         select count(t) > 0 from Trip t
         where t.busId = :busId
@@ -44,6 +73,17 @@ public interface TripRepository extends JpaRepository<Trip, UUID> {
                               @Param("arrivalTime") Instant arrivalTime,
                               @Param("excludedId") UUID excludedId);
 
+    /**
+     * Verifica se o motorista possui outra viagem que se sobrepõe ao período informado.
+     *
+     * <p>Segue as mesmas regras de {@link #existsBusConflict}.</p>
+     *
+     * @param driverId      identificador do motorista
+     * @param departureTime início do período
+     * @param arrivalTime   fim do período
+     * @param excludedId    viagem desconsiderada na verificação, ou {@code null}
+     * @return {@code true} se houver conflito de agenda
+     */
     @Query("""
         select count(t) > 0 from Trip t
         where t.driverId = :driverId

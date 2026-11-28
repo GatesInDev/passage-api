@@ -9,7 +9,12 @@ import org.springframework.stereotype.Service;
 import java.util.UUID;
 
 /**
- * Resolve a empresa do usuário autenticado para o módulo fiscal.
+ * Serviço responsável por definir o escopo de empresa das consultas de documentos fiscais.
+ *
+ * <ul>
+ *     <li>ADMIN – acessa os documentos de todas as empresas;</li>
+ *     <li>demais perfis – acessam apenas os documentos da empresa à qual estão vinculados.</li>
+ * </ul>
  */
 @Service
 @RequiredArgsConstructor
@@ -18,8 +23,10 @@ public class FiscalDocumentAccessService {
     private final IamApi iamApi;
 
     /**
-     * @return {@code null} para administradores, que enxergam todas as
-     *         empresas; caso contrário, a empresa do usuário.
+     * Recupera a empresa à qual as consultas do usuário autenticado são restritas.
+     *
+     * @return empresa do usuário, ou {@code null} para o administrador
+     * @throws AccessDeniedException se o usuário não for administrador nem estiver vinculado a uma empresa
      */
     public UUID currentCompanyId() {
         var user = iamApi.currentUser();

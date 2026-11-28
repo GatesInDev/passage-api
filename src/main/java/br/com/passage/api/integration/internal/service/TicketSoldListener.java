@@ -21,6 +21,11 @@ public class TicketSoldListener {
 
     private final IssueFiscalDocumentService issueFiscalDocumentService;
 
+    /**
+     * Emite o documento fiscal da passagem vendida.
+     *
+     * @param sale evento da venda
+     */
     @ApplicationModuleListener
     public void on(TicketSold sale) {
         log.info("Emitindo BP-e para a passagem {}", sale.ticketId());

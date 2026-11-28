@@ -13,11 +13,11 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.UUID;
 
 /**
- * Altera uma passagem já emitida.
+ * Serviço responsável pela atualização de passagens.
  *
- * <p>Remarcar é vender de novo: a viagem e o assento informados passam
- * pelas mesmas regras da emissão, e preço e horário continuam vindo da
- * viagem, nunca do cliente.</p>
+ * <p>Permite alterar os dados do passageiro, a viagem, o assento e a situação da passagem.
+ * O código não é alterado. A alteração segue as mesmas regras da venda, aplicadas pelo
+ * {@link TicketSaleValidator}, e o preço, a partida e a empresa passam a ser os da viagem.</p>
  */
 @Service
 @RequiredArgsConstructor
@@ -27,6 +27,16 @@ public class UpdateTicketService {
     private final TicketAccessService ticketAccessService;
     private final TicketSaleValidator ticketSaleValidator;
 
+    /**
+     * Atualiza uma passagem visível ao usuário autenticado.
+     *
+     * @param id      identificador da passagem
+     * @param request novos dados da passagem
+     * @return passagem atualizada
+     * @throws ResourceNotFoundException se a passagem ou a viagem não forem encontradas
+     * @throws AccessDeniedException     se a viagem pertencer a outra empresa
+     * @throws BusinessException         se alguma regra da venda falhar
+     */
     @Transactional
     public TicketResponse execute(UUID id, UpdateTicketRequest request) {
 

@@ -13,6 +13,22 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+/**
+ * Configuração das regras de segurança HTTP.
+ *
+ * <p>A API não mantém sessão: toda requisição é autenticada pelo token JWT, validado pelo
+ * {@link JwtAuthenticationFilter}.</p>
+ *
+ * <h2>Acesso público</h2>
+ *
+ * <ul>
+ *     <li>{@code POST /api/v1/auth/login};</li>
+ *     <li>documentação do Swagger ({@code /swagger-ui/**} e {@code /v3/api-docs/**}).</li>
+ * </ul>
+ *
+ * <p>Os demais endpoints exigem autenticação. A permissão por perfil de cada endpoint é
+ * declarada nos controllers com {@code @PreAuthorize}.</p>
+ */
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity

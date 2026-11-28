@@ -49,9 +49,6 @@ import java.util.List;
  * Ela deve ser obtida através da quantidade de assentos ativos associados
  * ao veículo.</p>
  *
- * <p>Essa abordagem evita inconsistências entre a capacidade declarada
- * e a quantidade real de assentos configurados.</p>
- *
  * <h2>Relacionamento</h2>
  *
  * <p>Um ônibus possui vários assentos e cada assento pertence a exatamente
@@ -73,6 +70,12 @@ import java.util.List;
 @EqualsAndHashCode(callSuper = true)
 public class Bus extends EntityBase {
 
+    /**
+     * Empresa proprietária do ônibus.
+     *
+     * <p>Define o escopo de acesso do veículo: o gestor de frota só enxerga os ônibus da
+     * própria empresa.</p>
+     */
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "company_id", nullable = false)
     @ToString.Exclude

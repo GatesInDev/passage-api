@@ -91,7 +91,7 @@ public class Company extends EntityBase {
      * O valor é validado através da anotação {@link CNPJ}.</p>
      *
      * <p>O tamanho máximo armazenado é de 14 caracteres, permitindo
-     * a representação formatada do CNPJ alphanumerico.</p>
+     * a representação do CNPJ alfanumérico.</p>
      */
     @CNPJ(format = CNPJ.Format.ALPHANUMERIC)
     @Column(name = "document_id", nullable = false, length = 14, unique = true)
@@ -118,8 +118,7 @@ public class Company extends EntityBase {
     /**
      * Lista de motoristas vinculados à empresa transportadora.
      * <p>
-     * Configurada com deleção em cascata e remoção de órfãos para manter
-     * a integridade do agregado da empresa.
+     * Configurada com deleção em cascata e remoção de órfãos.
      * </p>
      */
     @Builder.Default

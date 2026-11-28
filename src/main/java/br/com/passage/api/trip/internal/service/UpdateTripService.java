@@ -14,6 +14,22 @@ import br.com.passage.api.trip.internal.dto.UpdateTripRequest;
 import br.com.passage.api.trip.internal.repository.TripRepository;
 import lombok.RequiredArgsConstructor;
 
+/**
+ * Serviço responsável pela atualização de viagens.
+ *
+ * <p>Permite alterar o ônibus, o motorista, os horários, o preço e a situação da viagem. O código
+ * e a rota não são alterados.</p>
+ *
+ * <h2>Situação</h2>
+ *
+ * <ul>
+ *     <li>viagens concluídas ou canceladas não aceitam alterações;</li>
+ *     <li>a mudança de situação segue as transições de {@link TripStatus#canTransitionTo};</li>
+ *     <li>no cancelamento, apenas a situação é alterada e os demais campos são ignorados.</li>
+ * </ul>
+ *
+ * <p>Nas demais alterações, a viagem passa pelas mesmas validações do agendamento.</p>
+ */
 @Service 
 @RequiredArgsConstructor 
 public class UpdateTripService {
@@ -23,6 +39,16 @@ public class UpdateTripService {
     private final TripRepository tripRepository;
     private final TripAccessService tripAccessService;
     
+    /**
+     * Atualiza uma viagem visível ao usuário autenticado.
+     *
+     * @param id      identificador da viagem
+     * @param request novos dados da viagem
+     * @return viagem atualizada
+     * @throws ResourceNotFoundException se a viagem, o ônibus ou o motorista não forem encontrados
+     * @throws BusinessException         se a viagem estiver finalizada, a transição de situação for
+     *                                   inválida ou alguma das validações falhar
+     */
     @Transactional 
     public TripResponse execute(UUID id, UpdateTripRequest request){
         Trip trip = tripRepository.findVisibleById(id, tripAccessService.visibleCompanyUuid())

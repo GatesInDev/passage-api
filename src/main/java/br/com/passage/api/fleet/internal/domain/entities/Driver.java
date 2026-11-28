@@ -40,7 +40,7 @@ public class Driver extends EntityBase {
 
     /**
      * Empresa transportadora à qual o motorista está vinculado.
-     * Mapeamento com carregamento preguiçoso (Lazy loading) para otimização de consultas.
+     * Mapeamento com carregamento preguiçoso (lazy loading).
      */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "company_id", nullable = false)

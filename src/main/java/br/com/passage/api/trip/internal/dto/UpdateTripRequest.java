@@ -9,11 +9,17 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 
-@Schema(description = "Payload com os dados necessários para a atualização de uma viagem")
+/**
+ * Representa os dados de entrada para a atualização de uma viagem.
+ *
+ * <p>O código e a rota não são alterados. Ao informar a situação {@code CANCELED},
+ * os demais campos são ignorados.</p>
+ */
+@Schema(description = "Dados para atualizar uma viagem; o código e a rota não mudam")
 public record UpdateTripRequest
 (
         @Schema(
-                description = "UUID do ônibus alocado para a viagem",
+                description = "Ônibus alocado: da mesma empresa da rota, ativo e sem outra viagem no período",
                 example = "3f1c2b7a-8d4e-4a6b-9c1d-2e5f7a8b9c0d",
                 requiredMode = Schema.RequiredMode.REQUIRED
         )
@@ -21,7 +27,7 @@ public record UpdateTripRequest
         UUID busId,
 
         @Schema(
-                description = "UUID do motorista responsável pela viagem",
+                description = "Motorista alocado: da mesma empresa da rota, ativo e sem outra viagem no período",
                 example = "7c9e6679-7425-40de-944b-e07fc1f90ae7",
                 requiredMode = Schema.RequiredMode.REQUIRED
         )
@@ -29,7 +35,7 @@ public record UpdateTripRequest
         UUID driverId,
 
         @Schema(
-                description = "Data e hora de partida da viagem (UTC).",
+                description = "Partida prevista (UTC)",
                 example = "2026-11-10T11:00:00Z",
                 requiredMode = Schema.RequiredMode.REQUIRED
         )
@@ -37,7 +43,7 @@ public record UpdateTripRequest
         Instant departureTime,
 
         @Schema(
-                description = "Data e hora de chegada prevista da viagem (UTC). Deve ser posterior à partida.",
+                description = "Chegada prevista (UTC), posterior à partida",
                 example = "2026-11-10T23:00:00Z",
                 requiredMode = Schema.RequiredMode.REQUIRED
         )
@@ -45,7 +51,7 @@ public record UpdateTripRequest
         Instant arrivalTime,
 
         @Schema(
-                description = "Preço base da passagem da viagem",
+                description = "Preço base da passagem",
                 example = "189.90",
                 requiredMode = Schema.RequiredMode.REQUIRED
         )
@@ -54,7 +60,7 @@ public record UpdateTripRequest
         BigDecimal price,
 
         @Schema(
-                description = "Situação atual da viagem",
+                description = "Nova situação. Ao cancelar, os demais campos são ignorados",
                 example = "SCHEDULED",
                 requiredMode = Schema.RequiredMode.REQUIRED
         )

@@ -11,6 +11,14 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
+/**
+ * Serviço responsável pela autenticação dos usuários.
+ *
+ * <p>Valida o e-mail e a senha pelo Spring Security e, em caso de sucesso, emite o token
+ * JWT de acesso.</p>
+ *
+ * @see JwtService
+ */
 @Service
 @RequiredArgsConstructor
 public class AuthService {
@@ -18,6 +26,13 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
 
+    /**
+     * Autentica o usuário e emite o token de acesso.
+     *
+     * @param request e-mail e senha do usuário
+     * @return token de acesso, tipo e validade em segundos
+     * @throws BusinessException se o e-mail ou a senha estiverem incorretos
+     */
     public TokenResponse login(LoginRequest request)
     {
         try

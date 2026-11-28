@@ -9,6 +9,24 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.UUID;
 
+/**
+ * Representa uma passagem vendida para um assento de uma viagem.
+ *
+ * <p>A passagem registra os dados do passageiro e o assento ocupado. O preço, a data de
+ * partida e a empresa são copiados da viagem no momento da venda.</p>
+ *
+ * <h2>Assento</h2>
+ *
+ * <p>Um assento só pode ser vendido uma vez por viagem. Passagens canceladas liberam o
+ * assento novamente.</p>
+ *
+ * <h2>Relacionamentos</h2>
+ *
+ * <p>A viagem e o assento pertencem a outros módulos e são referenciados apenas pelos
+ * identificadores.</p>
+ *
+ * @see EntityBase
+ */
 @Entity
 @Table(name = "tickets")
 @Getter

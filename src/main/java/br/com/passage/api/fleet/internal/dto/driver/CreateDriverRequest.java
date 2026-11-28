@@ -5,14 +5,25 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import java.util.UUID;
 
-@Schema(description = "Create a driver.")
+/**
+ * Representa os dados de entrada para o cadastro de um motorista.
+ *
+ * <p>A empresa é obrigatória para o administrador. Para o gestor de frota, é
+ * sempre a própria empresa.</p>
+ */
+@Schema(description = "Dados para cadastrar um motorista")
 public record CreateDriverRequest(
-        @NotBlank @Size(max = 100)
+        @Schema(description = "Nome completo", example = "João Pereira", requiredMode = Schema.RequiredMode.REQUIRED)
+        @NotBlank(message = "O nome do motorista é obrigatório.")
+        @Size(max = 100, message = "O nome do motorista deve ter no máximo 100 caracteres.")
         String name,
-        @NotBlank @Size(max = 20)
+        @Schema(description = "Número da CNH, único no sistema", example = "02650306461", requiredMode = Schema.RequiredMode.REQUIRED)
+        @NotBlank(message = "O número da CNH é obrigatório.")
+        @Size(max = 20, message = "O número da CNH deve ter no máximo 20 caracteres.")
         String licenseNumber,
-        @Size(max = 5)
+        @Schema(description = "Categoria da CNH", example = "D")
+        @Size(max = 5, message = "A categoria da CNH deve ter no máximo 5 caracteres.")
         String licenseCategory,
-        @Schema(description = "Required for administrators; managers always use their authenticated company.")
+        @Schema(description = "Empresa dona: obrigatória para ADMIN e ignorada para FLEET_MANAGER, que usa a própria empresa")
         UUID companyUuid
 ) {}

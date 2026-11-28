@@ -12,6 +12,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
+/**
+ * Serviço responsável pela exclusão de empresas.
+ *
+ * <p>A exclusão é lógica e restrita ao administrador. A empresa é marcada como excluída e
+ * inativa, e os ônibus e motoristas dela deixam de ser retornados pelas consultas da frota.</p>
+ */
 @Service
 @RequiredArgsConstructor
 public class DeleteCompanyService {
@@ -19,13 +25,20 @@ public class DeleteCompanyService {
     private final CompanyRepository companyRepository;
     private final IamApi iamApi;
 
+    /**
+     * Exclui logicamente uma empresa.
+     *
+     * @param id identificador da empresa
+     * @throws AccessDeniedException     se o usuário não for administrador
+     * @throws ResourceNotFoundException se a empresa não existir ou já estiver excluída
+     */
     @Transactional
     public void execute(UUID id) {
         if (iamApi.currentUser().role() != UserRole.ADMIN) {
-            throw new AccessDeniedException("Only administrators can delete companies.");
+            throw new AccessDeniedException("Apenas administradores podem excluir empresas.");
         }
         Company company = companyRepository.findByIdAndIsDeletedFalse(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Company not found: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Empresa não encontrada com o identificador: " + id));
         company.setDeleted(true);
         company.setActive(false);
         companyRepository.save(company);

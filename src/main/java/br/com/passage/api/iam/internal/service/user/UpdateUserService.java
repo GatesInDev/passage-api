@@ -11,12 +11,26 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
+/**
+ * Serviço responsável pela atualização de usuários.
+ *
+ * <p>Permite alterar o nome, o perfil, a empresa vinculada e a situação do usuário.
+ * O e-mail e a senha não são alterados por este serviço.</p>
+ */
 @Service
 @RequiredArgsConstructor
 public class UpdateUserService {
 
     private final UserRepository userRepository;
 
+    /**
+     * Atualiza um usuário.
+     *
+     * @param id      identificador do usuário
+     * @param request novos dados do usuário
+     * @return usuário atualizado
+     * @throws ResourceNotFoundException se o usuário não existir ou estiver excluído
+     */
     @Transactional
     public UserResponse execute(UUID id, UpdateUserRequest request) {
         User user = userRepository.findById(id)

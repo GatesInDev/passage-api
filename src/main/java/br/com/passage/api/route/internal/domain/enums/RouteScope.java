@@ -33,5 +33,5 @@ public enum RouteScope {
      * Rota que ocorre dentro de uma área metropolitana.
      */
     METROPOLITAN
-    
+
 }

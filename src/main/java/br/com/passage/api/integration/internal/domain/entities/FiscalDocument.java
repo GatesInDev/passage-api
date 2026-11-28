@@ -47,7 +47,9 @@ public class FiscalDocument extends EntityBase {
     @Column(name = "access_key", length = 44)
     private String accessKey;
 
-    /** Modelo do documento fiscal. O BP-e é sempre o modelo 63. */
+    /**
+     * Modelo do documento fiscal. O BP-e é sempre o modelo 63.
+     */
     @Column(name = "model", nullable = false, length = 2)
     private String model;
 
@@ -57,7 +59,9 @@ public class FiscalDocument extends EntityBase {
     @Column(name = "number", nullable = false)
     private Long number;
 
-    /** Protocolo devolvido pela SEFAZ na autorização. */
+    /**
+     * Protocolo devolvido pela SEFAZ na autorização.
+     */
     @Column(name = "protocol", length = 20)
     private String protocol;
 
@@ -72,12 +76,14 @@ public class FiscalDocument extends EntityBase {
     /**
      * Passagem que originou o documento.
      *
-     * <p>Referenciada por UUID para manter o desacoplamento entre módulos.</p>
+     * <p>Referenciada apenas pelo identificador da passagem.</p>
      */
     @Column(name = "ticket_id", nullable = false)
     private UUID ticketId;
 
-    /** Empresa emitente, herdada da passagem. */
+    /**
+     * Empresa emitente, herdada da passagem.
+     */
     @Column(name = "company_uuid", nullable = false)
     private UUID companyUuid;
 
@@ -96,7 +102,9 @@ public class FiscalDocument extends EntityBase {
     @Column(name = "canceled_at")
     private Instant canceledAt;
 
-    /** Motivo informado pela SEFAZ quando o documento é recusado. */
+    /**
+     * Motivo informado pela SEFAZ quando o documento é recusado.
+     */
     @Column(name = "rejection_reason", length = 255)
     private String rejectionReason;
 
@@ -139,9 +147,9 @@ public class FiscalDocument extends EntityBase {
     /**
      * Indica se o documento ainda admite nova tentativa de autorização.
      *
-     * <p>Somente documentos pendentes ou recusados podem ser reenviados.
-     * Um documento autorizado já circulou, e um cancelado é definitivo:
-     * reenviá-lo o faria voltar a valer.</p>
+     * <p>Somente documentos pendentes ou recusados podem ser reenviados.</p>
+     *
+     * @return {@code true} para documentos {@code PENDING} ou {@code REJECTED}
      */
     public boolean canBeResubmitted() {
         return this.status == FiscalDocumentStatus.PENDING

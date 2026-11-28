@@ -9,10 +9,14 @@ import org.springframework.stereotype.Service;
 import java.util.UUID;
 
 /**
- * Resolve a empresa do usuário autenticado para o módulo de passagens.
+ * Serviço responsável por definir o escopo de empresa das operações de passagens.
  *
- * <p>Equivalente ao {@code FleetAccessService} do módulo de frota, com os
- * perfis que operam a bilheteria.</p>
+ * <ul>
+ *     <li>ADMIN – acessa as passagens de todas as empresas;</li>
+ *     <li>demais perfis – acessam apenas as passagens da empresa à qual estão vinculados.</li>
+ * </ul>
+ *
+ * <p>Os perfis autorizados em cada operação são definidos no {@code TicketController}.</p>
  */
 @Service
 @RequiredArgsConstructor
@@ -21,10 +25,10 @@ public class TicketAccessService {
     private final IamApi iamApi;
 
     /**
-     * Empresa a ser aplicada nas consultas.
+     * Recupera a empresa à qual as operações do usuário autenticado são restritas.
      *
-     * @return {@code null} para administradores, que enxergam todas as
-     *         empresas; caso contrário, a empresa do usuário.
+     * @return empresa do usuário, ou {@code null} para o administrador
+     * @throws AccessDeniedException se o usuário não for administrador nem estiver vinculado a uma empresa
      */
     public UUID currentCompanyId() {
         var user = iamApi.currentUser();

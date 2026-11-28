@@ -17,7 +17,15 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-@Tag(name = "Autenticação", description = "Endpoints de login e obtenção de token de acesso")
+/**
+ * Controlador REST responsável pela autenticação.
+ *
+ * <p>Expõe o endpoint público de login, que devolve o token JWT utilizado nas demais
+ * requisições no cabeçalho {@code Authorization: Bearer}.</p>
+ *
+ * @see AuthService
+ */
+@Tag(name = "Autenticação", description = "Login e emissão do token de acesso")
 @RestController
 @RequestMapping("api/v1/auth")
 @RequiredArgsConstructor
@@ -27,13 +35,13 @@ public class AuthController
     private final AuthService authService;
 
     @Operation(
-            summary = "Autenticar usuário",
-            description = "Valida as credenciais de e-mail e senha do usuário e devolve um token JWT válido."
+            summary = "Autenticar",
+            description = "Valida e-mail e senha e devolve o token JWT, a ser enviado como `Authorization: Bearer <token>`."
     )
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "200",
-                    description = "Autenticação realizada com sucesso",
+                    description = "Autenticado",
                     content = @Content(
                             mediaType = "application/json",
                             schema = @Schema(implementation = TokenResponse.class)
@@ -41,12 +49,17 @@ public class AuthController
             ),
             @ApiResponse(
                     responseCode = "400",
-                    description = "Formato de requisição inválido",
+                    description = "Dados inválidos",
                     content = @Content
             ),
             @ApiResponse(
-                    responseCode = "401",
-                    description = "Credenciais inválidas (e-mail ou senha incorretos)",
+                    responseCode = "403",
+                    description = "Usuário inativo ou excluído",
+                    content = @Content
+            ),
+            @ApiResponse(
+                    responseCode = "409",
+                    description = "E-mail ou senha incorretos",
                     content = @Content
             )
     })

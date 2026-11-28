@@ -11,6 +11,20 @@ import org.springframework.stereotype.Service;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 
+/**
+ * Serviço responsável por gerar e validar os tokens JWT de acesso.
+ *
+ * <p>Os tokens são assinados com HMAC-256 e emitidos por {@code passage-api}.</p>
+ *
+ * <h2>Configuração</h2>
+ *
+ * <ul>
+ *     <li>{@code api.security.token.secret} – chave de assinatura. O valor padrão é
+ *         destinado apenas ao ambiente local;</li>
+ *     <li>{@code api.security.token.expiration-hours} – validade do token, em horas.
+ *         O padrão é 24.</li>
+ * </ul>
+ */
 @Service
 public class JwtService {
 
@@ -20,6 +34,15 @@ public class JwtService {
     @Value("${api.security.token.expiration-hours:24}")
     private Long expirationHours;
 
+    /**
+     * Gera o token de acesso do usuário.
+     *
+     * <p>O e-mail é utilizado como {@code subject}. O perfil, o identificador e a empresa do
+     * usuário são incluídos como claims.</p>
+     *
+     * @param user usuário autenticado
+     * @return token JWT assinado
+     */
     public String generateToken(User user) {
         try {
             Algorithm algorithm = Algorithm.HMAC256(secret);
@@ -36,6 +59,12 @@ public class JwtService {
         }
     }
 
+    /**
+     * Valida a assinatura, o emissor e a expiração do token.
+     *
+     * @param token token JWT
+     * @return e-mail do usuário, ou {@code null} se o token for inválido ou estiver expirado
+     */
     public String validateToken(String token) {
         try {
             Algorithm algorithm = Algorithm.HMAC256(secret);
@@ -49,6 +78,11 @@ public class JwtService {
         }
     }
 
+    /**
+     * Retorna a validade do token.
+     *
+     * @return validade em segundos
+     */
     public Long getExpirationInSeconds() {
         return this.expirationHours * 3600;
     }

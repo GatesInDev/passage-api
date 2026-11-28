@@ -9,11 +9,16 @@ import java.util.UUID;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
-@Schema(description = "Payload para atualização de dados cadastrais e permissões do usuário")
+/**
+ * Representa os dados de entrada para a atualização de um usuário.
+ *
+ * <p>O e-mail e a senha não são alterados.</p>
+ */
+@Schema(description = "Dados para atualizar um usuário; o e-mail e a senha não são alterados por aqui")
 public record UpdateUserRequest(
 
         @Schema(
-                description = "Nome completo do usuário",
+                description = "Nome completo",
                 example = "Carlos Eduardo Souza",
                 requiredMode = Schema.RequiredMode.REQUIRED,
                 minLength = 3,
@@ -24,7 +29,7 @@ public record UpdateUserRequest(
         String name,
 
         @Schema(
-                description = "Papel ou perfil de permissão atualizado",
+                description = "Perfil de acesso",
                 example = "FLEET_MANAGER",
                 requiredMode = Schema.RequiredMode.REQUIRED
         )
@@ -32,13 +37,13 @@ public record UpdateUserRequest(
         UserRole role,
 
         @Schema(
-                description = "UUID público da empresa transportadora vinculada",
+                description = "Empresa vinculada; não se aplica a administradores e passageiros",
                 example = "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11"
         )
         UUID companyUuid,
 
         @Schema(
-                description = "Define se a conta do usuário está ativa para operar",
+                description = "Se o usuário está ativo; usuários inativos não conseguem autenticar",
                 example = "true",
                 requiredMode = Schema.RequiredMode.REQUIRED
         )

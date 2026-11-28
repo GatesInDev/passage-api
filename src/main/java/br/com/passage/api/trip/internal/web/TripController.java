@@ -33,7 +33,16 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
-@Tag(name = "Viagens", description = "Endpoints para gestão de viagens no módulo de Transporte")
+/**
+ * Controlador REST responsável pela gestão de viagens.
+ *
+ * <p>A consulta é permitida a qualquer usuário autenticado. O agendamento, a atualização e a
+ * exclusão são restritos aos perfis ADMIN e FLEET_MANAGER.</p>
+ *
+ * <p>O escopo de empresa é definido pelo {@link br.com.passage.api.trip.internal.service.TripAccessService}: o gestor de frota acessa
+ * apenas as viagens da própria empresa e os demais perfis acessam as viagens de todas as empresas.</p>
+ */
+@Tag(name = "Viagens", description = "Saídas agendadas das rotas, com ônibus, motorista e horários")
 @RestController
 @RequestMapping("api/v1/trips")
 @RequiredArgsConstructor
@@ -45,33 +54,34 @@ public class TripController {
     private final UpdateTripService updateTripService;
 
     @Operation(
-            summary = "Cadastrar nova viagem",
-            description = "Agenda uma nova viagem para uma rota, com ônibus, motorista e horários. A empresa da viagem é a mesma da rota."
+            summary = "Agendar viagem",
+            description = "A viagem herda a empresa da rota e nasce com a situação SCHEDULED."
     )
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "201",
-                    description = "Viagem cadastrada com sucesso",
+                    description = "Viagem agendada",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = TripResponse.class))
             ),
             @ApiResponse(
                     responseCode = "400",
-                    description = "Dados de entrada inválidos (erro de validação dos campos do payload)",
+                    description = "Dados inválidos ou partida no passado",
                     content = @Content
             ),
             @ApiResponse(
                     responseCode = "403",
-                    description = "Acesso não autorizado",
+                    description = "Sem permissão ou rota de outra empresa",
                     content = @Content
             ),
             @ApiResponse(
                     responseCode = "404",
-                    description = "Rota informada não encontrada",
+                    description = "Rota, ônibus ou motorista não encontrado",
                     content = @Content
             ),
             @ApiResponse(
                     responseCode = "409",
-                    description = "Conflito de dados (ex: código da viagem já cadastrado no sistema)",
+                    description = "Código já cadastrado, rota inativa, ônibus ou motorista de outra empresa ou inativo, "
+                            + "chegada antes da partida ou conflito de agenda",
                     content = @Content
             )
     })
@@ -82,39 +92,48 @@ public class TripController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    @Operation(
-            summary = "Buscar viagem por UUID",
-            description = "Busca uma viagem específica no sistema utilizando seu identificador único (UUID)."
-    )
+    @Operation(summary = "Buscar viagem")
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "200",
-                    description = "Viagem encontrada com sucesso",
+                    description = "Viagem encontrada",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = TripResponse.class))
             ),
             @ApiResponse(
+                    responseCode = "403",
+                    description = "Gestor sem empresa vinculada",
+                    content = @Content
+            ),
+            @ApiResponse(
                     responseCode = "404",
-                    description = "Viagem não encontrada com o identificador fornecido",
+                    description = "Viagem não encontrada, excluída ou de outra empresa",
                     content = @Content
             )
     })
     @GetMapping("/{id}")
     public ResponseEntity<TripResponse> findById(
-            @Parameter(description = "UUID público da viagem", example = "e9235aa8-262f-446f-b6fb-e8cce4c8e8f0", required = true)
+            @Parameter(description = "Identificador da viagem", example = "e9235aa8-262f-446f-b6fb-e8cce4c8e8f0", required = true)
             @PathVariable UUID id
     ) {
         return ResponseEntity.ok(findTripService.execute(id));
     }
 
     @Operation(
-            summary = "Listar todas as viagens",
-            description = "Retorna a listagem completa das viagens cadastradas no sistema, excluindo as que foram marcadas como deletadas."
+            summary = "Listar viagens",
+            description = "Lista as viagens não excluídas. O gestor vê apenas as da própria empresa."
     )
-    @ApiResponse(
-            responseCode = "200",
-            description = "Lista de viagens recuperada com sucesso",
-            content = @Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = TripResponse.class)))
-    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Lista de viagens",
+                    content = @Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = TripResponse.class)))
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Gestor sem empresa vinculada",
+                    content = @Content
+            )
+    })
     @GetMapping
     public ResponseEntity<List<TripResponse>> findAll() {
         return ResponseEntity.ok(findTripService.executeAll());
@@ -122,39 +141,41 @@ public class TripController {
 
     @Operation(
             summary = "Atualizar viagem",
-            description = "Atualiza os dados de uma viagem existente, incluindo ônibus, motorista, horários de partida e chegada, preço e situação"
+            description = "Atualiza ônibus, motorista, horários, preço e situação. Para cancelar, basta enviar "
+                    + "status CANCELED: os demais campos são ignorados. Viagens concluídas ou canceladas não mudam."
     )
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "200",
-                    description = "Viagem atualizada com sucesso",
+                    description = "Viagem atualizada",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = TripResponse.class))
             ),
             @ApiResponse(
                     responseCode = "400",
-                    description = "Payload inválido (erro de validação dos campos do payload)",
+                    description = "Dados inválidos",
                     content = @Content
             ),
             @ApiResponse(
                     responseCode = "403",
-                    description = "Usuário sem permissão para alterar viagens",
+                    description = "Sem permissão",
                     content = @Content
             ),
             @ApiResponse(
                     responseCode = "404",
-                    description = "Viagem não encontrada com o identificador fornecido",
+                    description = "Viagem, ônibus ou motorista não encontrado, ou viagem de outra empresa",
                     content = @Content
             ),
             @ApiResponse(
                     responseCode = "409",
-                    description = "Conflito de regra de negócio (ex: horário de chegada anterior ou igual ao de partida)",
+                    description = "Viagem finalizada, transição de situação inválida, ônibus ou motorista de outra "
+                            + "empresa ou inativo, chegada antes da partida ou conflito de agenda",
                     content = @Content
-            ),
+            )
     })
     @PreAuthorize("hasAnyRole('ADMIN', 'FLEET_MANAGER')")
     @PutMapping("/{id}")
     public ResponseEntity<TripResponse> update(
-            @Parameter(description = "UUID público da viagem", example = "e9235aa8-262f-446f-b6fb-e8cce4c8e8f0", required = true)
+            @Parameter(description = "Identificador da viagem", example = "e9235aa8-262f-446f-b6fb-e8cce4c8e8f0", required = true)
             @PathVariable UUID id,
             @Valid @RequestBody UpdateTripRequest request
     ) {
@@ -162,24 +183,29 @@ public class TripController {
     }
 
     @Operation(
-            summary = "Remover Viagem (exclusão Lógica)",
-            description = "Marca uma viagem como deletada, removendo-a da listagem de viagens."
+            summary = "Excluir viagem",
+            description = "Exclusão lógica: a viagem some da API, libera a agenda e continua no banco."
     )
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "204",
-                    description = "Viagem removida com sucesso"
+                    description = "Viagem excluída"
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Sem permissão",
+                    content = @Content
             ),
             @ApiResponse(
                     responseCode = "404",
-                    description = "Viagem não encontrada com o identificador fornecido",
+                    description = "Viagem não encontrada, excluída ou de outra empresa",
                     content = @Content
             )
     })
     @PreAuthorize("hasAnyRole('ADMIN', 'FLEET_MANAGER')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(
-            @Parameter(description = "UUID público da viagem", example = "e9235aa8-262f-446f-b6fb-e8cce4c8e8f0", required = true)
+            @Parameter(description = "Identificador da viagem", example = "e9235aa8-262f-446f-b6fb-e8cce4c8e8f0", required = true)
             @PathVariable UUID id
     ) {
         deleteTripService.execute(id);

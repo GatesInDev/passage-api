@@ -18,6 +18,30 @@ import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 
+/**
+ * Representa uma rota atendida por uma empresa transportadora.
+ *
+ * <p>A rota descreve o trajeto fixo de uma linha, com origem, destino, distância, duração
+ * estimada e abrangência. Cada saída da rota em uma data e horário definidos é representada
+ * por uma viagem do módulo de viagens.</p>
+ *
+ * <h2>Abrangência</h2>
+ *
+ * <p>A abrangência ({@link RouteScope}) deve ser coerente com a origem e o destino:</p>
+ *
+ * <ul>
+ *     <li>rotas estaduais e metropolitanas começam e terminam no mesmo estado;</li>
+ *     <li>rotas interestaduais ligam estados diferentes;</li>
+ *     <li>a origem e o destino não podem ser a mesma cidade.</li>
+ * </ul>
+ *
+ * <h2>Situação</h2>
+ *
+ * <p>Uma rota inativa permanece disponível para consulta, mas não recebe novas viagens.</p>
+ *
+ * @see RouteScope
+ * @see EntityBase
+ */
 @Entity
 @Table(name = "route")
 @Getter
@@ -28,7 +52,7 @@ import lombok.experimental.SuperBuilder;
 @ToString(callSuper = true)
 @EqualsAndHashCode(callSuper = true)
 public class Route extends EntityBase {
-    
+
     /**
      * Código da rota.
      *
@@ -106,7 +130,7 @@ public class Route extends EntityBase {
      *
      * <p>Indica o tipo de serviço que a rota oferece, como urbano, interestadual, etc.</p>
      */
-    @Enumerated(EnumType.STRING) 
+    @Enumerated(EnumType.STRING)
     @Column(name = "service_scope", nullable = false, length = 20)
     private RouteScope serviceScope;
 

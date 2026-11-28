@@ -62,6 +62,13 @@ public enum TripStatus {
         };
     }
 
+    /**
+     * Indica se a situação é final.
+     *
+     * <p>Viagens concluídas ou canceladas não aceitam mais alterações.</p>
+     *
+     * @return {@code true} para {@link #COMPLETED} e {@link #CANCELED}
+     */
     public boolean isFinal() {
         return this == COMPLETED || this == CANCELED;
     }

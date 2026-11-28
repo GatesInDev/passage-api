@@ -5,69 +5,78 @@ import br.com.passage.api.fleet.internal.domain.entities.Company;
 import java.time.Instant;
 import java.util.UUID;
 
-@Schema(description = "Representação detalhada dos dados de resposta de uma empresa transportadora")
+/**
+ * Representa os dados de uma empresa retornados pela API.
+ */
+@Schema(description = "Dados de uma empresa")
 public record CompanyResponse(
 
         @Schema(
-                description = "Identificador único (UUID) público da empresa",
+                description = "Identificador público (UUID) da empresa",
                 example = "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11"
         )
         UUID id,
 
         @Schema(
-                description = "Data e hora de criação do registro (UTC)",
+                description = "Data e hora de criação (UTC)",
                 example = "2026-08-13T19:20:15Z"
         )
         Instant createdAt,
 
         @Schema(
-                description = "Data e hora da última atualização do registro (UTC)",
+                description = "Data e hora da última alteração (UTC)",
                 example = "2026-08-13T19:25:00Z"
         )
         Instant updatedAt,
 
         @Schema(
-                description = "Indica se a empresa está ativa para operação no sistema",
+                description = "Se a empresa está ativa",
                 example = "true"
         )
         boolean isActive,
 
         @Schema(
-                description = "Indica se o registro passou por exclusão lógica (soft delete)",
+                description = "Se a empresa foi excluída logicamente",
                 example = "false"
         )
         boolean isDeleted,
 
         @Schema(
-                description = "Razão Social da empresa",
+                description = "Razão social",
                 example = "Viação Expressa Santa Catarina S.A."
         )
         String corporateName,
 
         @Schema(
-                description = "Nome Fantasia da empresa",
+                description = "Nome fantasia",
                 example = "Expressa Transportes"
         )
         String tradeName,
 
         @Schema(
-                description = "CNPJ da empresa (somente números ou formatado)",
+                description = "CNPJ, sem pontuação",
                 example = "12345678000195"
         )
         String documentId,
 
         @Schema(
-                description = "Inscrição Estadual (IE) da empresa",
+                description = "Inscrição estadual, ou ISENTO",
                 example = "251234567"
         )
         String stateRegistration,
 
         @Schema(
-                description = "Órgão regulador ou concedente cadastrado (ex: DETER, ARTESP, ANTT)",
+                description = "Órgão regulador estadual",
                 example = "DETER-SC"
         )
         String stateRegulatoryAgency
 ) {
+    /**
+     * Converte a empresa persistida em sua representação de resposta.
+     *
+     * @param company empresa de origem
+     * @return representação de resposta correspondente
+     */
     public static CompanyResponse from(Company company) {
         return new CompanyResponse(
                 company.getId(), company.getCreatedAt(), company.getUpdatedAt(),

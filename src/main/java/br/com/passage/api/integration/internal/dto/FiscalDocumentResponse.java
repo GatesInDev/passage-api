@@ -9,24 +9,27 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.UUID;
 
-@Schema(description = "Bilhete de Passagem Eletrônico (BP-e) emitido para uma passagem")
+/**
+ * Representa os dados de um documento fiscal retornados pela API.
+ */
+@Schema(description = "Dados de um BP-e (Bilhete de Passagem Eletrônico)")
 public record FiscalDocumentResponse(
 
-        @Schema(description = "Identificador único (UUID) do documento",
+        @Schema(description = "Identificador público (UUID) do documento",
                 example = "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11")
         UUID id,
 
-        @Schema(description = "Data e hora de criação do registro (UTC)")
+        @Schema(description = "Data e hora de criação (UTC)")
         Instant createdAt,
 
-        @Schema(description = "Data e hora da última atualização do registro (UTC)")
+        @Schema(description = "Data e hora da última alteração (UTC)")
         Instant updatedAt,
 
-        @Schema(description = "Chave de acesso de 44 dígitos atribuída pela SEFAZ",
+        @Schema(description = "Chave de acesso de 44 dígitos; nula até a autorização",
                 example = "42250112345678000199630010000000011234567890")
         String accessKey,
 
-        @Schema(description = "Modelo do documento fiscal. O BP-e é o modelo 63",
+        @Schema(description = "Modelo do documento; o BP-e é sempre o 63",
                 example = "63")
         String model,
 
@@ -36,30 +39,30 @@ public record FiscalDocumentResponse(
         @Schema(description = "Número sequencial dentro da série", example = "1")
         Long number,
 
-        @Schema(description = "Protocolo de autorização devolvido pela SEFAZ",
+        @Schema(description = "Protocolo de autorização da SEFAZ",
                 example = "142250000123456")
         String protocol,
 
-        @Schema(description = "Situação do documento perante a SEFAZ",
+        @Schema(description = "Situação perante a SEFAZ",
                 example = "AUTHORIZED")
         FiscalDocumentStatus status,
 
         @Schema(description = "Ambiente de emissão", example = "HOMOLOGATION")
         FiscalEnvironment environment,
 
-        @Schema(description = "Identificador UUID da passagem que originou o documento")
+        @Schema(description = "Passagem que originou o documento")
         UUID ticketId,
 
-        @Schema(description = "Identificador UUID da empresa emitente")
+        @Schema(description = "Empresa emitente")
         UUID companyUuid,
 
         @Schema(description = "Nome do passageiro", example = "João da Silva")
         String passengerName,
 
-        @Schema(description = "CPF do passageiro", example = "12345678909")
+        @Schema(description = "CPF do passageiro, sem pontuação", example = "12345678909")
         String passengerDocument,
 
-        @Schema(description = "Valor total do documento em reais", example = "189.90")
+        @Schema(description = "Valor total, em reais", example = "189.90")
         BigDecimal amount,
 
         @Schema(description = "Data e hora da autorização (UTC)")
@@ -68,10 +71,16 @@ public record FiscalDocumentResponse(
         @Schema(description = "Data e hora do cancelamento (UTC)")
         Instant canceledAt,
 
-        @Schema(description = "Motivo informado pela SEFAZ quando o documento é recusado")
+        @Schema(description = "Motivo da recusa da SEFAZ")
         String rejectionReason
 ) {
 
+    /**
+     * Converte o documento fiscal persistido em sua representação de resposta.
+     *
+     * @param document documento fiscal de origem
+     * @return representação de resposta correspondente
+     */
     public static FiscalDocumentResponse from(FiscalDocument document) {
         return new FiscalDocumentResponse(
                 document.getId(),

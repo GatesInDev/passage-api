@@ -38,9 +38,6 @@ import lombok.experimental.SuperBuilder;
  *     <li>{@link #seatNumber} — identificação apresentada ao passageiro.</li>
  * </ul>
  *
- * <p>Essa estrutura permite representar diferentes layouts de ônibus
- * sem precisar criar uma estrutura fixa para cada configuração.</p>
- *
  * <h2>Características</h2>
  *
  * <ul>

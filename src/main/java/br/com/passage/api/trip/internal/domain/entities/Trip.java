@@ -53,8 +53,8 @@ public class Trip extends EntityBase {
     /**
      * Identificador da rota da viagem.
      *
-     * <p>Representa o UUID da rota percorrida. A rota pertence a outro
-     * módulo, por isso é referenciada apenas pelo identificador.</p>
+     * <p>Representa o UUID da rota percorrida. A rota pertence ao
+     * módulo de rotas e é referenciada apenas pelo identificador.</p>
      */
     @Column(name = "route_id", nullable = false)
     private UUID routeId;
@@ -137,6 +137,14 @@ public class Trip extends EntityBase {
         this.status = next;
     }
 
+    /**
+     * Verifica se a viagem ainda pode ser alterada.
+     *
+     * <p>Viagens nas situações {@link TripStatus#COMPLETED} e {@link TripStatus#CANCELED} são
+     * finais e não aceitam alterações.</p>
+     *
+     * @throws BusinessException se a viagem estiver concluída ou cancelada
+     */
     public void ensureEditable() {
         if (this.status.isFinal()){
             throw new BusinessException("Não é possível alterar uma viagem que já foi concluída ou cancelada.");

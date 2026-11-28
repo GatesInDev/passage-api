@@ -14,6 +14,16 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
+/**
+ * Serviço responsável pela venda de passagens.
+ *
+ * <p>O preço, a data de partida e a empresa da passagem são obtidos da viagem no momento da
+ * venda. Após a venda, é publicado o evento {@link TicketSold}, que dispara a emissão do
+ * documento fiscal.</p>
+ *
+ * <p>O código deve ser único no sistema. As demais regras da venda são aplicadas pelo
+ * {@link TicketSaleValidator}.</p>
+ */
 @Service
 @RequiredArgsConstructor
 public class CreateTicketService {
@@ -22,6 +32,15 @@ public class CreateTicketService {
     private final TicketSaleValidator ticketSaleValidator;
     private final ApplicationEventPublisher events;
 
+    /**
+     * Vende uma passagem.
+     *
+     * @param request dados da passagem
+     * @return passagem vendida
+     * @throws ResourceNotFoundException se a viagem não existir ou estiver excluída
+     * @throws AccessDeniedException     se a viagem pertencer a outra empresa
+     * @throws BusinessException         se o código já estiver em uso ou alguma regra da venda falhar
+     */
     @Transactional
     public TicketResponse execute(CreateTicketRequest request) {
 
@@ -29,8 +48,7 @@ public class CreateTicketService {
             throw new BusinessException("Já existe uma passagem cadastrada com o código " + request.code());
         }
 
-        // A viagem é a fonte do preço, do horário e da empresa: nenhum
-        // desses dados é aceito do cliente.
+        // Preço, horário e empresa vêm da viagem, nunca do cliente.
         TripInfo trip = ticketSaleValidator.validate(request.tripId(), request.seatId(), null);
 
         Ticket ticket = Ticket.builder()
@@ -42,15 +60,13 @@ public class CreateTicketService {
                 .departureDateTime(trip.departureTime())
                 .tripId(trip.id())
                 .companyUuid(trip.companyUuid())
-                // @SuperBuilder ignora o valor inicial de isActive em EntityBase,
-                // por isso a passagem precisa nascer ativa explicitamente.
+                // @SuperBuilder ignora o valor padrão de isActive da EntityBase.
                 .isActive(true)
                 .build();
 
         Ticket saved = ticketRepository.save(ticket);
 
-        // A emissão do documento fiscal corre fora desta transação: a venda
-        // não deve falhar nem esperar caso a SEFAZ esteja indisponível.
+        // O documento fiscal é emitido depois do commit, fora desta transação.
         events.publishEvent(new TicketSold(saved.getId(), saved.getCompanyUuid()));
 
         return TicketResponse.from(saved);

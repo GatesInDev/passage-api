@@ -9,11 +9,14 @@ import jakarta.validation.constraints.Size;
 
 import java.util.UUID;
 
-@Schema(description = "Payload para criação de um novo operador ou usuário no sistema")
+/**
+ * Representa os dados de entrada para o cadastro de um usuário.
+ */
+@Schema(description = "Dados para cadastrar um usuário")
 public record CreateUserRequest(
 
         @Schema(
-                description = "Nome completo do usuário",
+                description = "Nome completo",
                 example = "Carlos Eduardo Souza",
                 requiredMode = Schema.RequiredMode.REQUIRED,
                 minLength = 3,
@@ -24,7 +27,7 @@ public record CreateUserRequest(
         String name,
 
         @Schema(
-                description = "E-mail corporativo ou pessoal para login",
+                description = "E-mail de login, único no sistema",
                 example = "carlos.souza@viacaoexpressa.com.br",
                 requiredMode = Schema.RequiredMode.REQUIRED,
                 maxLength = 150
@@ -35,7 +38,7 @@ public record CreateUserRequest(
         String email,
 
         @Schema(
-                description = "Senha inicial de acesso (mínimo de 6 caracteres)",
+                description = "Senha inicial",
                 example = "SenhaForte@2026",
                 requiredMode = Schema.RequiredMode.REQUIRED,
                 minLength = 6
@@ -45,7 +48,7 @@ public record CreateUserRequest(
         String password,
 
         @Schema(
-                description = "Papel ou perfil de permissão do usuário",
+                description = "Perfil de acesso",
                 example = "FLEET_MANAGER",
                 requiredMode = Schema.RequiredMode.REQUIRED
         )
@@ -53,7 +56,7 @@ public record CreateUserRequest(
         UserRole role,
 
         @Schema(
-                description = "UUID público da empresa transportadora vinculada (opcional para ADMIN ou passageiros avulsos)",
+                description = "Empresa vinculada; não se aplica a administradores e passageiros",
                 example = "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11"
         )
         UUID companyUuid
