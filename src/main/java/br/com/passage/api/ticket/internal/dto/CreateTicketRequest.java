@@ -6,18 +6,11 @@ import org.hibernate.validator.constraints.br.CPF;
 
 import java.util.UUID;
 
-/**
- * Dados informados na venda de uma passagem.
- *
- * <p>Preço, horário de partida e empresa não constam aqui: são obtidos da
- * viagem no momento da venda, para que não possam ser escolhidos por quem
- * emite o bilhete.</p>
- */
-@Schema(description = "Payload com os dados necessários para o cadastro de uma nova passagem")
+@Schema(description = "Dados para vender uma passagem; preço, partida e empresa vêm da viagem")
 public record CreateTicketRequest(
 
         @Schema(
-                description = "Código único da passagem",
+                description = "Código da passagem, único no sistema",
                 example = "PASS-2026-001",
                 requiredMode = Schema.RequiredMode.REQUIRED,
                 maxLength = 64
@@ -38,7 +31,7 @@ public record CreateTicketRequest(
         String passengerName,
 
         @Schema(
-                description = "CPF do passageiro (somente números, 11 dígitos)",
+                description = "CPF do passageiro, sem pontuação",
                 example = "12345678909",
                 requiredMode = Schema.RequiredMode.REQUIRED
         )
@@ -47,7 +40,7 @@ public record CreateTicketRequest(
         String passengerDocument,
 
         @Schema(
-                description = "Identificador UUID do assento reservado",
+                description = "Assento do ônibus da viagem, ainda não vendido nela",
                 example = "b1ffcd88-8d1c-4fa7-aa5e-5cc8ac291b22",
                 requiredMode = Schema.RequiredMode.REQUIRED
         )
@@ -55,7 +48,7 @@ public record CreateTicketRequest(
         UUID seatId,
 
         @Schema(
-                description = "Identificador UUID da viagem da passagem",
+                description = "Viagem agendada ou em embarque",
                 example = "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11",
                 requiredMode = Schema.RequiredMode.REQUIRED
         )

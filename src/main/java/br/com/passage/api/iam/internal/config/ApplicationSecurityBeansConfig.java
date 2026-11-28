@@ -11,12 +11,16 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+/**
+ * Componentes de autenticação: busca de usuário por e-mail, gerenciador de autenticação e hash BCrypt.
+ */
 @Configuration
 @RequiredArgsConstructor
 public class ApplicationSecurityBeansConfig {
 
     private final UserRepository userRepository;
 
+    /** Carrega o usuário pelo e-mail, que é o login. */
     @Bean
     public UserDetailsService userDetailsService() {
         return username -> userRepository.findByEmail(username)

@@ -9,6 +9,12 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+/**
+ * Acesso aos ônibus.
+ *
+ * <p>As consultas {@code Visible} desconsideram registros excluídos ou de empresa excluída e,
+ * quando {@code companyId} é informado, restringem o resultado a essa empresa.</p>
+ */
 public interface BusRepository extends JpaRepository<Bus, UUID> {
 
     @Query("""
@@ -29,6 +35,7 @@ public interface BusRepository extends JpaRepository<Bus, UUID> {
             """)
     List<Bus> findAllVisible(@Param("companyId") UUID companyId);
 
+    /** Considera também os ônibus excluídos, já que a placa continua reservada. */
     boolean existsByLicensePlate(String value);
 
     boolean existsByLicensePlateAndIdNot(String value, UUID id);

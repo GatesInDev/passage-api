@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
+/** Busca uma passagem visível ao usuário logado. */
 @Service
 @RequiredArgsConstructor
 public class FindByIdTicketService {

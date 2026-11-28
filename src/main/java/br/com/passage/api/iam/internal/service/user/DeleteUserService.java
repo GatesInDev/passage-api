@@ -9,6 +9,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
+/**
+ * Exclui logicamente um usuário, que deixa de conseguir autenticar.
+ */
 @Service
 @RequiredArgsConstructor
 public class DeleteUserService {

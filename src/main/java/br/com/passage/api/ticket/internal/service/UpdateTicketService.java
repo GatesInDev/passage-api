@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
+/** Atualiza uma passagem visível ao usuário logado; o código e a empresa não mudam. */
 @Service
 @RequiredArgsConstructor
 public class UpdateTicketService {

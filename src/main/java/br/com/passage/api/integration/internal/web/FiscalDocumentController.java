@@ -6,6 +6,7 @@ import br.com.passage.api.integration.internal.service.FindFiscalDocumentService
 import br.com.passage.api.integration.internal.service.RetryFiscalDocumentService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -19,8 +20,13 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.UUID;
 
-@Tag(name = "Documentos fiscais",
-        description = "Consulta e eventos do BP-e emitido para as passagens")
+/**
+ * Endpoints de documentos fiscais (BP-e).
+ *
+ * <p>Os documentos são emitidos automaticamente na venda da passagem; aqui só se consulta,
+ * cancela e reenvia. Quem não é ADMIN só acessa os da própria empresa.</p>
+ */
+@Tag(name = "Documentos fiscais", description = "Consulta, cancelamento e reenvio do BP-e das passagens")
 @RestController
 @RequestMapping("api/v1/fiscal-documents")
 @RequiredArgsConstructor
@@ -32,30 +38,48 @@ public class FiscalDocumentController {
 
     @Operation(
             summary = "Listar documentos fiscais",
-            description = "Recupera os BP-e da empresa do usuário. O administrador recebe os de todas as empresas."
+            description = "Lista os BP-e não excluídos. Quem não é ADMIN vê apenas os da própria empresa."
     )
-    @ApiResponses(@ApiResponse(responseCode = "200", description = "Listagem recuperada com sucesso"))
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Lista de documentos",
+                    content = @Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = FiscalDocumentResponse.class)))
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Sem permissão ou usuário sem empresa vinculada",
+                    content = @Content
+            )
+    })
     @PreAuthorize("hasAnyRole('ADMIN', 'TICKET_SELLER')")
     @GetMapping
     public ResponseEntity<List<FiscalDocumentResponse>> findAll() {
         return ResponseEntity.ok(findFiscalDocumentService.executeAll());
     }
 
-    @Operation(
-            summary = "Buscar documento fiscal por UUID",
-            description = "Recupera um BP-e pelo seu identificador público."
-    )
+    @Operation(summary = "Buscar documento fiscal")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Documento encontrado com sucesso",
-                    content = @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = FiscalDocumentResponse.class))),
-            @ApiResponse(responseCode = "404", description = "Nenhum documento encontrado para o UUID informado",
-                    content = @Content)
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Documento encontrado",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = FiscalDocumentResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Sem permissão ou usuário sem empresa vinculada",
+                    content = @Content
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Documento não encontrado, excluído ou de outra empresa",
+                    content = @Content
+            )
     })
     @PreAuthorize("hasAnyRole('ADMIN', 'TICKET_SELLER', 'INSPECTOR')")
     @GetMapping("/{id}")
     public ResponseEntity<FiscalDocumentResponse> findById(
-            @Parameter(description = "UUID público do documento fiscal", required = true)
+            @Parameter(description = "Identificador do documento fiscal", example = "d4c3b2a1-6f5e-4d7c-8b9a-0e1f2a3b4c5d", required = true)
             @PathVariable UUID id
     ) {
         return ResponseEntity.ok(findFiscalDocumentService.execute(id));
@@ -63,22 +87,34 @@ public class FiscalDocumentController {
 
     @Operation(
             summary = "Cancelar documento fiscal",
-            description = "Registra o cancelamento de um BP-e autorizado. O documento permanece "
-                    + "armazenado com sua chave de acesso e protocolo originais."
+            description = "Registra o cancelamento de um BP-e autorizado; a chave de acesso e o protocolo são mantidos."
     )
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Documento cancelado com sucesso",
-                    content = @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = FiscalDocumentResponse.class))),
-            @ApiResponse(responseCode = "404", description = "Nenhum documento encontrado para o UUID informado",
-                    content = @Content),
-            @ApiResponse(responseCode = "409", description = "Documento não está autorizado",
-                    content = @Content)
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Documento cancelado",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = FiscalDocumentResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Sem permissão",
+                    content = @Content
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Documento não encontrado, excluído ou de outra empresa",
+                    content = @Content
+            ),
+            @ApiResponse(
+                    responseCode = "409",
+                    description = "Documento não autorizado",
+                    content = @Content
+            )
     })
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/{id}/cancel")
     public ResponseEntity<FiscalDocumentResponse> cancel(
-            @Parameter(description = "UUID público do documento fiscal", required = true)
+            @Parameter(description = "Identificador do documento fiscal", example = "d4c3b2a1-6f5e-4d7c-8b9a-0e1f2a3b4c5d", required = true)
             @PathVariable UUID id
     ) {
         return ResponseEntity.ok(cancelFiscalDocumentService.execute(id));
@@ -86,21 +122,34 @@ public class FiscalDocumentController {
 
     @Operation(
             summary = "Reenviar documento à SEFAZ",
-            description = "Submete novamente um documento pendente ou recusado."
+            description = "Envia novamente um documento pendente ou recusado."
     )
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Documento reenviado",
-                    content = @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = FiscalDocumentResponse.class))),
-            @ApiResponse(responseCode = "404", description = "Nenhum documento encontrado para o UUID informado",
-                    content = @Content),
-            @ApiResponse(responseCode = "409", description = "Documento já autorizado",
-                    content = @Content)
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Documento reenviado; a situação mostra o resultado",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = FiscalDocumentResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Sem permissão ou usuário sem empresa vinculada",
+                    content = @Content
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Documento não encontrado, excluído ou de outra empresa",
+                    content = @Content
+            ),
+            @ApiResponse(
+                    responseCode = "409",
+                    description = "Documento já autorizado",
+                    content = @Content
+            )
     })
     @PreAuthorize("hasAnyRole('ADMIN', 'TICKET_SELLER')")
     @PostMapping("/{id}/retry")
     public ResponseEntity<FiscalDocumentResponse> retry(
-            @Parameter(description = "UUID público do documento fiscal", required = true)
+            @Parameter(description = "Identificador do documento fiscal", example = "d4c3b2a1-6f5e-4d7c-8b9a-0e1f2a3b4c5d", required = true)
             @PathVariable UUID id
     ) {
         return ResponseEntity.ok(retryFiscalDocumentService.execute(id));

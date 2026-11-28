@@ -18,6 +18,12 @@ import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 
+/**
+ * Linha regular entre uma origem e um destino, operada por uma empresa.
+ *
+ * <p>A rota é o trajeto fixo; cada saída em data e horário definidos é uma viagem
+ * do módulo {@code trip}. Uma rota inativa não recebe novas viagens.</p>
+ */
 @Entity
 @Table(name = "route")
 @Getter
@@ -28,93 +34,46 @@ import lombok.experimental.SuperBuilder;
 @ToString(callSuper = true)
 @EqualsAndHashCode(callSuper = true)
 public class Route extends EntityBase {
-    
-    /**
-     * Código da rota.
-     *
-     * <p>Identificador único da rota, utilizado para referência e identificação.</p>
-     */
+
+    /** Prefixo da linha no órgão regulador, único e imutável após o cadastro. */
     @Column(name = "code", nullable = false, length = 64, unique = true)
     private String code;
 
-    /**
-     * Identificador da empresa associada à rota.
-     *
-     * <p>Representa o UUID da empresa que possui ou opera a rota.</p>
-     */
+    /** Empresa que opera a rota, referenciada pelo identificador por pertencer a outro módulo. */
     @Column(name = "company_uuid", nullable = false)
     private UUID companyUuid;
 
-    /**
-     * Nome da rota.
-     *
-     * <p>Nome descritivo da rota, utilizado para referência e identificação.</p>
-     */
     @Column(name = "name", nullable = false, length = 128)
     private String name;
 
-    /**
-     * Cidade de origem da rota.
-     *
-     * <p>Indica a cidade de onde a rota se inicia.</p>
-     */
     @Column(name = "origin_city", nullable = false, length = 128)
     private String originCity;
 
-    /**
-     * Estado de origem da rota.
-     *
-     * <p>Indica o estado de onde a rota se inicia.</p>
-     */
+    /** UF de origem, com duas letras. */
     @Column(name = "origin_state", nullable = false, length = 2)
     private String originState;
 
-    /**
-     * Cidade de destino da rota.
-     *
-     * <p>Indica a cidade onde a rota termina.</p>
-     */
     @Column(name = "destination_city", nullable = false, length = 128)
     private String destinationCity;
 
-    /**
-     * Estado de destino da rota.
-     *
-     * <p>Indica o estado onde a rota termina.</p>
-     */
+    /** UF de destino, com duas letras. */
     @Column(name = "destination_state", nullable = false, length = 2)
     private String destinationState;
 
-    /**
-     * Distância da rota em quilômetros.
-     *
-     * <p>Representa a distância total da rota, medida em quilômetros.</p>
-     */
+    /** Distância total, em quilômetros. */
     @Column(name = "distance_km", nullable = false, precision = 7, scale = 2)
     private BigDecimal distanceKm;
 
-    /**
-     * Duração estimada da rota em minutos.
-     *
-     * <p>Representa o tempo estimado para percorrer a rota, medido em minutos.</p>
-     */
+    /** Duração estimada do trajeto, em minutos. */
     @Column(name = "estimated_duration_minutes", nullable = false)
     private Integer estimatedDurationMinutes;
 
-    /**
-     * Escopo de serviço da rota.
-     *
-     * <p>Indica o tipo de serviço que a rota oferece, como urbano, interestadual, etc.</p>
-     */
-    @Enumerated(EnumType.STRING) 
+    /** Abrangência da linha, que determina o órgão regulador e a coerência entre as UFs. */
+    @Enumerated(EnumType.STRING)
     @Column(name = "service_scope", nullable = false, length = 20)
     private RouteScope serviceScope;
 
-    /**
-     * Órgão regulador da linha (ex.: ANTT, DETER-SC).
-     *
-     * <p>Representa o órgão responsável por regulamentar a linha.</p>
-     */
+    /** Órgão regulador da linha (ex.: ANTT, DETER-SC). */
     @Column(name = "regulatory_agency", nullable = false, length = 64)
     private String regulatoryAgency;
 

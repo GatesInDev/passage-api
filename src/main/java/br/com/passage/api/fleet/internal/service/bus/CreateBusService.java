@@ -11,6 +11,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * Cadastra um ônibus, sem assentos; a capacidade cresce conforme eles são cadastrados.
+ *
+ * <p>O gestor cadastra sempre na própria empresa; o ADMIN precisa informá-la.</p>
+ */
 @Service
 @RequiredArgsConstructor
 public class CreateBusService {

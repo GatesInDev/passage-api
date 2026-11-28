@@ -17,8 +17,8 @@ import java.util.UUID;
 /**
  * Emite o BP-e de uma passagem vendida.
  *
- * <p>O documento é gravado antes do envio à SEFAZ: assim a recusa ou a
- * indisponibilidade da receita deixa rastro em vez de perder a emissão.</p>
+ * <p>O documento é gravado antes do envio à SEFAZ, para que uma recusa ou indisponibilidade deixe
+ * rastro em vez de perder a emissão.</p>
  */
 @Service
 @RequiredArgsConstructor
@@ -33,10 +33,10 @@ public class IssueFiscalDocumentService {
     private final SefazGateway sefazGateway;
     private final TicketApi ticketApi;
 
+    /** Idempotente: se a passagem já tiver documento, devolve o existente. */
     @Transactional
     public FiscalDocument execute(UUID ticketId) {
 
-        // A passagem pode ser reprocessada: um bilhete gera um único documento.
         var existing = fiscalDocumentRepository.findByTicketId(ticketId);
         if (existing.isPresent()) {
             return existing.get();
@@ -61,7 +61,7 @@ public class IssueFiscalDocumentService {
         return submit(document);
     }
 
-    /** Envia o documento à SEFAZ e registra o desfecho. */
+    /** Envia o documento à SEFAZ e registra o resultado. */
     @Transactional
     public FiscalDocument submit(FiscalDocument document) {
         SefazResponse response = sefazGateway.authorize(document);

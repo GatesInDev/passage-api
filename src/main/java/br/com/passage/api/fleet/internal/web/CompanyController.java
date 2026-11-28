@@ -4,6 +4,7 @@ import br.com.passage.api.fleet.internal.dto.company.*;
 import br.com.passage.api.fleet.internal.service.company.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -19,7 +20,12 @@ import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
 import java.util.List;
 
-@Tag(name = "Empresas", description = "Endpoints para gestão de empresas transportadoras no módulo de Frota")
+/**
+ * Endpoints de empresas transportadoras.
+ *
+ * <p>Cadastro e exclusão são restritos ao ADMIN; o gestor consulta e altera só a própria empresa.</p>
+ */
+@Tag(name = "Empresas", description = "Empresas transportadoras, donas da frota e das rotas")
 @RestController
 @RequestMapping("api/v1/companies")
 @RequiredArgsConstructor
@@ -31,39 +37,78 @@ public class CompanyController {
     private final FindAllCompanyService findAllCompanyService;
     private final DeleteCompanyService deleteCompanyService;
 
-    @Operation(summary = "List accessible companies")
+    @Operation(
+            summary = "Listar empresas",
+            description = "Lista as empresas não excluídas. O gestor vê apenas a própria."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Lista de empresas",
+                    content = @Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = CompanyResponse.class)))
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Sem permissão",
+                    content = @Content
+            )
+    })
     @PreAuthorize("hasAnyRole('ADMIN', 'FLEET_MANAGER')")
     @GetMapping
     public ResponseEntity<List<CompanyResponse>> findAll() {
         return ResponseEntity.ok(findAllCompanyService.execute());
     }
 
-    @Operation(summary = "Soft delete a company")
+    @Operation(
+            summary = "Excluir empresa",
+            description = "Exclusão lógica: a empresa e a frota dela somem da API e continuam no banco."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "204",
+                    description = "Empresa excluída"
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Sem permissão",
+                    content = @Content
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Empresa não encontrada ou excluída",
+                    content = @Content
+            )
+    })
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable UUID id) {
+    public ResponseEntity<Void> delete(
+            @Parameter(description = "Identificador da empresa", example = "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11", required = true)
+            @PathVariable UUID id
+    ) {
         deleteCompanyService.execute(id);
         return ResponseEntity.noContent().build();
     }
 
-    @Operation(
-            summary = "Cadastrar nova empresa",
-            description = "Cria um novo registro de empresa transportadora com suas regras de identificação e órgãos reguladores."
-    )
+    @Operation(summary = "Cadastrar empresa")
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "201",
-                    description = "Empresa cadastrada com sucesso",
+                    description = "Empresa cadastrada",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = CompanyResponse.class))
             ),
             @ApiResponse(
                     responseCode = "400",
-                    description = "Dados de entrada inválidos (erro de validação dos campos do payload)",
+                    description = "Dados inválidos",
+                    content = @Content
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Sem permissão",
                     content = @Content
             ),
             @ApiResponse(
                     responseCode = "409",
-                    description = "Conflito de dados (ex: CNPJ já cadastrado no sistema)",
+                    description = "CNPJ já cadastrado",
                     content = @Content
             )
     })
@@ -74,75 +119,68 @@ public class CompanyController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    @Operation(
-            summary = "Buscar empresa por UUID",
-            description = "Recupera os detalhes cadastrais de uma empresa transportadora a partir do seu identificador público (UUID)."
-    )
+    @Operation(summary = "Buscar empresa")
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "200",
-                    description = "Empresa encontrada com sucesso",
-                    content = @Content(
-                            mediaType = "application/json",
-                            schema = @Schema(implementation = CompanyResponse.class)
-                    )
+                    description = "Empresa encontrada",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = CompanyResponse.class))
             ),
             @ApiResponse(
-                    responseCode = "404",
-                    description = "Nenhuma empresa encontrada para o UUID informado",
+                    responseCode = "403",
+                    description = "Sem permissão ou empresa diferente da do gestor",
                     content = @Content
             ),
             @ApiResponse(
-                    responseCode = "400",
-                    description = "Formato de UUID inválido na URL",
+                    responseCode = "404",
+                    description = "Empresa não encontrada ou excluída",
                     content = @Content
             )
     })
     @PreAuthorize("hasAnyRole('ADMIN', 'FLEET_MANAGER')")
     @GetMapping("/{id}")
     public ResponseEntity<CompanyResponse> findById(
-            @Parameter(
-                    description = "UUID público da empresa transportadora",
-                    example = "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11",
-                    required = true
-            )
+            @Parameter(description = "Identificador da empresa", example = "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11", required = true)
             @PathVariable UUID id
     ) {
         return ResponseEntity.ok(findByIdCompanyService.execute(id));
     }
 
     @Operation(
-            summary = "Atualizar empresa por UUID",
-            description = "Atualiza os detalhes cadastrais de uma empresa transportadora a partir do seu identificador público (UUID)."
+            summary = "Atualizar empresa",
+            description = "Substitui os dados cadastrais. O gestor só altera a própria empresa."
     )
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "200",
-                    description = "Empresa atualizada com sucesso",
-                    content = @Content(
-                            mediaType = "application/json",
-                            schema = @Schema(implementation = CompanyResponse.class)
-                    )
-            ),
-            @ApiResponse(
-                    responseCode = "404",
-                    description = "Nenhuma empresa atualizada para o UUID informado",
-                    content = @Content
+                    description = "Empresa atualizada",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = CompanyResponse.class))
             ),
             @ApiResponse(
                     responseCode = "400",
-                    description = "Formato de UUID inválido na URL",
+                    description = "Dados inválidos",
+                    content = @Content
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Sem permissão ou empresa diferente da do gestor",
+                    content = @Content
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Empresa não encontrada ou excluída",
+                    content = @Content
+            ),
+            @ApiResponse(
+                    responseCode = "409",
+                    description = "CNPJ já cadastrado",
                     content = @Content
             )
     })
     @PreAuthorize("hasAnyRole('ADMIN', 'FLEET_MANAGER')")
     @PatchMapping("/{id}")
     public ResponseEntity<CompanyResponse> update(
-            @Parameter(
-                    description = "UUID público da empresa transportadora",
-                    example = "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11",
-                    required = true
-            )
+            @Parameter(description = "Identificador da empresa", example = "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11", required = true)
             @PathVariable UUID id,
             @Valid @RequestBody UpdateCompanyRequest request
     ) {

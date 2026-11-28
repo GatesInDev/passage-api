@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+/** Lista as passagens não excluídas; quem não é ADMIN vê apenas as da própria empresa. */
 @Service
 @RequiredArgsConstructor
 public class FindAllTicketService {

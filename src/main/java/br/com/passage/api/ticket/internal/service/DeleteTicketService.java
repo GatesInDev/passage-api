@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
+/** Exclui logicamente uma passagem, liberando o assento na viagem. */
 @Service
 @RequiredArgsConstructor
 public class DeleteTicketService {

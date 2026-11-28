@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
+/** Exclui logicamente um assento; o número e a posição continuam reservados. */
 @Service
 @RequiredArgsConstructor
 public class DeleteSeatService {

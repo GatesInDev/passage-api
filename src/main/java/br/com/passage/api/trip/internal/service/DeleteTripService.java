@@ -10,6 +10,7 @@ import br.com.passage.api.trip.internal.domain.entities.Trip;
 import br.com.passage.api.trip.internal.repository.TripRepository;
 import lombok.RequiredArgsConstructor;
 
+/** Exclui logicamente uma viagem visível ao usuário logado. */
 @Service 
 @RequiredArgsConstructor 
 public class DeleteTripService {

@@ -9,12 +9,18 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+/** Acesso aos assentos. */
 public interface SeatRepository extends JpaRepository<Seat, UUID> {
 
     Optional<Seat> findByIdAndBus_IdAndIsDeletedFalse(UUID id, UUID busId);
 
     List<Seat> findAllByBus_IdAndIsDeletedFalse(UUID busId);
 
+    /**
+     * Indica se outro assento do ônibus, mesmo excluído, já usa o número ou a posição (fileira e coluna).
+     *
+     * @param excludedId assento ignorado na verificação (o próprio, na atualização), ou {@code null}
+     */
     @Query("""
             select count(seat) > 0 from Seat seat
             where seat.bus.id = :busId

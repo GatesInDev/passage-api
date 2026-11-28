@@ -12,6 +12,7 @@ import br.com.passage.api.trip.internal.dto.TripResponse;
 import br.com.passage.api.trip.internal.repository.TripRepository;
 import lombok.RequiredArgsConstructor;
 
+/** Consulta viagens no escopo do usuário logado (ver {@link TripAccessService}). */
 @Service 
 @RequiredArgsConstructor 
 public class FindTripService {

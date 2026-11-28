@@ -8,12 +8,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.UUID;
 
-/**
- * Resolve a empresa do usuário autenticado para o módulo de passagens.
- *
- * <p>Equivalente ao {@code FleetAccessService} do módulo de frota, com os
- * perfis que operam a bilheteria.</p>
- */
+/** Define o escopo de empresa das operações de passagens para o usuário logado. */
 @Service
 @RequiredArgsConstructor
 public class TicketAccessService {
@@ -21,10 +16,8 @@ public class TicketAccessService {
     private final IamApi iamApi;
 
     /**
-     * Empresa a ser aplicada nas consultas.
-     *
-     * @return {@code null} para administradores, que enxergam todas as
-     *         empresas; caso contrário, a empresa do usuário.
+     * @return a empresa do usuário, ou {@code null} (sem restrição) para o ADMIN
+     * @throws AccessDeniedException se o usuário não for ADMIN nem tiver empresa vinculada
      */
     public UUID currentCompanyId() {
         var user = iamApi.currentUser();

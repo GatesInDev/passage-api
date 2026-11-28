@@ -11,8 +11,7 @@ import lombok.RequiredArgsConstructor;
 /**
  * API pública do módulo de viagens.
  *
- * <p>Ponto de acesso para que outros módulos consultem informações das
- * viagens sem depender das classes internas do módulo.</p>
+ * <p>Não aplica o escopo do usuário logado: quem chama aplica a própria regra de acesso.</p>
  */
 @Component
 @RequiredArgsConstructor
@@ -20,6 +19,7 @@ public class TripApi {
 
     private final TripRepository tripRepository;
 
+    /** @throws ResourceNotFoundException se a viagem não existir ou estiver excluída */
     public TripInfo findTrip(UUID tripId) {
         return tripRepository.findVisibleById(tripId, null)
                 .map(trip -> new TripInfo(

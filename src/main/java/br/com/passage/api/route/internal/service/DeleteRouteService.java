@@ -10,6 +10,9 @@ import br.com.passage.api.route.internal.repository.RouteRepository;
 import br.com.passage.api.shared.domain.exceptions.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 
+/**
+ * Exclui logicamente uma rota visível ao usuário logado.
+ */
 @Service
 @RequiredArgsConstructor
 public class DeleteRouteService {

@@ -12,10 +12,10 @@ import java.time.Instant;
 import java.util.UUID;
 
 /**
- * Cancela um documento fiscal junto à SEFAZ.
+ * Cancela um documento fiscal autorizado.
  *
- * <p>O cancelamento é um evento fiscal, não uma exclusão: o documento
- * permanece com sua chave de acesso e protocolo originais.</p>
+ * <p>O cancelamento é um evento fiscal, não uma exclusão: o documento mantém a chave de acesso e o
+ * protocolo.</p>
  */
 @Service
 @RequiredArgsConstructor

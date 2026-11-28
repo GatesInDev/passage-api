@@ -17,6 +17,12 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
+/**
+ * Autentica a requisição a partir do token JWT do cabeçalho {@code Authorization: Bearer}.
+ *
+ * <p>O usuário é recarregado do banco a cada requisição, então perfil, desativação
+ * e exclusão valem imediatamente, mesmo com um token ainda válido.</p>
+ */
 @Component
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter

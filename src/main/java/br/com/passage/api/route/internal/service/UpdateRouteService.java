@@ -12,6 +12,9 @@ import br.com.passage.api.route.internal.repository.RouteRepository;
 import br.com.passage.api.shared.domain.exceptions.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 
+/**
+ * Atualiza uma rota visível ao usuário logado; o código e a empresa não mudam.
+ */
 @Service
 @RequiredArgsConstructor 
 public class UpdateRouteService {

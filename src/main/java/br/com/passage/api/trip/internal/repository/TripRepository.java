@@ -12,7 +12,10 @@ import org.springframework.data.repository.query.Param;
 import br.com.passage.api.trip.internal.domain.entities.Trip;
 
 /**
- * Repositório de acesso às viagens.
+ * Acesso às viagens.
+ *
+ * <p>As consultas {@code Visible} desconsideram viagens excluídas e, quando
+ * {@code companyUuid} é informado, restringem o resultado a essa empresa.</p>
  */
 public interface TripRepository extends JpaRepository<Trip, UUID> {
 
@@ -30,6 +33,13 @@ public interface TripRepository extends JpaRepository<Trip, UUID> {
         """)
     List<Trip> findAllVisible(@Param("companyUuid") UUID companyUuid);
 
+    /**
+     * Indica se o ônibus tem outra viagem que se sobrepõe ao período.
+     *
+     * Viagens canceladas ou excluídas não contam; viagens em sequência (uma começa
+     * quando a outra termina) não são conflito. {@code excludedId} desconsidera a
+     * própria viagem na alteração.
+     */
     @Query("""
         select count(t) > 0 from Trip t
         where t.busId = :busId
@@ -44,6 +54,7 @@ public interface TripRepository extends JpaRepository<Trip, UUID> {
                               @Param("arrivalTime") Instant arrivalTime,
                               @Param("excludedId") UUID excludedId);
 
+    /** Mesma regra de {@link #existsBusConflict}, aplicada ao motorista. */
     @Query("""
         select count(t) > 0 from Trip t
         where t.driverId = :driverId
@@ -58,11 +69,6 @@ public interface TripRepository extends JpaRepository<Trip, UUID> {
                                  @Param("arrivalTime") Instant arrivalTime,
                                  @Param("excludedId") UUID excludedId);
 
-    /**
-     * Verifica se já existe uma viagem cadastrada com o código informado.
-     *
-     * @param code código da viagem
-     * @return {@code true} se o código já estiver em uso
-     */
+    /** Considera também as viagens excluídas, já que o código continua reservado. */
     boolean existsByCode(String code);
 }

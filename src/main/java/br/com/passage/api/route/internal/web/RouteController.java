@@ -33,7 +33,13 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
-@Tag(name = "Rotas", description = "Endpoints para gestão de rotas no módulo de Transporte")
+/**
+ * Endpoints de rotas.
+ *
+ * <p>A leitura é aberta a qualquer usuário autenticado; a escrita, a ADMIN e FLEET_MANAGER.
+ * O gestor só enxerga e altera as rotas da própria empresa.</p>
+ */
+@Tag(name = "Rotas", description = "Linhas operadas pelas empresas")
 @RestController
 @RequestMapping("api/v1/routes")
 @RequiredArgsConstructor
@@ -45,23 +51,28 @@ public class RouteController {
     private final UpdateRouteService updateRouteService;
 
     @Operation(
-            summary = "Cadastrar nova rota",
-            description = "Cria um novo registro de rota com suas regras de identificação e órgãos reguladores."
+            summary = "Cadastrar rota",
+            description = "O gestor cadastra na própria empresa; o ADMIN informa a empresa no payload."
     )
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "201",
-                    description = "Rota cadastrada com sucesso",
+                    description = "Rota cadastrada",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = RouteResponse.class))
             ),
             @ApiResponse(
                     responseCode = "400",
-                    description = "Dados de entrada inválidos (erro de validação dos campos do payload)",
+                    description = "Dados inválidos",
+                    content = @Content
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Sem permissão",
                     content = @Content
             ),
             @ApiResponse(
                     responseCode = "409",
-                    description = "Conflito de dados (ex: código da rota já cadastrado no sistema)",
+                    description = "Código já cadastrado, empresa não informada ou origem, destino e abrangência incoerentes",
                     content = @Content
             )
     })
@@ -72,39 +83,48 @@ public class RouteController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    @Operation(
-            summary = "Buscar rota por UUID",
-            description = "Busca uma rota específica no sistema utilizando seu identificador único (UUID)."
-    )
+    @Operation(summary = "Buscar rota")
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "200",
-                    description = "Rota encontrada com sucesso",
+                    description = "Rota encontrada",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = RouteResponse.class))
             ),
             @ApiResponse(
+                    responseCode = "403",
+                    description = "Gestor sem empresa vinculada",
+                    content = @Content
+            ),
+            @ApiResponse(
                     responseCode = "404",
-                    description = "Rota não encontrada com o identificador fornecido",
+                    description = "Rota não encontrada, excluída ou de outra empresa",
                     content = @Content
             )
     })
     @GetMapping("/{id}")
     public ResponseEntity<RouteResponse> findById(
-            @Parameter(description = "UUID público da rota", example = "e9235aa8-262f-446f-b6fb-e8cce4c8e8f0", required = true)
+            @Parameter(description = "Identificador da rota", example = "e9235aa8-262f-446f-b6fb-e8cce4c8e8f0", required = true)
             @PathVariable UUID id
     ) {
         return ResponseEntity.ok(findRouteService.execute(id));
     }
 
     @Operation(
-            summary = "Listar todas as rotas",
-            description = "Retorna a listagem completa das rotas cadastradas no sistema, excluindo as que foram marcadas como deletadas."
+            summary = "Listar rotas",
+            description = "Lista as rotas não excluídas. O gestor vê apenas as da própria empresa."
     )
-    @ApiResponse(
-            responseCode = "200",
-            description = "Lista de rotas recuperada com sucesso",
-            content = @Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = RouteResponse.class)))
-    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Lista de rotas",
+                    content = @Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = RouteResponse.class)))
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Gestor sem empresa vinculada",
+                    content = @Content
+            )
+    })
     @GetMapping
     public ResponseEntity<List<RouteResponse>> findAll() {
         return ResponseEntity.ok(findRouteService.executeAll());
@@ -112,29 +132,39 @@ public class RouteController {
 
     @Operation(
             summary = "Atualizar rota",
-            description = "Atualiza os dados de uma rota existente, incluindo nome, cidades de origem e destino, estados, distância, duração estimada, escopo de serviço e órgão regulador."
+            description = "Atualiza todos os dados da rota, exceto o código e a empresa."
     )
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "200",
-                    description = "Rota atualizada com sucesso",
+                    description = "Rota atualizada",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = RouteResponse.class))
             ),
             @ApiResponse(
                     responseCode = "400",
-                    description = "Payload inválido (erro de validação dos campos do payload)",
+                    description = "Dados inválidos",
+                    content = @Content
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Sem permissão",
                     content = @Content
             ),
             @ApiResponse(
                     responseCode = "404",
-                    description = "Rota não encontrada com o identificador fornecido",
+                    description = "Rota não encontrada, excluída ou de outra empresa",
+                    content = @Content
+            ),
+            @ApiResponse(
+                    responseCode = "409",
+                    description = "Origem, destino e abrangência incoerentes",
                     content = @Content
             )
     })
     @PreAuthorize("hasAnyRole('ADMIN', 'FLEET_MANAGER')")
     @PutMapping("/{id}")
     public ResponseEntity<RouteResponse> update(
-            @Parameter(description = "UUID público da rota", example = "e9235aa8-262f-446f-b6fb-e8cce4c8e8f0", required = true)
+            @Parameter(description = "Identificador da rota", example = "e9235aa8-262f-446f-b6fb-e8cce4c8e8f0", required = true)
             @PathVariable UUID id,
             @Valid @RequestBody UpdateRouteRequest request
     ) {
@@ -142,24 +172,29 @@ public class RouteController {
     }
 
     @Operation(
-            summary = "Remover Rota (exclusão Lógica)",
-            description = "Marca uma rota como deletada, removendo-a da listagem de rotas."
+            summary = "Excluir rota",
+            description = "Exclusão lógica: a rota some da API e continua no banco."
     )
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "204",
-                    description = "Rota removida com sucesso"
+                    description = "Rota excluída"
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Sem permissão",
+                    content = @Content
             ),
             @ApiResponse(
                     responseCode = "404",
-                    description = "Rota não encontrada com o identificador fornecido",
+                    description = "Rota não encontrada, excluída ou de outra empresa",
                     content = @Content
             )
     })
     @PreAuthorize("hasAnyRole('ADMIN', 'FLEET_MANAGER')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(
-            @Parameter(description = "UUID público da rota", example = "e9235aa8-262f-446f-b6fb-e8cce4c8e8f0", required = true)
+            @Parameter(description = "Identificador da rota", example = "e9235aa8-262f-446f-b6fb-e8cce4c8e8f0", required = true)
             @PathVariable UUID id
     ) {
         deleteRouteService.execute(id);

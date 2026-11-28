@@ -19,16 +19,17 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Set;
 import java.util.UUID;
 
+/**
+ * Vende uma passagem.
+ *
+ * <p>Preço, partida e empresa vêm da viagem, nunca do cliente. Depois de salvar, publica
+ * {@link TicketSold} para a emissão do documento fiscal.</p>
+ */
 @Service
 @RequiredArgsConstructor
 public class CreateTicketService {
 
-    /**
-     * Situações em que a viagem ainda admite venda.
-     *
-     * <p>Uma viagem em andamento, concluída ou cancelada não recebe
-     * passageiros novos.</p>
-     */
+    /** Situações em que a viagem aceita venda. */
     private static final Set<TripStatus> OPEN_FOR_SALE =
             Set.of(TripStatus.SCHEDULED, TripStatus.BOARDING);
 
@@ -45,8 +46,6 @@ public class CreateTicketService {
             throw new BusinessException("Já existe uma passagem cadastrada com o código " + request.code());
         }
 
-        // A viagem é a fonte do preço, do horário e da empresa: nenhum
-        // desses dados é aceito do cliente.
         TripInfo trip = tripApi.findTrip(request.tripId());
 
         if (!OPEN_FOR_SALE.contains(trip.status())) {
@@ -59,7 +58,6 @@ public class CreateTicketService {
             throw new AccessDeniedException("Não é possível vender passagens de viagens de outra empresa.");
         }
 
-        // O assento precisa existir no ônibus que fará a viagem.
         if (!fleetApi.seatBelongsToBus(request.seatId(), trip.busId())) {
             throw new BusinessException("O assento informado não pertence ao ônibus da viagem.");
         }
@@ -77,15 +75,13 @@ public class CreateTicketService {
                 .departureDateTime(trip.departureTime())
                 .tripId(trip.id())
                 .companyUuid(trip.companyUuid())
-                // @SuperBuilder ignora o valor inicial de isActive em EntityBase,
-                // por isso a passagem precisa nascer ativa explicitamente.
+                // @SuperBuilder ignora o valor padrão de isActive da EntityBase.
                 .isActive(true)
                 .build();
 
         Ticket saved = ticketRepository.save(ticket);
 
-        // A emissão do documento fiscal corre fora desta transação: a venda
-        // não deve falhar nem esperar caso a SEFAZ esteja indisponível.
+        // O documento fiscal é emitido depois do commit: a venda não espera nem falha se a SEFAZ estiver fora.
         events.publishEvent(new TicketSold(saved.getId(), saved.getCompanyUuid()));
 
         return TicketResponse.from(saved);

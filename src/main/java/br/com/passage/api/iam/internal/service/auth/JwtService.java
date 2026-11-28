@@ -11,6 +11,12 @@ import org.springframework.stereotype.Service;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 
+/**
+ * Gera e valida os tokens JWT de acesso, assinados com HMAC-256.
+ *
+ * <p>A chave vem de {@code api.security.token.secret} e precisa ser definida fora
+ * do ambiente local: o valor padrão serve apenas para desenvolvimento.</p>
+ */
 @Service
 public class JwtService {
 
@@ -20,6 +26,7 @@ public class JwtService {
     @Value("${api.security.token.expiration-hours:24}")
     private Long expirationHours;
 
+    /** Gera o token com o e-mail como subject e o perfil, o id e a empresa como claims. */
     public String generateToken(User user) {
         try {
             Algorithm algorithm = Algorithm.HMAC256(secret);
@@ -36,6 +43,9 @@ public class JwtService {
         }
     }
 
+    /**
+     * @return o e-mail do usuário, ou {@code null} se o token for inválido ou estiver expirado
+     */
     public String validateToken(String token) {
         try {
             Algorithm algorithm = Algorithm.HMAC256(secret);

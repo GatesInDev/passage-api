@@ -5,9 +5,17 @@ import org.springframework.security.authentication.AuthenticationCredentialsNotF
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
+/**
+ * API pública do módulo de identidade e acesso.
+ */
 @Component
 public class IamApi {
 
+    /**
+     * Retorna o usuário autenticado na requisição atual.
+     *
+     * @throws AuthenticationCredentialsNotFoundException se não houver usuário autenticado
+     */
     public CurrentUser currentUser() {
         var authentication = SecurityContextHolder.getContext().getAuthentication();
 

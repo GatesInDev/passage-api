@@ -13,6 +13,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
+/**
+ * Define o escopo de empresa das operações de frota para o usuário logado.
+ *
+ * <p>Só ADMIN e FLEET_MANAGER acessam a frota; o gestor fica restrito à própria empresa.</p>
+ */
 @Service
 @RequiredArgsConstructor
 public class FleetAccessService {
@@ -20,6 +25,10 @@ public class FleetAccessService {
     private final IamApi iamApi;
     private final CompanyRepository companyRepository;
 
+    /**
+     * @return a empresa do gestor, ou {@code null} (sem restrição) para o ADMIN
+     * @throws AccessDeniedException se o usuário não for ADMIN nem gestor com empresa vinculada
+     */
     public UUID currentCompanyId() {
         var user = iamApi.currentUser();
         if (user.role() == UserRole.ADMIN) {
@@ -31,6 +40,13 @@ public class FleetAccessService {
         return user.companyUuid();
     }
 
+    /**
+     * Carrega a empresa, validando se o usuário logado pode acessá-la.
+     *
+     * @throws AccessDeniedException     se o gestor tentar acessar outra empresa
+     * @throws BusinessException         se o identificador for {@code null}
+     * @throws ResourceNotFoundException se a empresa não existir ou estiver excluída
+     */
     @Transactional(readOnly = true)
     public Company requireCompany(UUID companyId) {
         UUID currentCompanyId = currentCompanyId();
@@ -44,6 +60,11 @@ public class FleetAccessService {
                 .orElseThrow(() -> new ResourceNotFoundException("Company not found: " + companyId));
     }
 
+    /**
+     * Empresa dona de um novo cadastro: a do gestor, ignorando a informada, ou a informada pelo ADMIN.
+     *
+     * @see #requireCompany(UUID)
+     */
     @Transactional(readOnly = true)
     public Company resolveCompany(UUID requestedCompanyId) {
         UUID currentCompanyId = currentCompanyId();

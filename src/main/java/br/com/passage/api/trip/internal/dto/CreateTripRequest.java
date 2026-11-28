@@ -11,11 +11,11 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 
-@Schema(description = "Payload com os dados necessários para o cadastro de uma nova viagem")
+@Schema(description = "Dados para agendar uma viagem")
 public record CreateTripRequest
 (
         @Schema(
-                description = "Código identificador da viagem",
+                description = "Código da viagem, único e não alterável depois",
                 example = "FLN-SP-20261110-0800",
                 requiredMode = Schema.RequiredMode.REQUIRED,
                 maxLength = 64
@@ -25,7 +25,7 @@ public record CreateTripRequest
         String code,
 
         @Schema(
-                description = "UUID da rota percorrida pela viagem. A empresa da viagem é a mesma da rota.",
+                description = "Rota percorrida, ativa; a viagem herda a empresa dela",
                 example = "e9235aa8-262f-446f-b6fb-e8cce4c8e8f0",
                 requiredMode = Schema.RequiredMode.REQUIRED
         )
@@ -33,7 +33,7 @@ public record CreateTripRequest
         UUID routeId,
 
         @Schema(
-                description = "UUID do ônibus alocado para a viagem",
+                description = "Ônibus alocado: da mesma empresa da rota, ativo e sem outra viagem no período",
                 example = "3f1c2b7a-8d4e-4a6b-9c1d-2e5f7a8b9c0d",
                 requiredMode = Schema.RequiredMode.REQUIRED
         )
@@ -41,7 +41,7 @@ public record CreateTripRequest
         UUID busId,
 
         @Schema(
-                description = "UUID do motorista responsável pela viagem",
+                description = "Motorista alocado: da mesma empresa da rota, ativo e sem outra viagem no período",
                 example = "7c9e6679-7425-40de-944b-e07fc1f90ae7",
                 requiredMode = Schema.RequiredMode.REQUIRED
         )
@@ -49,7 +49,7 @@ public record CreateTripRequest
         UUID driverId,
 
         @Schema(
-                description = "Data e hora de partida da viagem (UTC). Deve ser uma data futura.",
+                description = "Partida prevista (UTC), no futuro",
                 example = "2026-11-10T11:00:00Z",
                 requiredMode = Schema.RequiredMode.REQUIRED
         )
@@ -58,7 +58,7 @@ public record CreateTripRequest
         Instant departureTime,
 
         @Schema(
-                description = "Data e hora de chegada prevista da viagem (UTC). Deve ser posterior à partida.",
+                description = "Chegada prevista (UTC), posterior à partida",
                 example = "2026-11-10T23:00:00Z",
                 requiredMode = Schema.RequiredMode.REQUIRED
         )
@@ -66,7 +66,7 @@ public record CreateTripRequest
         Instant arrivalTime,
 
         @Schema(
-                description = "Preço base da passagem da viagem",
+                description = "Preço base da passagem",
                 example = "189.90",
                 requiredMode = Schema.RequiredMode.REQUIRED
         )

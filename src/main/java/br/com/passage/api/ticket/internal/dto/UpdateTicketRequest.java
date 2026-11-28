@@ -8,7 +8,7 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.UUID;
 
-@Schema(description = "Payload com os dados atualizáveis de uma passagem já cadastrada")
+@Schema(description = "Dados para atualizar uma passagem; o código e a empresa não mudam")
 public record UpdateTicketRequest(
 
         @Schema(
@@ -23,7 +23,7 @@ public record UpdateTicketRequest(
         String passengerName,
 
         @Schema(
-                description = "CPF do passageiro (somente números, 11 dígitos)",
+                description = "CPF do passageiro, sem pontuação",
                 example = "12345678909",
                 requiredMode = Schema.RequiredMode.REQUIRED
         )
@@ -32,7 +32,7 @@ public record UpdateTicketRequest(
         String passengerDocument,
 
         @Schema(
-                description = "Identificador UUID do assento reservado",
+                description = "Assento",
                 example = "b1ffcd88-8d1c-4fa7-aa5e-5cc8ac291b22",
                 requiredMode = Schema.RequiredMode.REQUIRED
         )
@@ -40,7 +40,7 @@ public record UpdateTicketRequest(
         UUID seatId,
 
         @Schema(
-                description = "Valor da passagem em reais",
+                description = "Preço da passagem, em reais",
                 example = "189.90",
                 requiredMode = Schema.RequiredMode.REQUIRED
         )
@@ -49,7 +49,7 @@ public record UpdateTicketRequest(
         BigDecimal price,
 
         @Schema(
-                description = "Data e hora da partida (UTC)",
+                description = "Partida (UTC), no futuro",
                 example = "2026-10-01T08:00:00Z",
                 requiredMode = Schema.RequiredMode.REQUIRED
         )
@@ -58,7 +58,7 @@ public record UpdateTicketRequest(
         Instant departureDateTime,
 
         @Schema(
-                description = "Identificador UUID da viagem da passagem",
+                description = "Viagem",
                 example = "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11",
                 requiredMode = Schema.RequiredMode.REQUIRED
         )
@@ -66,7 +66,7 @@ public record UpdateTicketRequest(
         UUID tripId,
 
         @Schema(
-                description = "Define se a passagem está ativa no sistema",
+                description = "Se a passagem está ativa",
                 example = "true",
                 requiredMode = Schema.RequiredMode.REQUIRED
         )

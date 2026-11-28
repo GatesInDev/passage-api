@@ -10,6 +10,7 @@ import br.com.passage.api.ticket.internal.service.FindByIdTicketService;
 import br.com.passage.api.ticket.internal.service.UpdateTicketService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -25,7 +26,12 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.UUID;
 
-@Tag(name = "Passagens", description = "Endpoints para gestão de passagens no módulo de Tickets")
+/**
+ * Endpoints de passagens.
+ *
+ * <p>Quem não é ADMIN só enxerga e altera as passagens da própria empresa.</p>
+ */
+@Tag(name = "Passagens", description = "Venda e consulta de passagens")
 @RestController
 @RequestMapping("api/v1/tickets")
 @RequiredArgsConstructor
@@ -38,23 +44,33 @@ public class TicketController {
     private final DeleteTicketService deleteTicketService;
 
     @Operation(
-            summary = "Cadastrar nova passagem",
-            description = "Cria um novo registro de passagem com os dados do passageiro, assento, rota e classe do serviço."
+            summary = "Vender passagem",
+            description = "Preço, partida e empresa vêm da viagem, que precisa estar SCHEDULED ou BOARDING. Após a venda, o BP-e é emitido de forma assíncrona."
     )
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "201",
-                    description = "Passagem cadastrada com sucesso",
+                    description = "Passagem vendida",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = TicketResponse.class))
             ),
             @ApiResponse(
                     responseCode = "400",
-                    description = "Dados de entrada inválidos (erro de validação dos campos do payload)",
+                    description = "Dados inválidos",
+                    content = @Content
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Sem permissão, usuário sem empresa vinculada ou viagem de outra empresa",
+                    content = @Content
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Viagem não encontrada",
                     content = @Content
             ),
             @ApiResponse(
                     responseCode = "409",
-                    description = "Conflito de dados (ex: código de passagem já cadastrado no sistema)",
+                    description = "Código já cadastrado, viagem fora de venda, assento de outro ônibus ou já vendido",
                     content = @Content
             )
     })
@@ -65,35 +81,28 @@ public class TicketController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    @Operation(
-            summary = "Buscar passagem por UUID",
-            description = "Recupera os detalhes de uma passagem a partir do seu identificador público (UUID)."
-    )
+    @Operation(summary = "Buscar passagem")
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "200",
-                    description = "Passagem encontrada com sucesso",
+                    description = "Passagem encontrada",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = TicketResponse.class))
             ),
             @ApiResponse(
-                    responseCode = "404",
-                    description = "Nenhuma passagem encontrada para o UUID informado",
+                    responseCode = "403",
+                    description = "Sem permissão ou usuário sem empresa vinculada",
                     content = @Content
             ),
             @ApiResponse(
-                    responseCode = "400",
-                    description = "Formato de UUID inválido na URL",
+                    responseCode = "404",
+                    description = "Passagem não encontrada, excluída ou de outra empresa",
                     content = @Content
             )
     })
     @PreAuthorize("hasAnyRole('ADMIN', 'TICKET_SELLER', 'INSPECTOR')")
     @GetMapping("/{id}")
     public ResponseEntity<TicketResponse> findById(
-            @Parameter(
-                    description = "UUID público da passagem",
-                    example = "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11",
-                    required = true
-            )
+            @Parameter(description = "Identificador da passagem", example = "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11", required = true)
             @PathVariable UUID id
     ) {
         return ResponseEntity.ok(findByIdTicketService.execute(id));
@@ -101,13 +110,18 @@ public class TicketController {
 
     @Operation(
             summary = "Listar passagens",
-            description = "Recupera todas as passagens cadastradas que não passaram por exclusão lógica."
+            description = "Lista as passagens não excluídas. Quem não é ADMIN vê apenas as da própria empresa."
     )
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "200",
-                    description = "Listagem recuperada com sucesso",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = TicketResponse.class))
+                    description = "Lista de passagens",
+                    content = @Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = TicketResponse.class)))
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Sem permissão ou usuário sem empresa vinculada",
+                    content = @Content
             )
     })
     @PreAuthorize("hasAnyRole('ADMIN', 'TICKET_SELLER')")
@@ -118,33 +132,34 @@ public class TicketController {
 
     @Operation(
             summary = "Atualizar passagem",
-            description = "Atualiza os dados de uma passagem existente. O código da passagem não é alterável."
+            description = "O código e a empresa não mudam."
     )
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "200",
-                    description = "Passagem atualizada com sucesso",
+                    description = "Passagem atualizada",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = TicketResponse.class))
             ),
             @ApiResponse(
                     responseCode = "400",
-                    description = "Dados de entrada inválidos (erro de validação dos campos do payload)",
+                    description = "Dados inválidos",
+                    content = @Content
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Sem permissão ou usuário sem empresa vinculada",
                     content = @Content
             ),
             @ApiResponse(
                     responseCode = "404",
-                    description = "Nenhuma passagem encontrada para o UUID informado",
+                    description = "Passagem não encontrada, excluída ou de outra empresa",
                     content = @Content
             )
     })
     @PreAuthorize("hasAnyRole('ADMIN', 'TICKET_SELLER')")
     @PutMapping("/{id}")
     public ResponseEntity<TicketResponse> update(
-            @Parameter(
-                    description = "UUID público da passagem",
-                    example = "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11",
-                    required = true
-            )
+            @Parameter(description = "Identificador da passagem", example = "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11", required = true)
             @PathVariable UUID id,
             @Valid @RequestBody UpdateTicketRequest request
     ) {
@@ -153,28 +168,28 @@ public class TicketController {
 
     @Operation(
             summary = "Cancelar passagem",
-            description = "Realiza a exclusão lógica de uma passagem, mantendo o registro no banco para fins de auditoria."
+            description = "Exclusão lógica: a passagem some da API, libera o assento e continua no banco."
     )
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "204",
-                    description = "Passagem cancelada com sucesso",
+                    description = "Passagem cancelada"
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Sem permissão",
                     content = @Content
             ),
             @ApiResponse(
                     responseCode = "404",
-                    description = "Nenhuma passagem encontrada para o UUID informado",
+                    description = "Passagem não encontrada, excluída ou de outra empresa",
                     content = @Content
             )
     })
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(
-            @Parameter(
-                    description = "UUID público da passagem",
-                    example = "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11",
-                    required = true
-            )
+            @Parameter(description = "Identificador da passagem", example = "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11", required = true)
             @PathVariable UUID id
     ) {
         deleteTicketService.execute(id);

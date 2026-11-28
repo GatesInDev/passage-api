@@ -2,9 +2,7 @@ package br.com.passage.api.integration.internal.gateway;
 
 import java.time.Instant;
 
-/**
- * Resposta da SEFAZ ao pedido de autorização de um documento fiscal.
- */
+/** Resposta da SEFAZ ao pedido de autorização. */
 public record SefazResponse(
         boolean authorized,
         String accessKey,

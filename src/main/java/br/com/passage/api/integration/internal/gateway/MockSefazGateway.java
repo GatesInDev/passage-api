@@ -10,15 +10,11 @@ import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 
 /**
- * Emissor simulado da SEFAZ.
+ * Emissor simulado da SEFAZ, sem tráfego externo.
  *
- * <p>Reproduz o formato das respostas da receita sem tráfego externo: a
- * chave de acesso segue a composição de 44 dígitos do BP-e e o protocolo
- * o formato de 15 dígitos, o suficiente para exercitar o ciclo de vida do
- * documento de ponta a ponta.</p>
- *
- * <p>Não substitui a integração real, que exige certificado digital,
- * assinatura XML e os webservices da unidade federativa.</p>
+ * <p>Gera chave de acesso (44 dígitos) e protocolo (15 dígitos) no formato real e recusa documentos
+ * sem valor positivo. A integração real exige certificado digital, assinatura do XML e os
+ * webservices da UF.</p>
  */
 @Component
 public class MockSefazGateway implements SefazGateway {
@@ -49,11 +45,8 @@ public class MockSefazGateway implements SefazGateway {
     }
 
     /**
-     * Monta a chave de acesso de 44 dígitos.
-     *
-     * <p>Composição: UF, período de emissão, CNPJ do emitente, modelo,
-     * série, número, forma de emissão, código numérico e dígito
-     * verificador.</p>
+     * Chave de acesso: UF, período, CNPJ do emitente, modelo, série, número, forma de emissão,
+     * código numérico e dígito verificador.
      */
     private String generateAccessKey(FiscalDocument document) {
         String base = UF_CODE
@@ -72,7 +65,7 @@ public class MockSefazGateway implements SefazGateway {
         return "%015d".formatted(Math.abs(random.nextLong()) % 1_000_000_000_000_000L);
     }
 
-    /** Extrai apenas dígitos de um texto, completando com zeros à esquerda. */
+    /** Extrai os dígitos do texto, completando com zeros à esquerda. */
     private String digitsFrom(String value, int length) {
         String digits = value.replaceAll("\\D", "");
         return digits.length() >= length
@@ -80,7 +73,7 @@ public class MockSefazGateway implements SefazGateway {
                 : "0".repeat(length - digits.length()) + digits;
     }
 
-    /** Dígito verificador no padrão módulo 11 usado pelos documentos fiscais. */
+    /** Dígito verificador em módulo 11, padrão dos documentos fiscais. */
     private int checkDigit(String key) {
         int weight = 2;
         int sum = 0;

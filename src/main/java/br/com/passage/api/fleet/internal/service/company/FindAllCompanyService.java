@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.UUID;
 
+/** Lista as empresas não excluídas; o gestor vê apenas a própria. */
 @Service
 @RequiredArgsConstructor
 public class FindAllCompanyService {

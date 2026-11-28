@@ -11,11 +11,11 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 
-@Schema(description = "Payload com os dados necessários para o cadastro de uma nova rota")
+@Schema(description = "Dados para cadastrar uma rota")
 public record CreateRouteRequest
 (
         @Schema(
-                description = "Código ou prefixo da linha registrado no órgão regulador",
+                description = "Prefixo da linha no órgão regulador, único e não alterável depois",
                 example = "1234-56",
                 requiredMode = Schema.RequiredMode.REQUIRED,
                 maxLength = 64
@@ -25,13 +25,13 @@ public record CreateRouteRequest
         String code,
 
         @Schema(
-                description = "UUID da empresa dona da rota. Obrigatório apenas para ADMIN; para FLEET_MANAGER é ignorado, e a empresa vem do usuário logado.",
+                description = "Empresa operadora: obrigatória para ADMIN e ignorada para FLEET_MANAGER, que usa a própria empresa",
                 example = "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11"
         )
         UUID companyUuid,
 
         @Schema(
-                description = "Nome descritivo da linha/rota",
+                description = "Nome da linha",
                 example = "Florianópolis - São Paulo via BR-101",
                 requiredMode = Schema.RequiredMode.REQUIRED,
                 minLength = 3,
@@ -42,7 +42,7 @@ public record CreateRouteRequest
         String name,
 
         @Schema(
-                description = "Cidade de origem da rota",
+                description = "Cidade de origem",
                 example = "Florianópolis",
                 requiredMode = Schema.RequiredMode.REQUIRED,
                 minLength = 3,
@@ -53,7 +53,7 @@ public record CreateRouteRequest
         String originCity,
 
         @Schema(
-                description = "Unidade Federativa (UF) de origem, com 2 letras maiúsculas",
+                description = "UF de origem, com 2 letras maiúsculas",
                 example = "SC",
                 requiredMode = Schema.RequiredMode.REQUIRED,
                 minLength = 2,
@@ -64,7 +64,7 @@ public record CreateRouteRequest
         String originState,
 
         @Schema(
-                description = "Cidade de destino da rota",
+                description = "Cidade de destino",
                 example = "São Paulo",
                 requiredMode = Schema.RequiredMode.REQUIRED,
                 minLength = 3,
@@ -75,7 +75,7 @@ public record CreateRouteRequest
         String destinationCity,
 
         @Schema(
-                description = "Unidade Federativa (UF) de destino, com 2 letras maiúsculas",
+                description = "UF de destino, com 2 letras maiúsculas",
                 example = "SP",
                 requiredMode = Schema.RequiredMode.REQUIRED,
                 minLength = 2,
@@ -86,7 +86,7 @@ public record CreateRouteRequest
         String destinationState,
 
         @Schema(
-                description = "Distância total da rota em quilômetros",
+                description = "Distância total, em quilômetros",
                 example = "705.40",
                 requiredMode = Schema.RequiredMode.REQUIRED
         )
@@ -95,7 +95,7 @@ public record CreateRouteRequest
         BigDecimal distanceKm,
 
         @Schema(
-                description = "Tempo estimado de viagem, em minutos",
+                description = "Duração estimada do trajeto, em minutos",
                 example = "720",
                 requiredMode = Schema.RequiredMode.REQUIRED
         )
@@ -104,7 +104,7 @@ public record CreateRouteRequest
         Integer estimatedDurationMinutes,
 
         @Schema(
-                description = "Abrangência do serviço da linha, que determina o órgão regulador",
+                description = "Abrangência da linha: INTRASTATE e METROPOLITAN exigem a mesma UF, INTERSTATE exige UFs diferentes",
                 example = "INTERSTATE",
                 requiredMode = Schema.RequiredMode.REQUIRED
         )
@@ -112,7 +112,7 @@ public record CreateRouteRequest
         RouteScope serviceScope,
 
         @Schema(
-                description = "Órgão regulador ou concedente da linha (ex.: ANTT, DETER-SC)",
+                description = "Órgão regulador da linha",
                 example = "ANTT",
                 requiredMode = Schema.RequiredMode.REQUIRED,
                 maxLength = 64

@@ -15,6 +15,12 @@ import br.com.passage.api.route.internal.repository.RouteRepository;
 import br.com.passage.api.shared.domain.exceptions.BusinessException;
 import lombok.AllArgsConstructor;
 
+/**
+ * Cadastra uma rota.
+ *
+ * <p>O gestor cadastra sempre na própria empresa, ignorando o {@code companyUuid}
+ * do payload; o ADMIN precisa informá-lo.</p>
+ */
 @Service
 @AllArgsConstructor
 public class CreateRouteService {

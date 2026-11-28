@@ -9,6 +9,11 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.UUID;
 
+/**
+ * Passagem vendida para um assento de uma viagem.
+ *
+ * <p>Preço, partida e empresa são copiados da viagem na venda.</p>
+ */
 @Entity
 @Table(name = "tickets")
 @Getter
@@ -20,54 +25,33 @@ import java.util.UUID;
 @EqualsAndHashCode(callSuper = true)
 public class Ticket extends EntityBase {
 
-    /**
-     * Código único da passagem.
-     *
-     * <p>Identificador utilizado para referência externa da passagem.</p>
-     */
+    /** Código da passagem, único no sistema. */
     @Column(name = "code", nullable = false, length = 64, unique = true)
     private String code;
 
-    /**
-     * Nome completo do passageiro.
-     */
     @Column(name = "passenger_name", nullable = false, length = 100)
     private String passengerName;
 
-    /**
-     * CPF do passageiro.
-     */
+    /** CPF do passageiro, sem pontuação. */
     @Column(name = "passenger_document", nullable = false, length = 11)
     private String passengerDocument;
 
-    /**
-     * Identificador do assento reservado para a passagem.
-     *
-     */
+    /** Assento vendido, do ônibus da viagem. */
     @Column(name = "seat_id", nullable = false)
     private UUID seatId;
 
-    /**
-     * Valor da passagem em reais.
-     */
+    /** Preço pago, em reais. */
     @Column(name = "price", nullable = false, precision = 10, scale = 2)
     private BigDecimal price;
 
-    /**
-     * Data e hora de partida registradas na venda.
-     */
+    /** Partida da viagem no momento da venda. */
     @Column(name = "departure_date_time", nullable = false)
     private Instant departureDateTime;
 
-    /**
-     * Empresa dona da passagem.
-     */
+    /** Empresa dona da passagem, a mesma da viagem. */
     @Column(name = "company_uuid", nullable = false)
     private UUID companyUuid;
 
-    /**
-     * Identificador da viagem para a qual a passagem foi vendida.
-     */
     @Column(name = "trip_id", nullable = false)
     private UUID tripId;
 }

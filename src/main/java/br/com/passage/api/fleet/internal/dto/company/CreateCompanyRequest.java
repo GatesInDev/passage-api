@@ -4,11 +4,11 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.*;
 import org.hibernate.validator.constraints.br.CNPJ;
 
-@Schema(description = "Payload com os dados necessários para o cadastro de uma nova empresa transportadora")
+@Schema(description = "Dados para cadastrar uma empresa")
 public record CreateCompanyRequest
         (
                 @Schema(
-                        description = "Razão Social da empresa",
+                        description = "Razão social",
                         example = "Viação Expressa Santa Catarina S.A.",
                         requiredMode = Schema.RequiredMode.REQUIRED,
                         minLength = 3,
@@ -19,7 +19,7 @@ public record CreateCompanyRequest
                 String corporateName,
 
                 @Schema(
-                        description = "Nome Fantasia da empresa",
+                        description = "Nome fantasia, opcional",
                         example = "Expressa Transportes",
                         minLength = 3,
                         maxLength = 255
@@ -28,7 +28,7 @@ public record CreateCompanyRequest
                 String tradeName,
 
                 @Schema(
-                        description = "Registro de Identificação Fiscal (CNPJ com 14 caracteres, sem pontuação)",
+                        description = "CNPJ com 14 caracteres, sem pontuação e único no sistema",
                         example = "12345678000195",
                         requiredMode = Schema.RequiredMode.REQUIRED,
                         minLength = 14,
@@ -40,7 +40,7 @@ public record CreateCompanyRequest
                 String documentId,
 
                 @Schema(
-                        description = "Inscrição Estadual (IE) contendo apenas números ou a palavra 'ISENTO'",
+                        description = "Inscrição estadual: somente números, ou ISENTO",
                         example = "251234567",
                         maxLength = 15
                 )
@@ -50,7 +50,7 @@ public record CreateCompanyRequest
                 String stateRegistration,
 
                 @Schema(
-                        description = "Órgão regulador ou concedente do estado (ex: DETER, ARTESP, ANTT)",
+                        description = "Órgão regulador estadual (ex.: DETER-SC, ARTESP)",
                         example = "DETER-SC",
                         requiredMode = Schema.RequiredMode.REQUIRED,
                         minLength = 3,

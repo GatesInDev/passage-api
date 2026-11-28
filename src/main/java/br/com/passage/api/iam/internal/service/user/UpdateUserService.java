@@ -11,6 +11,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
+/**
+ * Atualiza nome, perfil, empresa e situação de um usuário; e-mail e senha não mudam.
+ */
 @Service
 @RequiredArgsConstructor
 public class UpdateUserService {

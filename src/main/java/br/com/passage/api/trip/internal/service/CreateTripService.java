@@ -18,6 +18,12 @@ import br.com.passage.api.trip.internal.dto.TripResponse;
 import br.com.passage.api.trip.internal.repository.TripRepository;
 import lombok.AllArgsConstructor;
 
+/**
+ * Agenda uma viagem em uma rota.
+ *
+ * <p>A empresa vem da rota, nunca do payload, e o gestor só agenda em rotas da própria
+ * empresa. Toda viagem nasce {@link TripStatus#SCHEDULED}.</p>
+ */
 @Service 
 @AllArgsConstructor
 public class CreateTripService {

@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.UUID;
 
+/** Consulta ônibus no escopo do usuário logado (ver {@link FleetAccessService}). */
 @Service
 @RequiredArgsConstructor
 public class FindBusService {
@@ -19,6 +20,7 @@ public class FindBusService {
     private final BusRepository busRepository;
     private final FleetAccessService fleetAccessService;
 
+    /** @throws ResourceNotFoundException se o ônibus não existir, estiver excluído ou for de outra empresa */
     @Transactional(readOnly = true)
     public Bus findEntity(UUID id) {
         UUID companyId = fleetAccessService.currentCompanyId();

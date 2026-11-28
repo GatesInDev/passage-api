@@ -9,6 +9,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/** Cadastra uma empresa; o CNPJ é único no sistema. */
 @Service
 @AllArgsConstructor
 public class CreateCompanyService

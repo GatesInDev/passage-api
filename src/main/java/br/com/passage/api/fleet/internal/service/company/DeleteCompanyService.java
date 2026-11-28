@@ -12,6 +12,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
+/**
+ * Exclui logicamente uma empresa; restrito ao ADMIN.
+ *
+ * <p>A frota não é excluída junto, mas deixa de ser visível com a empresa excluída.</p>
+ */
 @Service
 @RequiredArgsConstructor
 public class DeleteCompanyService {

@@ -1,13 +1,11 @@
 package br.com.passage.api.integration.internal.domain.enums;
 
-/**
- * Ambiente de emissão, conforme a legislação fiscal.
- */
+/** Ambiente de emissão do documento fiscal. */
 public enum FiscalEnvironment {
 
-    /** Ambiente de produção: documentos com validade fiscal. */
+    /** Com validade fiscal. */
     PRODUCTION,
 
-    /** Ambiente de homologação: documentos sem validade fiscal. */
+    /** Testes, sem validade fiscal. */
     HOMOLOGATION
 }

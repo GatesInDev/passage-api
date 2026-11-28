@@ -10,6 +10,11 @@ import br.com.passage.api.fleet.FleetApi;
 import br.com.passage.api.shared.domain.exceptions.BusinessException;
 import lombok.RequiredArgsConstructor;
 
+/**
+ * Valida o ônibus e o motorista de uma viagem pela {@code FleetApi}.
+ *
+ * <p>Inexistentes ou excluídos resultam em 404; de outra empresa ou inativos, em 409.</p>
+ */
 @Service
 @RequiredArgsConstructor
 public class TripFleetValidator {

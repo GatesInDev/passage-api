@@ -14,13 +14,9 @@ import java.util.UUID;
 /**
  * Bilhete de Passagem Eletrônico (BP-e, modelo 63) de uma passagem vendida.
  *
- * <p>Representa o documento fiscal emitido junto à SEFAZ. Nesta versão a
- * comunicação com a receita é simulada: a estrutura do documento e o ciclo
- * de vida são reais, mas a autorização vem de um emissor local.</p>
- *
- * <p>O documento nasce {@code PENDING} e caminha para {@code AUTHORIZED} ou
- * {@code REJECTED}. Depois de autorizado pode ser {@code CANCELED} por um
- * evento próprio — documento fiscal não se apaga.</p>
+ * <p>Nasce {@code PENDING} e vai para {@code AUTHORIZED} ou {@code REJECTED}. Depois de autorizado,
+ * só pode ser {@code CANCELED}: documento fiscal não se apaga. A comunicação com a SEFAZ é simulada
+ * (ver {@link br.com.passage.api.integration.internal.gateway.MockSefazGateway}).</p>
  */
 @Entity
 @Table(
@@ -39,15 +35,11 @@ import java.util.UUID;
 @EqualsAndHashCode(callSuper = true)
 public class FiscalDocument extends EntityBase {
 
-    /**
-     * Chave de acesso de 44 dígitos que identifica o documento na SEFAZ.
-     *
-     * <p>Fica nula enquanto a autorização não ocorre.</p>
-     */
+    /** Chave de acesso de 44 dígitos; nula até a autorização. */
     @Column(name = "access_key", length = 44)
     private String accessKey;
 
-    /** Modelo do documento fiscal. O BP-e é sempre o modelo 63. */
+    /** Modelo do documento; o BP-e é sempre o 63. */
     @Column(name = "model", nullable = false, length = 2)
     private String model;
 
@@ -69,11 +61,7 @@ public class FiscalDocument extends EntityBase {
     @Column(name = "environment", nullable = false, length = 20)
     private FiscalEnvironment environment;
 
-    /**
-     * Passagem que originou o documento.
-     *
-     * <p>Referenciada por UUID para manter o desacoplamento entre módulos.</p>
-     */
+    /** Passagem que originou o documento; um documento por passagem. */
     @Column(name = "ticket_id", nullable = false)
     private UUID ticketId;
 
@@ -96,13 +84,11 @@ public class FiscalDocument extends EntityBase {
     @Column(name = "canceled_at")
     private Instant canceledAt;
 
-    /** Motivo informado pela SEFAZ quando o documento é recusado. */
+    /** Motivo da recusa da SEFAZ. */
     @Column(name = "rejection_reason", length = 255)
     private String rejectionReason;
 
-    /**
-     * Registra a autorização concedida pela SEFAZ.
-     */
+    /** Registra a autorização da SEFAZ. */
     public void authorize(String accessKey, String protocol, Instant authorizedAt) {
         this.accessKey = accessKey;
         this.protocol = protocol;
@@ -120,7 +106,7 @@ public class FiscalDocument extends EntityBase {
     }
 
     /**
-     * Cancela um documento já autorizado.
+     * Cancela o documento.
      *
      * @throws IllegalStateException se o documento não estiver autorizado
      */

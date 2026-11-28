@@ -9,10 +9,9 @@ import org.springframework.stereotype.Component;
 /**
  * Emite o documento fiscal quando uma passagem é vendida.
  *
- * <p>{@code @ApplicationModuleListener} entrega o evento em uma transação
- * própria e apenas após a venda ser confirmada. A entrega fica registrada
- * pelo Spring Modulith, então uma falha aqui não desfaz a venda e o evento
- * pode ser reprocessado depois.</p>
+ * <p>{@code @ApplicationModuleListener} roda depois do commit da venda, em transação própria, e o
+ * Spring Modulith registra a entrega: uma falha aqui não desfaz a venda e o evento pode ser
+ * reprocessado.</p>
  */
 @Slf4j
 @Component

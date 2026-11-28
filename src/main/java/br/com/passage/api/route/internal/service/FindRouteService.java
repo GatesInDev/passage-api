@@ -12,6 +12,9 @@ import br.com.passage.api.route.internal.repository.RouteRepository;
 import br.com.passage.api.shared.domain.exceptions.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 
+/**
+ * Consulta rotas no escopo do usuário logado (ver {@link RouteAccessService}).
+ */
 @Service 
 @RequiredArgsConstructor 
 public class FindRouteService {

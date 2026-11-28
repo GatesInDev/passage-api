@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.UUID;
 
+/** Consulta os assentos de um ônibus visível ao usuário logado. */
 @Service
 @RequiredArgsConstructor
 public class FindSeatService {
@@ -19,6 +20,10 @@ public class FindSeatService {
     private final SeatRepository seatRepository;
     private final FindBusService findBusService;
 
+    /**
+     * @throws ResourceNotFoundException se o ônibus não for visível ao usuário, ou se o assento não existir,
+     *                                    estiver excluído ou for de outro ônibus
+     */
     @Transactional(readOnly = true)
     public Seat findEntity(UUID busId, UUID id) {
         findBusService.findEntity(busId);

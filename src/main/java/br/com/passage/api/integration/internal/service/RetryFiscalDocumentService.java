@@ -9,9 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
-/**
- * Reenvia à SEFAZ um documento pendente ou recusado.
- */
+/** Reenvia à SEFAZ um documento ainda não autorizado. */
 @Service
 @RequiredArgsConstructor
 public class RetryFiscalDocumentService {

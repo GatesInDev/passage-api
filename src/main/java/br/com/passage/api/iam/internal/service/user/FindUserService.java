@@ -11,6 +11,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * Consulta usuários, desconsiderando os excluídos.
+ */
 @Service
 @RequiredArgsConstructor
 public class FindUserService {

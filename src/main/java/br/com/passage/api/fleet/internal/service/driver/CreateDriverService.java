@@ -11,6 +11,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * Cadastra um motorista; a CNH é única no sistema.
+ *
+ * <p>O gestor cadastra sempre na própria empresa; o ADMIN precisa informá-la.</p>
+ */
 @Service
 @RequiredArgsConstructor
 public class CreateDriverService {

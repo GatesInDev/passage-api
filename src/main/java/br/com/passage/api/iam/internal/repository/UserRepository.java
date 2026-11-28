@@ -7,6 +7,9 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.Optional;
 import java.util.UUID;
 
+/**
+ * Acesso aos usuários.
+ */
 public interface UserRepository extends JpaRepository<User, Long> {
     Optional<UserDetails> findByEmail(String email);
     Optional<User> findById(UUID id);

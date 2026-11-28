@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
+/** Busca uma empresa visível ao usuário logado. */
 @Service
 @RequiredArgsConstructor
 public class FindByIdCompanyService {

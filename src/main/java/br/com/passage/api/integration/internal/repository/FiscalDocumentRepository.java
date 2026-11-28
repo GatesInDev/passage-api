@@ -9,14 +9,14 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+/**
+ * Acesso aos documentos fiscais.
+ *
+ * <p>As consultas {@code Visible} desconsideram registros excluídos e, quando
+ * {@code companyId} é informado, restringem o resultado a essa empresa.</p>
+ */
 public interface FiscalDocumentRepository extends JpaRepository<FiscalDocument, UUID> {
 
-    /**
-     * Documento visível ao usuário atual.
-     *
-     * <p>{@code companyId} nulo representa um administrador, que enxerga
-     * os documentos de todas as empresas.</p>
-     */
     @Query("""
             select item from FiscalDocument item
             where item.id = :id and item.isDeleted = false
@@ -35,6 +35,7 @@ public interface FiscalDocumentRepository extends JpaRepository<FiscalDocument, 
 
     Optional<FiscalDocument> findByTicketId(UUID ticketId);
 
+    /** Último número usado na série, ou 0 se não houver documento. */
     @Query("select coalesce(max(item.number), 0) from FiscalDocument item where item.series = :series")
     long lastNumberOfSeries(@Param("series") Integer series);
 }

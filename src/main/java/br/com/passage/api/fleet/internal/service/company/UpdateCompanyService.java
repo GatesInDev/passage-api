@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.UUID;
 
+/** Atualiza uma empresa; o gestor só pode alterar a própria. */
 @Service
 @AllArgsConstructor
 public class UpdateCompanyService

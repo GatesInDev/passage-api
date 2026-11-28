@@ -9,12 +9,17 @@ import br.com.passage.api.shared.domain.exceptions.BusinessException;
 import br.com.passage.api.trip.internal.repository.TripRepository;
 import lombok.RequiredArgsConstructor;
 
+/** Impede que o mesmo ônibus ou motorista esteja em duas viagens no mesmo período. */
 @Service
 @RequiredArgsConstructor
 public class TripScheduleValidator{
 
     private final TripRepository tripRepository;
 
+    /**
+     * @param excludedTripId viagem desconsiderada na verificação (a própria, na alteração);
+     *                       {@code null} no cadastro
+     */
     public void validate(UUID busId, UUID driverId, Instant departureTime, Instant arrivalTime, UUID excludedTripId) {
 
         if (tripRepository.existsBusConflict(busId, departureTime, arrivalTime, excludedTripId)) {

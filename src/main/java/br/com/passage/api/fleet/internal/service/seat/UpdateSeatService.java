@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
+/** Atualiza um assento de um ônibus visível ao usuário logado. */
 @Service
 @RequiredArgsConstructor
 public class UpdateSeatService {

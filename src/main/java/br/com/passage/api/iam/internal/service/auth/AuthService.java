@@ -11,6 +11,9 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
+/**
+ * Autentica o usuário por e-mail e senha e emite o token de acesso.
+ */
 @Service
 @RequiredArgsConstructor
 public class AuthService {
@@ -18,6 +21,9 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
 
+    /**
+     * @throws BusinessException se o e-mail ou a senha estiverem incorretos
+     */
     public TokenResponse login(LoginRequest request)
     {
         try

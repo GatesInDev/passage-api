@@ -1,54 +1,32 @@
 package br.com.passage.api.trip.enums;
 
 /**
- * Representa a situação de uma viagem.
+ * Situação de uma viagem ao longo da operação.
  *
- * <p>A situação indica em qual etapa do ciclo de vida a viagem se encontra,
- * podendo ser:</p>
- *
- * <ul>
- *     <li>{@link #SCHEDULED} - Viagem agendada, ainda não iniciada.</li>
- *     <li>{@link #BOARDING} - Embarque dos passageiros em andamento.</li>
- *     <li>{@link #IN_PROGRESS} - Viagem em curso.</li>
- *     <li>{@link #COMPLETED} - Viagem concluída.</li>
- *     <li>{@link #CANCELED} - Viagem cancelada.</li>
- * </ul>
+ * <p>Fluxo: {@code SCHEDULED → BOARDING → IN_PROGRESS → COMPLETED}, com cancelamento
+ * possível até a conclusão. {@link #COMPLETED} e {@link #CANCELED} são finais.</p>
  */
 public enum TripStatus {
 
-    /**
-     * Viagem agendada, ainda não iniciada.
-     */
+    /** Agendada, ainda não iniciada. */
     SCHEDULED,
 
-    /**
-     * Embarque dos passageiros em andamento.
-     */
+    /** Embarque em andamento. */
     BOARDING,
 
-    /**
-     * Viagem em curso.
-     */
+    /** Em viagem. */
     IN_PROGRESS,
 
-    /**
-     * Viagem concluída.
-     */
+    /** Concluída. */
     COMPLETED,
 
-    /**
-     * Viagem cancelada.
-     */
+    /** Cancelada; libera o ônibus e o motorista. */
     CANCELED;
 
     /**
-     * Indica se a viagem pode passar da situação atual para a informada.
+     * Indica se a viagem pode passar da situação atual para {@code next}.
      *
-     * <p>Permanecer na mesma situação é sempre permitido. As situações
-     * {@link #COMPLETED} e {@link #CANCELED} são finais.</p>
-     *
-     * @param next situação de destino
-     * @return {@code true} se a transição for permitida
+     * Permanecer na mesma situação é sempre permitido.
      */
     public boolean canTransitionTo(TripStatus next) {
         if (this == next) {
@@ -62,6 +40,7 @@ public enum TripStatus {
         };
     }
 
+    /** Concluída ou cancelada: a viagem não aceita mais alterações. */
     public boolean isFinal() {
         return this == COMPLETED || this == CANCELED;
     }

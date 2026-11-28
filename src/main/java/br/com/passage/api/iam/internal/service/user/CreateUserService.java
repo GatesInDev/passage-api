@@ -10,6 +10,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * Cadastra um usuário com a senha armazenada como hash BCrypt.
+ */
 @Service
 @RequiredArgsConstructor
 public class CreateUserService {

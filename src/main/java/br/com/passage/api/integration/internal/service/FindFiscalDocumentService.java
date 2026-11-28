@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.UUID;
 
+/** Consulta documentos fiscais no escopo do usuário logado (ver {@link FiscalDocumentAccessService}). */
 @Service
 @RequiredArgsConstructor
 public class FindFiscalDocumentService {
@@ -30,6 +31,7 @@ public class FindFiscalDocumentService {
                 .toList();
     }
 
+    /** @throws ResourceNotFoundException se o documento não existir, estiver excluído ou for de outra empresa */
     @Transactional(readOnly = true)
     public FiscalDocument findEntity(UUID id) {
         return fiscalDocumentRepository.findVisibleById(id, accessService.currentCompanyId())

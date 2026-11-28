@@ -9,14 +9,14 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+/**
+ * Acesso às passagens.
+ *
+ * <p>As consultas {@code Visible} desconsideram registros excluídos e, quando
+ * {@code companyId} é informado, restringem o resultado a essa empresa.</p>
+ */
 public interface TicketRepository extends JpaRepository<Ticket, UUID> {
 
-    /**
-     * Passagem visível ao usuário atual.
-     *
-     * <p>{@code companyId} nulo representa um administrador, que enxerga
-     * as passagens de todas as empresas.</p>
-     */
     @Query("""
             select item from Ticket item
             where item.id = :id and item.isDeleted = false
@@ -31,12 +31,9 @@ public interface TicketRepository extends JpaRepository<Ticket, UUID> {
             """)
     List<Ticket> findAllVisible(@Param("companyId") UUID companyId);
 
+    /** Considera também as passagens excluídas, já que o código continua reservado. */
     boolean existsByCode(String code);
 
-    /**
-     * Indica se o assento já está vendido para a viagem.
-     *
-     * <p>Passagens canceladas liberam o assento novamente.</p>
-     */
+    /** Indica se o assento já foi vendido para a viagem; passagens excluídas liberam o assento. */
     boolean existsByTripIdAndSeatIdAndIsDeletedFalse(UUID tripId, UUID seatId);
 }

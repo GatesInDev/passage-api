@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
+/** Cadastra um assento em um ônibus visível ao usuário logado. */
 @Service
 @RequiredArgsConstructor
 public class CreateSeatService {

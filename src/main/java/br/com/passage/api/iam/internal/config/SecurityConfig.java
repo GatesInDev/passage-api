@@ -13,6 +13,12 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+/**
+ * Regras de segurança HTTP: API sem sessão, autenticada por JWT.
+ *
+ * <p>Apenas o login e a documentação são públicos. A permissão por perfil de cada
+ * endpoint é declarada nos controllers com {@code @PreAuthorize}.</p>
+ */
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity

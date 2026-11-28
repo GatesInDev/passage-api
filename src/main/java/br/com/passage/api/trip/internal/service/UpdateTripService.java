@@ -14,6 +14,13 @@ import br.com.passage.api.trip.internal.dto.UpdateTripRequest;
 import br.com.passage.api.trip.internal.repository.TripRepository;
 import lombok.RequiredArgsConstructor;
 
+/**
+ * Atualiza uma viagem visível ao usuário logado; o código e a rota não mudam.
+ *
+ * <p>Viagens finalizadas não aceitam alterações. O cancelamento apenas altera a situação
+ * e dispensa as demais validações, para que uma viagem possa ser cancelada mesmo com
+ * o ônibus ou o motorista desativados.</p>
+ */
 @Service 
 @RequiredArgsConstructor 
 public class UpdateTripService {

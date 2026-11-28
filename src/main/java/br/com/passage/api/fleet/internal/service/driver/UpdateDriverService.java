@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
+/** Atualiza um motorista visível ao usuário logado; a empresa não muda. */
 @Service
 @RequiredArgsConstructor
 public class UpdateDriverService {

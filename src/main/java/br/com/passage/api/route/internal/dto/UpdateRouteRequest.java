@@ -10,11 +10,11 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 
-@Schema(description = "Payload com os dados necessários para a atualização de uma rota existente")
+@Schema(description = "Dados para atualizar uma rota; o código e a empresa não mudam")
 public record UpdateRouteRequest
 (
         @Schema(
-                description = "Nome descritivo da linha/rota",
+                description = "Nome da linha",
                 example = "Florianópolis - São Paulo via BR-101",
                 requiredMode = Schema.RequiredMode.REQUIRED,
                 minLength = 3,
@@ -25,7 +25,7 @@ public record UpdateRouteRequest
         String name,
 
         @Schema(
-                description = "Cidade de origem da rota",
+                description = "Cidade de origem",
                 example = "Florianópolis",
                 requiredMode = Schema.RequiredMode.REQUIRED,
                 minLength = 3,
@@ -36,7 +36,7 @@ public record UpdateRouteRequest
         String originCity,
 
         @Schema(
-                description = "Unidade Federativa (UF) de origem, com 2 letras maiúsculas",
+                description = "UF de origem, com 2 letras maiúsculas",
                 example = "SC",
                 requiredMode = Schema.RequiredMode.REQUIRED,
                 minLength = 2,
@@ -47,7 +47,7 @@ public record UpdateRouteRequest
         String originState,
 
         @Schema(
-                description = "Cidade de destino da rota",
+                description = "Cidade de destino",
                 example = "São Paulo",
                 requiredMode = Schema.RequiredMode.REQUIRED,
                 minLength = 3,
@@ -58,7 +58,7 @@ public record UpdateRouteRequest
         String destinationCity,
 
         @Schema(
-                description = "Unidade Federativa (UF) de destino, com 2 letras maiúsculas",
+                description = "UF de destino, com 2 letras maiúsculas",
                 example = "SP",
                 requiredMode = Schema.RequiredMode.REQUIRED,
                 minLength = 2,
@@ -69,7 +69,7 @@ public record UpdateRouteRequest
         String destinationState,
 
         @Schema(
-                description = "Distância total da rota em quilômetros",
+                description = "Distância total, em quilômetros",
                 example = "705.40",
                 requiredMode = Schema.RequiredMode.REQUIRED
         )
@@ -78,7 +78,7 @@ public record UpdateRouteRequest
         BigDecimal distanceKm,
 
         @Schema(
-                description = "Tempo estimado de viagem, em minutos",
+                description = "Duração estimada do trajeto, em minutos",
                 example = "720",
                 requiredMode = Schema.RequiredMode.REQUIRED
         )
@@ -87,7 +87,7 @@ public record UpdateRouteRequest
         Integer estimatedDurationMinutes,
 
         @Schema(
-                description = "Abrangência do serviço da linha, que determina o órgão regulador",
+                description = "Abrangência da linha: INTRASTATE e METROPOLITAN exigem a mesma UF, INTERSTATE exige UFs diferentes",
                 example = "INTERSTATE",
                 requiredMode = Schema.RequiredMode.REQUIRED
         )
@@ -95,7 +95,7 @@ public record UpdateRouteRequest
         RouteScope serviceScope,
 
         @Schema(
-                description = "Órgão regulador ou concedente da linha (ex.: ANTT, DETER-SC)",
+                description = "Órgão regulador da linha",
                 example = "ANTT",
                 requiredMode = Schema.RequiredMode.REQUIRED,
                 maxLength = 64
@@ -105,7 +105,7 @@ public record UpdateRouteRequest
         String regulatoryAgency,
 
         @Schema(
-                description = "Define se a rota está ativa para operação",
+                description = "Se a rota está ativa; rotas inativas não recebem novas viagens",
                 example = "true",
                 requiredMode = Schema.RequiredMode.REQUIRED
         )
