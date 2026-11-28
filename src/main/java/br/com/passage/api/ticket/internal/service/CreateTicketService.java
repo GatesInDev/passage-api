@@ -1,22 +1,17 @@
 package br.com.passage.api.ticket.internal.service;
 
-import br.com.passage.api.fleet.FleetApi;
 import br.com.passage.api.shared.domain.exceptions.BusinessException;
 import br.com.passage.api.ticket.TicketSold;
 import br.com.passage.api.ticket.internal.domain.entities.Ticket;
 import br.com.passage.api.ticket.internal.dto.CreateTicketRequest;
 import br.com.passage.api.ticket.internal.dto.TicketResponse;
 import br.com.passage.api.ticket.internal.repository.TicketRepository;
-import br.com.passage.api.trip.TripApi;
 import br.com.passage.api.trip.TripInfo;
-import br.com.passage.api.trip.enums.TripStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -39,19 +34,8 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class CreateTicketService {
 
-    /**
-     * Situações em que a viagem ainda admite venda.
-     *
-     * <p>Uma viagem em andamento, concluída ou cancelada não recebe
-     * passageiros novos.</p>
-     */
-    private static final Set<TripStatus> OPEN_FOR_SALE =
-            Set.of(TripStatus.SCHEDULED, TripStatus.BOARDING);
-
     private final TicketRepository ticketRepository;
-    private final TicketAccessService ticketAccessService;
-    private final TripApi tripApi;
-    private final FleetApi fleetApi;
+    private final TicketSaleValidator ticketSaleValidator;
     private final ApplicationEventPublisher events;
 
     /**

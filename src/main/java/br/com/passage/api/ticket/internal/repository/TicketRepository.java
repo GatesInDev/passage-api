@@ -56,7 +56,7 @@ public interface TicketRepository extends JpaRepository<Ticket, UUID> {
     boolean existsByCode(String code);
 
     /**
-     * Indica se o assento já está vendido para a viagem.
+     * Passagem que ocupa o assento na viagem, se houver.
      *
      * <p>Passagens canceladas liberam o assento novamente.</p>
      *
@@ -64,5 +64,9 @@ public interface TicketRepository extends JpaRepository<Ticket, UUID> {
      * @param seatId identificador do assento
      * @return {@code true} se o assento já estiver vendido
      */
-    boolean existsByTripIdAndSeatIdAndIsDeletedFalse(UUID tripId, UUID seatId);
+    @Query("""
+            select item from Ticket item
+            where item.tripId = :tripId and item.seatId = :seatId and item.isDeleted = false
+            """)
+    Optional<Ticket> findActiveByTripIdAndSeatId(@Param("tripId") UUID tripId, @Param("seatId") UUID seatId);
 }

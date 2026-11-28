@@ -143,4 +143,16 @@ public class FiscalDocument extends EntityBase {
     public boolean isAuthorized() {
         return this.status == FiscalDocumentStatus.AUTHORIZED;
     }
+
+    /**
+     * Indica se o documento ainda admite nova tentativa de autorização.
+     *
+     * <p>Somente documentos pendentes ou recusados podem ser reenviados.
+     * Um documento autorizado já circulou, e um cancelado é definitivo:
+     * reenviá-lo o faria voltar a valer.</p>
+     */
+    public boolean canBeResubmitted() {
+        return this.status == FiscalDocumentStatus.PENDING
+                || this.status == FiscalDocumentStatus.REJECTED;
+    }
 }
