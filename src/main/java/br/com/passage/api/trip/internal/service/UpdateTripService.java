@@ -17,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor 
 public class UpdateTripService {
     
+    private final TripFleetValidator tripFleetValidator;
     private final TripRepository tripRepository;
     private final TripAccessService tripAccessService;
     
@@ -24,6 +25,10 @@ public class UpdateTripService {
     public TripResponse execute(UUID id, UpdateTripRequest request){
         Trip trip = tripRepository.findVisibleById(id, tripAccessService.visibleCompanyUuid())
             .orElseThrow(() -> new ResourceNotFoundException("Viagem não encontrada com o identificador: " + id));
+
+        trip.ensureEditable();
+        
+        tripFleetValidator.validate(trip.getCompanyUuid(), request.busId(), request.driverId());
 
         if(!request.arrivalTime().isAfter(request.departureTime())){
             throw new BusinessException("O horário de chegada deve ser posterior ao horário de partida.");

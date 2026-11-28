@@ -61,4 +61,8 @@ public enum TripStatus {
             case COMPLETED, CANCELED -> false;
         };
     }
+
+    public boolean isFinal() {
+        return this == COMPLETED || this == CANCELED;
+    }
 }

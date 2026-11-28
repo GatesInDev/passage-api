@@ -22,6 +22,7 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public class CreateTripService {
     
+    private final TripFleetValidator tripFleetValidator;
     private final TripRepository tripRepository;
     private final IamApi iamApi;
     private final RouteApi routeApi;
@@ -39,6 +40,8 @@ public class CreateTripService {
         if(user.role() != UserRole.ADMIN && !companyUuid.equals(user.companyUuid())){
             throw new AccessDeniedException("Usuário não tem permissão para criar uma viagem para esta rota.");
         }
+        
+        tripFleetValidator.validate(companyUuid, request.busId(), request.driverId());
         
         if(!request.arrivalTime().isAfter(request.departureTime())){
             throw new BusinessException("O horário de chegada deve ser posterior ao horário de partida.");
