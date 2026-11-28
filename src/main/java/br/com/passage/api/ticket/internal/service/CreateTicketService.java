@@ -21,14 +21,8 @@ import java.util.UUID;
  * venda. Após a venda, é publicado o evento {@link TicketSold}, que dispara a emissão do
  * documento fiscal.</p>
  *
- * <h2>Validações</h2>
- *
- * <ul>
- *     <li>o código deve ser único no sistema;</li>
- *     <li>a viagem deve estar agendada ou em embarque;</li>
- *     <li>quem não é administrador só vende passagens de viagens da própria empresa;</li>
- *     <li>o assento deve pertencer ao ônibus da viagem e não pode estar vendido.</li>
- * </ul>
+ * <p>O código deve ser único no sistema. As demais regras da venda são aplicadas pelo
+ * {@link TicketSaleValidator}.</p>
  */
 @Service
 @RequiredArgsConstructor
@@ -45,7 +39,7 @@ public class CreateTicketService {
      * @return passagem vendida
      * @throws ResourceNotFoundException se a viagem não existir ou estiver excluída
      * @throws AccessDeniedException     se a viagem pertencer a outra empresa
-     * @throws BusinessException         se alguma das validações falhar
+     * @throws BusinessException         se o código já estiver em uso ou alguma regra da venda falhar
      */
     @Transactional
     public TicketResponse execute(CreateTicketRequest request) {
@@ -54,25 +48,8 @@ public class CreateTicketService {
             throw new BusinessException("Já existe uma passagem cadastrada com o código " + request.code());
         }
 
-        TripInfo trip = tripApi.findTrip(request.tripId());
-
-        if (!OPEN_FOR_SALE.contains(trip.status())) {
-            throw new BusinessException(
-                    "A viagem não está disponível para venda. Situação atual: " + trip.status() + ".");
-        }
-
-        UUID operatorCompany = ticketAccessService.currentCompanyId();
-        if (operatorCompany != null && !operatorCompany.equals(trip.companyUuid())) {
-            throw new AccessDeniedException("Não é possível vender passagens de viagens de outra empresa.");
-        }
-
-        if (!fleetApi.seatBelongsToBus(request.seatId(), trip.busId())) {
-            throw new BusinessException("O assento informado não pertence ao ônibus da viagem.");
-        }
-
-        if (ticketRepository.existsByTripIdAndSeatIdAndIsDeletedFalse(request.tripId(), request.seatId())) {
-            throw new BusinessException("O assento informado já está vendido para esta viagem.");
-        }
+        // Preço, horário e empresa vêm da viagem, nunca do cliente.
+        TripInfo trip = ticketSaleValidator.validate(request.tripId(), request.seatId(), null);
 
         Ticket ticket = Ticket.builder()
                 .code(request.code())
@@ -89,7 +66,7 @@ public class CreateTicketService {
 
         Ticket saved = ticketRepository.save(ticket);
 
-        // O documento fiscal é emitido depois do commit: a venda não espera nem falha se a SEFAZ estiver fora.
+        // O documento fiscal é emitido depois do commit, fora desta transação.
         events.publishEvent(new TicketSold(saved.getId(), saved.getCompanyUuid()));
 
         return TicketResponse.from(saved);

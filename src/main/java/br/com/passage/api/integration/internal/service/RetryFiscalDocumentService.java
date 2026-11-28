@@ -10,10 +10,10 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.UUID;
 
 /**
- * Reenvia à SEFAZ um documento pendente ou recusado.
+ * Serviço responsável pelo reenvio de documentos fiscais à SEFAZ.
  *
- * <p>Documentos autorizados ou cancelados não são reenviados: o
- * cancelamento é definitivo e não deve ser desfeito por um reenvio.</p>
+ * <p>Somente documentos pendentes ou recusados podem ser reenviados. Documentos autorizados ou
+ * cancelados não são reenviados.</p>
  */
 @Service
 @RequiredArgsConstructor
@@ -28,7 +28,7 @@ public class RetryFiscalDocumentService {
      * @param id identificador do documento
      * @return documento com o novo resultado da autorização
      * @throws ResourceNotFoundException se o documento não existir, estiver excluído ou pertencer a outra empresa
-     * @throws BusinessException         se o documento já estiver autorizado
+     * @throws BusinessException         se o documento não estiver pendente nem recusado
      */
     @Transactional
     public FiscalDocumentResponse execute(UUID id) {

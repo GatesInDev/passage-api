@@ -9,9 +9,10 @@ import java.util.UUID;
 /**
  * Representa os dados de entrada para a atualização de uma passagem.
  *
- * <p>O código e a empresa não são alterados.</p>
+ * <p>O código não é alterado. O preço, a data de partida e a empresa não
+ * constam aqui: são obtidos da viagem, como na venda.</p>
  */
-@Schema(description = "Dados para atualizar uma passagem; o código e a empresa não mudam")
+@Schema(description = "Dados para atualizar uma passagem; preço, partida e empresa vêm da viagem")
 public record UpdateTicketRequest(
 
         @Schema(
@@ -41,24 +42,6 @@ public record UpdateTicketRequest(
         )
         @NotNull(message = "O identificador do assento é obrigatório.")
         UUID seatId,
-
-        @Schema(
-                description = "Preço da passagem, em reais",
-                example = "189.90",
-                requiredMode = Schema.RequiredMode.REQUIRED
-        )
-        @NotNull(message = "O valor da passagem é obrigatório.")
-        @Positive(message = "O valor da passagem deve ser um valor positivo.")
-        BigDecimal price,
-
-        @Schema(
-                description = "Partida (UTC), no futuro",
-                example = "2026-10-01T08:00:00Z",
-                requiredMode = Schema.RequiredMode.REQUIRED
-        )
-        @NotNull(message = "A data e hora de partida são obrigatórias.")
-        @Future(message = "A data de partida deve ser uma data futura.")
-        Instant departureDateTime,
 
         @Schema(
                 description = "Viagem",

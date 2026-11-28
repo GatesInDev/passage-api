@@ -14,11 +14,16 @@ import java.util.Set;
 import java.util.UUID;
 
 /**
- * Regras comuns à emissão e à alteração de uma passagem.
+ * Validador das regras comuns à venda e à alteração de uma passagem.
  *
- * <p>Alterar uma passagem é vendê-la de novo: a viagem precisa continuar
- * aberta, o assento precisa existir no ônibus dela e não pode estar com
- * outro passageiro.</p>
+ * <h2>Regras</h2>
+ *
+ * <ul>
+ *     <li>a viagem deve estar agendada ou em embarque;</li>
+ *     <li>quem não é administrador só opera viagens da própria empresa;</li>
+ *     <li>o assento deve pertencer ao ônibus da viagem;</li>
+ *     <li>o assento não pode estar ocupado por outra passagem na viagem.</li>
+ * </ul>
  */
 @Service
 @RequiredArgsConstructor
@@ -39,12 +44,15 @@ public class TicketSaleValidator {
     private final TicketAccessService ticketAccessService;
 
     /**
-     * Valida a venda e devolve a viagem, que é a fonte do preço e do horário.
+     * Valida a venda e retorna a viagem, de onde vêm o preço, a partida e a empresa.
      *
-     * @param tripId   viagem escolhida
-     * @param seatId   assento escolhido
-     * @param ticketId passagem sendo alterada, ou {@code null} em uma emissão
+     * @param tripId   identificador da viagem
+     * @param seatId   identificador do assento
+     * @param ticketId passagem sendo alterada, ou {@code null} em uma venda
      * @return dados da viagem
+     * @throws ResourceNotFoundException se a viagem não existir ou estiver excluída
+     * @throws AccessDeniedException     se a viagem pertencer a outra empresa
+     * @throws BusinessException         se alguma das regras for violada
      */
     public TripInfo validate(UUID tripId, UUID seatId, UUID ticketId) {
         TripInfo trip = tripApi.findTrip(tripId);
@@ -70,7 +78,16 @@ public class TicketSaleValidator {
         return trip;
     }
 
-    /** A própria passagem não conta como ocupante do assento ao ser alterada. */
+    /**
+     * Verifica se o assento está ocupado por outra passagem na viagem.
+     *
+     * <p>A própria passagem, quando alterada, não conta como ocupante.</p>
+     *
+     * @param tripId   identificador da viagem
+     * @param seatId   identificador do assento
+     * @param ticketId passagem desconsiderada, ou {@code null}
+     * @return {@code true} se o assento estiver ocupado
+     */
     private boolean isSeatTaken(UUID tripId, UUID seatId, UUID ticketId) {
         return ticketRepository.findActiveByTripIdAndSeatId(tripId, seatId)
                 .filter(occupant -> !occupant.getId().equals(ticketId))

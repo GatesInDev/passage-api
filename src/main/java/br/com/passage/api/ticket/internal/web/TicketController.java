@@ -141,7 +141,7 @@ public class TicketController {
 
     @Operation(
             summary = "Atualizar passagem",
-            description = "O código e a empresa não mudam."
+            description = "Segue as mesmas regras da venda. O código não muda; preço, partida e empresa vêm da viagem."
     )
     @ApiResponses(value = {
             @ApiResponse(
@@ -161,7 +161,12 @@ public class TicketController {
             ),
             @ApiResponse(
                     responseCode = "404",
-                    description = "Passagem não encontrada, excluída ou de outra empresa",
+                    description = "Passagem ou viagem não encontrada, ou passagem de outra empresa",
+                    content = @Content
+            ),
+            @ApiResponse(
+                    responseCode = "409",
+                    description = "Viagem fora de venda, assento de outro ônibus ou já vendido",
                     content = @Content
             )
     })

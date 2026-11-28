@@ -62,7 +62,7 @@ public interface TicketRepository extends JpaRepository<Ticket, UUID> {
      *
      * @param tripId identificador da viagem
      * @param seatId identificador do assento
-     * @return {@code true} se o assento já estiver vendido
+     * @return passagem que ocupa o assento, se houver
      */
     @Query("""
             select item from Ticket item

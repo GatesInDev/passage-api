@@ -15,8 +15,9 @@ import java.util.UUID;
 /**
  * Serviço responsável pela atualização de passagens.
  *
- * <p>Permite alterar os dados do passageiro, o assento, o preço, a partida, a viagem e a
- * situação da passagem. O código e a empresa não são alterados.</p>
+ * <p>Permite alterar os dados do passageiro, a viagem, o assento e a situação da passagem.
+ * O código não é alterado. A alteração segue as mesmas regras da venda, aplicadas pelo
+ * {@link TicketSaleValidator}, e o preço, a partida e a empresa passam a ser os da viagem.</p>
  */
 @Service
 @RequiredArgsConstructor
@@ -32,7 +33,9 @@ public class UpdateTicketService {
      * @param id      identificador da passagem
      * @param request novos dados da passagem
      * @return passagem atualizada
-     * @throws ResourceNotFoundException se a passagem não existir, estiver excluída ou pertencer a outra empresa
+     * @throws ResourceNotFoundException se a passagem ou a viagem não forem encontradas
+     * @throws AccessDeniedException     se a viagem pertencer a outra empresa
+     * @throws BusinessException         se alguma regra da venda falhar
      */
     @Transactional
     public TicketResponse execute(UUID id, UpdateTicketRequest request) {

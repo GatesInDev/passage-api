@@ -153,7 +153,7 @@ public class FiscalDocumentController {
             ),
             @ApiResponse(
                     responseCode = "409",
-                    description = "Documento já autorizado",
+                    description = "Documento autorizado ou cancelado",
                     content = @Content
             )
     })
