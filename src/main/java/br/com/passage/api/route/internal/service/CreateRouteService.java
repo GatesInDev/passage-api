@@ -18,7 +18,8 @@ import lombok.AllArgsConstructor;
 @Service
 @AllArgsConstructor
 public class CreateRouteService {
-    
+
+    private final RouteConsistencyValidator routeConsistencyValidator;
     private final RouteRepository routeRepository;
     private final IamApi iamApi;
 
@@ -43,6 +44,9 @@ public class CreateRouteService {
                 throw new BusinessException("Usuário sem empresa vinculada não pode cadastrar rotas.");
             }
         }
+
+        routeConsistencyValidator.validate(request.originCity(), request.originState(),
+                request.destinationCity(), request.destinationState(), request.serviceScope());
 
         Route route = new Route(
             request.code(),

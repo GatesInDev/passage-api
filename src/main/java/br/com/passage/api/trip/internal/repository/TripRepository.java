@@ -1,5 +1,6 @@
 package br.com.passage.api.trip.internal.repository;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -28,6 +29,34 @@ public interface TripRepository extends JpaRepository<Trip, UUID> {
         and (:companyUuid is null or t.companyUuid = :companyUuid)
         """)
     List<Trip> findAllVisible(@Param("companyUuid") UUID companyUuid);
+
+    @Query("""
+        select count(t) > 0 from Trip t
+        where t.busId = :busId
+        and t.isDeleted = false
+        and t.status <> br.com.passage.api.trip.enums.TripStatus.CANCELED
+        and t.departureTime < :arrivalTime
+        and t.arrivalTime > :departureTime
+        and (:excludedId is null or t.id <> :excludedId)
+        """)
+    boolean existsBusConflict(@Param("busId") UUID busId,
+                              @Param("departureTime") Instant departureTime,
+                              @Param("arrivalTime") Instant arrivalTime,
+                              @Param("excludedId") UUID excludedId);
+
+    @Query("""
+        select count(t) > 0 from Trip t
+        where t.driverId = :driverId
+        and t.isDeleted = false
+        and t.status <> br.com.passage.api.trip.enums.TripStatus.CANCELED
+        and t.departureTime < :arrivalTime
+        and t.arrivalTime > :departureTime
+        and (:excludedId is null or t.id <> :excludedId)
+        """)
+    boolean existsDriverConflict(@Param("driverId") UUID driverId,
+                                 @Param("departureTime") Instant departureTime,
+                                 @Param("arrivalTime") Instant arrivalTime,
+                                 @Param("excludedId") UUID excludedId);
 
     /**
      * Verifica se já existe uma viagem cadastrada com o código informado.

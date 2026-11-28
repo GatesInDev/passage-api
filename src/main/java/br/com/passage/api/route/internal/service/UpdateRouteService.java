@@ -16,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor 
 public class UpdateRouteService {
     
+    private final RouteConsistencyValidator routeConsistencyValidator;
     private final RouteRepository routeRepository;
     private final RouteAccessService routeAccessService;
 
@@ -24,6 +25,9 @@ public class UpdateRouteService {
         Route route = routeRepository.findVisibleById(id, routeAccessService.visibleCompanyUuid())
              .orElseThrow(() -> new ResourceNotFoundException("Rota não encontrada com o identificador: " + id));
 
+        routeConsistencyValidator.validate(request.originCity(), request.originState(),
+                request.destinationCity(), request.destinationState(), request.serviceScope());
+        
         route.setName(request.name());
         route.setOriginCity(request.originCity());
         route.setOriginState(request.originState());

@@ -75,12 +75,19 @@ abstract class TripIntegrationTestSupport {
     /** Viagem de outra empresa, que o gestor não deve enxergar. */
     protected Trip otherTrip;
 
-    /** Partida sempre no futuro, exigida pela validação do cadastro. */
+    /** Partida das viagens de exemplo, sempre no futuro. */
     protected Instant departure;
+
+    /**
+     * Horário livre, dois dias depois das viagens de exemplo, usado pelos payloads
+     * para não esbarrar no conflito de agenda do ônibus e do motorista.
+     */
+    protected Instant freeSlot;
 
     @BeforeEach
     void seedTrips() {
         departure = Instant.now().plus(10, ChronoUnit.DAYS).truncatedTo(ChronoUnit.SECONDS);
+        freeSlot = departure.plus(2, ChronoUnit.DAYS);
 
         ownCompany = saveCompany("Viação Própria", "48130527000167");
         otherCompany = saveCompany("Viação Concorrente", "73019462000124");
@@ -138,7 +145,7 @@ abstract class TripIntegrationTestSupport {
     }
 
     protected String createPayload(String code, UUID routeId, UUID busId, UUID driverId) {
-        return createPayload(code, routeId, busId, driverId, departure, departure.plus(5, ChronoUnit.HOURS));
+        return createPayload(code, routeId, busId, driverId, freeSlot, freeSlot.plus(5, ChronoUnit.HOURS));
     }
 
     protected String createPayload(String code, UUID routeId, UUID busId, UUID driverId,
@@ -159,7 +166,7 @@ abstract class TripIntegrationTestSupport {
     }
 
     protected String updatePayload(UUID busId, UUID driverId, TripStatus status, String price) {
-        return updatePayload(busId, driverId, status, price, departure, departure.plus(4, ChronoUnit.HOURS));
+        return updatePayload(busId, driverId, status, price, freeSlot, freeSlot.plus(4, ChronoUnit.HOURS));
     }
 
     protected String updatePayload(UUID busId, UUID driverId, TripStatus status, String price,
