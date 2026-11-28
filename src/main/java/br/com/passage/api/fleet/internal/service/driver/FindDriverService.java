@@ -25,7 +25,7 @@ public class FindDriverService {
     public Driver findEntity(UUID id) {
         UUID companyId = fleetAccessService.currentCompanyId();
         return driverRepository.findVisibleById(id, companyId)
-                .orElseThrow(() -> new ResourceNotFoundException("Driver not found: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Motorista não encontrado com o identificador: " + id));
     }
 
     @Transactional(readOnly = true)

@@ -29,11 +29,11 @@ public class UpdateCompanyService
         var currentUser = iamApi.currentUser();
         if (currentUser.role() != UserRole.ADMIN
                 && (currentUser.role() != UserRole.FLEET_MANAGER || !id.equals(currentUser.companyUuid()))) {
-            throw new AccessDeniedException("Você não tem permissão para atualizar esta empresa");
+            throw new AccessDeniedException("Você não tem permissão para atualizar esta empresa.");
         }
 
         Company savedCompany = companyRepository.findByIdAndIsDeletedFalse(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Company not found: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Empresa não encontrada com o identificador: " + id));
 
         if (companyRepository.existsByDocumentIdAndIdNot(request.documentId(), id)) {
             throw new BusinessException("Já existe uma empresa cadastrada com o CNPJ " + request.documentId());

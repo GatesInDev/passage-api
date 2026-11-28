@@ -28,7 +28,7 @@ public class FindSeatService {
     public Seat findEntity(UUID busId, UUID id) {
         findBusService.findEntity(busId);
         return seatRepository.findByIdAndBus_IdAndIsDeletedFalse(id, busId)
-                .orElseThrow(() -> new ResourceNotFoundException("Seat not found: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Assento não encontrado com o identificador: " + id));
     }
 
     @Transactional(readOnly = true)

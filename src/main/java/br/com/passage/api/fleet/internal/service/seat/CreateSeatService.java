@@ -25,7 +25,7 @@ public class CreateSeatService {
     public SeatResponse execute(UUID busId, CreateSeatRequest request) {
         Bus bus = findBusService.findEntity(busId);
         if (seatRepository.existsConflictingSeat(busId, request.seatNumber(), request.row(), request.column(), null)) {
-            throw new BusinessException("Seat number or position is already in use on this bus.");
+            throw new BusinessException("O número ou a posição do assento já está em uso neste ônibus.");
         }
         Seat seat = Seat.builder()
                 .bus(bus)

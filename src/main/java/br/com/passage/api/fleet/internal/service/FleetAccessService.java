@@ -35,7 +35,7 @@ public class FleetAccessService {
             return null;
         }
         if (user.role() != UserRole.FLEET_MANAGER || user.companyUuid() == null) {
-            throw new AccessDeniedException("Fleet access requires an administrator or a manager linked to a company.");
+            throw new AccessDeniedException("O acesso à frota exige um administrador ou um gestor vinculado a uma empresa.");
         }
         return user.companyUuid();
     }
@@ -51,13 +51,13 @@ public class FleetAccessService {
     public Company requireCompany(UUID companyId) {
         UUID currentCompanyId = currentCompanyId();
         if (currentCompanyId != null && !currentCompanyId.equals(companyId)) {
-            throw new AccessDeniedException("You cannot access another company's fleet.");
+            throw new AccessDeniedException("Não é possível acessar a frota de outra empresa.");
         }
         if (companyId == null) {
-            throw new BusinessException("A company identifier is required.");
+            throw new BusinessException("O identificador da empresa é obrigatório.");
         }
         return companyRepository.findByIdAndIsDeletedFalse(companyId)
-                .orElseThrow(() -> new ResourceNotFoundException("Company not found: " + companyId));
+                .orElseThrow(() -> new ResourceNotFoundException("Empresa não encontrada com o identificador: " + companyId));
     }
 
     /**

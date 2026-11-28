@@ -29,7 +29,7 @@ public class FleetApi {
     @Transactional(readOnly = true)
     public BusInfo findBus(UUID busId) {
         Bus bus = busRepository.findVisibleById(busId, null)
-                .orElseThrow(() -> new ResourceNotFoundException("Bus not found: " + busId));
+                .orElseThrow(() -> new ResourceNotFoundException("Ônibus não encontrado com o identificador: " + busId));
         return new BusInfo(bus.getId(), bus.getCompany().getId(), bus.isActive(), bus.getCapacity());
     }
 
@@ -37,7 +37,7 @@ public class FleetApi {
     @Transactional(readOnly = true)
     public DriverInfo findDriver(UUID driverId) {
         Driver driver = driverRepository.findVisibleById(driverId, null)
-                .orElseThrow(() -> new ResourceNotFoundException("Driver not found: " + driverId));
+                .orElseThrow(() -> new ResourceNotFoundException("Motorista não encontrado com o identificador: " + driverId));
         return new DriverInfo(driver.getId(), driver.getCompany().getId(), driver.isActive());
     }
 

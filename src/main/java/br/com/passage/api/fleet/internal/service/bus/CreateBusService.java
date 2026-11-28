@@ -27,7 +27,7 @@ public class CreateBusService {
     public BusResponse execute(CreateBusRequest request) {
         Company company = fleetAccessService.resolveCompany(request.companyUuid());
         if (busRepository.existsByLicensePlate(request.licensePlate())) {
-            throw new BusinessException("A bus with this licensePlate already exists.");
+            throw new BusinessException("Já existe um ônibus cadastrado com a placa " + request.licensePlate());
         }
         Bus bus = Bus.builder()
                 .company(company)

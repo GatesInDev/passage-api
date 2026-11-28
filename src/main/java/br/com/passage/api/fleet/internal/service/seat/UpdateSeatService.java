@@ -23,7 +23,7 @@ public class UpdateSeatService {
     public SeatResponse execute(UUID busId, UUID id, UpdateSeatRequest request) {
         Seat seat = findSeatService.findEntity(busId, id);
         if (seatRepository.existsConflictingSeat(busId, request.seatNumber(), request.row(), request.column(), id)) {
-            throw new BusinessException("Seat number or position is already in use on this bus.");
+            throw new BusinessException("O número ou a posição do assento já está em uso neste ônibus.");
         }
         seat.setSeatNumber(request.seatNumber());
         seat.setRow(request.row());

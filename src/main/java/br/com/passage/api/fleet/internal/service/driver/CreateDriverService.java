@@ -27,7 +27,7 @@ public class CreateDriverService {
     public DriverResponse execute(CreateDriverRequest request) {
         Company company = fleetAccessService.resolveCompany(request.companyUuid());
         if (driverRepository.existsByLicenseNumber(request.licenseNumber())) {
-            throw new BusinessException("A driver with this licenseNumber already exists.");
+            throw new BusinessException("Já existe um motorista cadastrado com a CNH " + request.licenseNumber());
         }
         Driver driver = new Driver(request.name(), request.licenseNumber(), request.licenseCategory(), company);
         return DriverResponse.from(driverRepository.save(driver));

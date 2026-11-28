@@ -23,7 +23,7 @@ public class UpdateBusService {
     public BusResponse execute(UUID id, UpdateBusRequest request) {
         Bus bus = findBusService.findEntity(id);
         if (busRepository.existsByLicensePlateAndIdNot(request.licensePlate(), id)) {
-            throw new BusinessException("A bus with this licensePlate already exists.");
+            throw new BusinessException("Já existe um ônibus cadastrado com a placa " + request.licensePlate());
         }
         bus.setCode(request.code());
         bus.setModel(request.model());

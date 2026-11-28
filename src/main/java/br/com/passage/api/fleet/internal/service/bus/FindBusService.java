@@ -25,7 +25,7 @@ public class FindBusService {
     public Bus findEntity(UUID id) {
         UUID companyId = fleetAccessService.currentCompanyId();
         return busRepository.findVisibleById(id, companyId)
-                .orElseThrow(() -> new ResourceNotFoundException("Bus not found: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Ônibus não encontrado com o identificador: " + id));
     }
 
     @Transactional(readOnly = true)

@@ -8,18 +8,22 @@ import jakarta.validation.constraints.NotNull;
 @Schema(description = "Dados para atualizar um ônibus; a empresa não muda")
 public record UpdateBusRequest(
         @Schema(description = "Código interno na operação da empresa", example = "ONB-1020", requiredMode = Schema.RequiredMode.REQUIRED)
-        @NotBlank @Size(max = 64)
+        @NotBlank(message = "O código do ônibus é obrigatório.")
+        @Size(max = 64, message = "O código do ônibus deve ter no máximo 64 caracteres.")
         String code,
         @Schema(description = "Modelo", example = "Paradiso 1800 DD", requiredMode = Schema.RequiredMode.REQUIRED)
-        @NotBlank @Size(max = 128)
+        @NotBlank(message = "O modelo do ônibus é obrigatório.")
+        @Size(max = 128, message = "O modelo do ônibus deve ter no máximo 128 caracteres.")
         String model,
         @Schema(description = "Fabricante", example = "Marcopolo", requiredMode = Schema.RequiredMode.REQUIRED)
-        @NotBlank @Size(max = 128)
+        @NotBlank(message = "O fabricante do ônibus é obrigatório.")
+        @Size(max = 128, message = "O fabricante do ônibus deve ter no máximo 128 caracteres.")
         String manufacturer,
         @Schema(description = "Placa, única no sistema", example = "ABC1D23", requiredMode = Schema.RequiredMode.REQUIRED)
-        @NotBlank @Size(max = 8)
+        @NotBlank(message = "A placa do ônibus é obrigatória.")
+        @Size(max = 8, message = "A placa do ônibus deve ter no máximo 8 caracteres.")
         String licensePlate,
         @Schema(description = "Se o ônibus está ativo; ônibus inativos não podem ser alocados em viagens", example = "true", requiredMode = Schema.RequiredMode.REQUIRED)
-        @NotNull
+        @NotNull(message = "O status de ativação do ônibus é obrigatório.")
         Boolean isActive
 ) {}

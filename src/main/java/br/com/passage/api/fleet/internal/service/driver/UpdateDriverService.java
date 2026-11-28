@@ -23,7 +23,7 @@ public class UpdateDriverService {
     public DriverResponse execute(UUID id, UpdateDriverRequest request) {
         Driver driver = findDriverService.findEntity(id);
         if (driverRepository.existsByLicenseNumberAndIdNot(request.licenseNumber(), id)) {
-            throw new BusinessException("A driver with this licenseNumber already exists.");
+            throw new BusinessException("Já existe um motorista cadastrado com a CNH " + request.licenseNumber());
         }
         driver.setName(request.name());
         driver.setLicenseNumber(request.licenseNumber());

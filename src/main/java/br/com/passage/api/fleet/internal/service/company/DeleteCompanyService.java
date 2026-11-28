@@ -27,10 +27,10 @@ public class DeleteCompanyService {
     @Transactional
     public void execute(UUID id) {
         if (iamApi.currentUser().role() != UserRole.ADMIN) {
-            throw new AccessDeniedException("Only administrators can delete companies.");
+            throw new AccessDeniedException("Apenas administradores podem excluir empresas.");
         }
         Company company = companyRepository.findByIdAndIsDeletedFalse(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Company not found: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Empresa não encontrada com o identificador: " + id));
         company.setDeleted(true);
         company.setActive(false);
         companyRepository.save(company);
