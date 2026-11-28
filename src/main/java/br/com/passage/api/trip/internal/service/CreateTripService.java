@@ -19,10 +19,22 @@ import br.com.passage.api.trip.internal.repository.TripRepository;
 import lombok.AllArgsConstructor;
 
 /**
- * Agenda uma viagem em uma rota.
+ * Serviço responsável pelo agendamento de viagens.
  *
- * <p>A empresa vem da rota, nunca do payload, e o gestor só agenda em rotas da própria
- * empresa. Toda viagem nasce {@link TripStatus#SCHEDULED}.</p>
+ * <p>A viagem é cadastrada na situação {@link TripStatus#SCHEDULED} e herda a empresa da rota,
+ * que precisa estar ativa. O gestor de frota só agenda viagens em rotas da própria empresa.</p>
+ *
+ * <h2>Validações</h2>
+ *
+ * <ul>
+ *     <li>o código deve ser único no sistema;</li>
+ *     <li>o ônibus e o motorista devem ser da empresa da rota e estar ativos;</li>
+ *     <li>a chegada deve ser posterior à partida;</li>
+ *     <li>o ônibus e o motorista não podem ter outra viagem no período.</li>
+ * </ul>
+ *
+ * @see TripFleetValidator
+ * @see TripScheduleValidator
  */
 @Service 
 @AllArgsConstructor
@@ -34,6 +46,15 @@ public class CreateTripService {
     private final IamApi iamApi;
     private final RouteApi routeApi;
 
+    /**
+     * Agenda uma viagem.
+     *
+     * @param request dados da viagem
+     * @return viagem agendada
+     * @throws ResourceNotFoundException se a rota, o ônibus ou o motorista não forem encontrados
+     * @throws AccessDeniedException     se a rota pertencer a outra empresa
+     * @throws BusinessException         se alguma das validações falhar
+     */
     @Transactional 
     public TripResponse execute(CreateTripRequest request){
         

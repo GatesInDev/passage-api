@@ -13,7 +13,11 @@ import lombok.RequiredArgsConstructor;
 /**
  * API pública do módulo de rotas.
  *
- * <p>Não aplica o escopo do usuário logado: quem chama aplica a própria regra de acesso.</p>
+ * <p>Ponto de acesso para que outros módulos consultem informações das rotas sem depender
+ * das classes internas do módulo.</p>
+ *
+ * <p>As consultas não aplicam o escopo do usuário autenticado: o módulo que chama é
+ * responsável por validar o acesso conforme a própria regra.</p>
  */
 @Component
 @RequiredArgsConstructor
@@ -22,8 +26,10 @@ public class RouteApi {
     private final RouteRepository routeRepository;
 
     /**
-     * Retorna a empresa de uma rota disponível para receber viagens.
+     * Recupera a empresa de uma rota disponível para receber viagens.
      *
+     * @param routeId identificador da rota
+     * @return empresa da rota
      * @throws ResourceNotFoundException se a rota não existir ou estiver excluída
      * @throws BusinessException         se a rota estiver inativa
      */

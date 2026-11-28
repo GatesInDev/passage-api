@@ -18,7 +18,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * Endpoint público de login.
+ * Controlador REST responsável pela autenticação.
+ *
+ * <p>Expõe o endpoint público de login, que devolve o token JWT utilizado nas demais
+ * requisições no cabeçalho {@code Authorization: Bearer}.</p>
+ *
+ * @see AuthService
  */
 @Tag(name = "Autenticação", description = "Login e emissão do token de acesso")
 @RestController

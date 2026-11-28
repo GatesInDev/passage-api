@@ -10,19 +10,26 @@ import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 
 /**
- * Emissor simulado da SEFAZ, sem tráfego externo.
+ * Emissor simulado da SEFAZ.
  *
- * <p>Gera chave de acesso (44 dígitos) e protocolo (15 dígitos) no formato real e recusa documentos
- * sem valor positivo. A integração real exige certificado digital, assinatura do XML e os
- * webservices da UF.</p>
+ * <p>Reproduz o formato das respostas da receita sem tráfego externo: a
+ * chave de acesso segue a composição de 44 dígitos do BP-e e o protocolo
+ * o formato de 15 dígitos.</p>
+ *
+ * <p>Não substitui a integração real, que exige certificado digital,
+ * assinatura XML e os webservices da unidade federativa.</p>
  */
 @Component
 public class MockSefazGateway implements SefazGateway {
 
-    /** Código da unidade federativa de Santa Catarina. */
+    /**
+     * Código da unidade federativa de Santa Catarina.
+     */
     private static final String UF_CODE = "42";
 
-    /** Código numérico do BP-e na tabela de documentos fiscais. */
+    /**
+     * Código numérico do BP-e na tabela de documentos fiscais.
+     */
     private static final String MODEL_CODE = "63";
 
     private static final DateTimeFormatter PERIOD =
@@ -45,8 +52,11 @@ public class MockSefazGateway implements SefazGateway {
     }
 
     /**
-     * Chave de acesso: UF, período, CNPJ do emitente, modelo, série, número, forma de emissão,
-     * código numérico e dígito verificador.
+     * Monta a chave de acesso de 44 dígitos.
+     *
+     * <p>Composição: UF, período de emissão, CNPJ do emitente, modelo,
+     * série, número, forma de emissão, código numérico e dígito
+     * verificador.</p>
      */
     private String generateAccessKey(FiscalDocument document) {
         String base = UF_CODE
@@ -65,7 +75,9 @@ public class MockSefazGateway implements SefazGateway {
         return "%015d".formatted(Math.abs(random.nextLong()) % 1_000_000_000_000_000L);
     }
 
-    /** Extrai os dígitos do texto, completando com zeros à esquerda. */
+    /**
+     * Extrai apenas dígitos de um texto, completando com zeros à esquerda.
+     */
     private String digitsFrom(String value, int length) {
         String digits = value.replaceAll("\\D", "");
         return digits.length() >= length
@@ -73,7 +85,9 @@ public class MockSefazGateway implements SefazGateway {
                 : "0".repeat(length - digits.length()) + digits;
     }
 
-    /** Dígito verificador em módulo 11, padrão dos documentos fiscais. */
+    /**
+     * Dígito verificador no padrão módulo 11 usado pelos documentos fiscais.
+     */
     private int checkDigit(String key) {
         int weight = 2;
         int sum = 0;

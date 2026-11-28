@@ -20,16 +20,31 @@ import java.util.Set;
 import java.util.UUID;
 
 /**
- * Vende uma passagem.
+ * Serviço responsável pela venda de passagens.
  *
- * <p>Preço, partida e empresa vêm da viagem, nunca do cliente. Depois de salvar, publica
- * {@link TicketSold} para a emissão do documento fiscal.</p>
+ * <p>O preço, a data de partida e a empresa da passagem são obtidos da viagem no momento da
+ * venda. Após a venda, é publicado o evento {@link TicketSold}, que dispara a emissão do
+ * documento fiscal.</p>
+ *
+ * <h2>Validações</h2>
+ *
+ * <ul>
+ *     <li>o código deve ser único no sistema;</li>
+ *     <li>a viagem deve estar agendada ou em embarque;</li>
+ *     <li>quem não é administrador só vende passagens de viagens da própria empresa;</li>
+ *     <li>o assento deve pertencer ao ônibus da viagem e não pode estar vendido.</li>
+ * </ul>
  */
 @Service
 @RequiredArgsConstructor
 public class CreateTicketService {
 
-    /** Situações em que a viagem aceita venda. */
+    /**
+     * Situações em que a viagem ainda admite venda.
+     *
+     * <p>Uma viagem em andamento, concluída ou cancelada não recebe
+     * passageiros novos.</p>
+     */
     private static final Set<TripStatus> OPEN_FOR_SALE =
             Set.of(TripStatus.SCHEDULED, TripStatus.BOARDING);
 
@@ -39,6 +54,15 @@ public class CreateTicketService {
     private final FleetApi fleetApi;
     private final ApplicationEventPublisher events;
 
+    /**
+     * Vende uma passagem.
+     *
+     * @param request dados da passagem
+     * @return passagem vendida
+     * @throws ResourceNotFoundException se a viagem não existir ou estiver excluída
+     * @throws AccessDeniedException     se a viagem pertencer a outra empresa
+     * @throws BusinessException         se alguma das validações falhar
+     */
     @Transactional
     public TicketResponse execute(CreateTicketRequest request) {
 

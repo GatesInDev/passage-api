@@ -1,32 +1,54 @@
 package br.com.passage.api.trip.enums;
 
 /**
- * Situação de uma viagem ao longo da operação.
+ * Representa a situação de uma viagem.
  *
- * <p>Fluxo: {@code SCHEDULED → BOARDING → IN_PROGRESS → COMPLETED}, com cancelamento
- * possível até a conclusão. {@link #COMPLETED} e {@link #CANCELED} são finais.</p>
+ * <p>A situação indica em qual etapa do ciclo de vida a viagem se encontra,
+ * podendo ser:</p>
+ *
+ * <ul>
+ *     <li>{@link #SCHEDULED} - Viagem agendada, ainda não iniciada.</li>
+ *     <li>{@link #BOARDING} - Embarque dos passageiros em andamento.</li>
+ *     <li>{@link #IN_PROGRESS} - Viagem em curso.</li>
+ *     <li>{@link #COMPLETED} - Viagem concluída.</li>
+ *     <li>{@link #CANCELED} - Viagem cancelada.</li>
+ * </ul>
  */
 public enum TripStatus {
 
-    /** Agendada, ainda não iniciada. */
+    /**
+     * Viagem agendada, ainda não iniciada.
+     */
     SCHEDULED,
 
-    /** Embarque em andamento. */
+    /**
+     * Embarque dos passageiros em andamento.
+     */
     BOARDING,
 
-    /** Em viagem. */
+    /**
+     * Viagem em curso.
+     */
     IN_PROGRESS,
 
-    /** Concluída. */
+    /**
+     * Viagem concluída.
+     */
     COMPLETED,
 
-    /** Cancelada; libera o ônibus e o motorista. */
+    /**
+     * Viagem cancelada.
+     */
     CANCELED;
 
     /**
-     * Indica se a viagem pode passar da situação atual para {@code next}.
+     * Indica se a viagem pode passar da situação atual para a informada.
      *
-     * Permanecer na mesma situação é sempre permitido.
+     * <p>Permanecer na mesma situação é sempre permitido. As situações
+     * {@link #COMPLETED} e {@link #CANCELED} são finais.</p>
+     *
+     * @param next situação de destino
+     * @return {@code true} se a transição for permitida
      */
     public boolean canTransitionTo(TripStatus next) {
         if (this == next) {
@@ -40,7 +62,13 @@ public enum TripStatus {
         };
     }
 
-    /** Concluída ou cancelada: a viagem não aceita mais alterações. */
+    /**
+     * Indica se a situação é final.
+     *
+     * <p>Viagens concluídas ou canceladas não aceitam mais alterações.</p>
+     *
+     * @return {@code true} para {@link #COMPLETED} e {@link #CANCELED}
+     */
     public boolean isFinal() {
         return this == COMPLETED || this == CANCELED;
     }

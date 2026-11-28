@@ -1,13 +1,21 @@
 package br.com.passage.api.fleet.internal.domain.enums;
-/** Categoria de conforto do assento. */
+/**
+ * Representa a categoria de qualidade do assento.
+ */
 public enum SeatQuality {
 
-    /** Padrão. */
+    /**
+     * Assento de categoria padrão.
+     */
     STANDARD,
 
-    /** Conforto superior ao padrão. */
+    /**
+     * Assento com características superiores de conforto.
+     */
     COMFORT,
 
-    /** Categoria mais alta. */
+    /**
+     * Assento de categoria premium.
+     */
     PREMIUM
 }

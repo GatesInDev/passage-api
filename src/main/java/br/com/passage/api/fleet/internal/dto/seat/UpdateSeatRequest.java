@@ -8,6 +8,11 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 
+/**
+ * Representa os dados de entrada para a atualização de um assento.
+ *
+ * <p>O número e a posição (fileira e coluna) devem ser únicos no ônibus.</p>
+ */
 @Schema(description = "Dados para atualizar um assento; número e posição são únicos no ônibus")
 public record UpdateSeatRequest(
         @Schema(description = "Número exibido ao passageiro", example = "01", requiredMode = Schema.RequiredMode.REQUIRED)

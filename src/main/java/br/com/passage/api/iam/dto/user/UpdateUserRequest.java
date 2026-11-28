@@ -9,6 +9,11 @@ import java.util.UUID;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
+/**
+ * Representa os dados de entrada para a atualização de um usuário.
+ *
+ * <p>O e-mail e a senha não são alterados.</p>
+ */
 @Schema(description = "Dados para atualizar um usuário; o e-mail e a senha não são alterados por aqui")
 public record UpdateUserRequest(
 

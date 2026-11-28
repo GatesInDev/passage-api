@@ -3,9 +3,12 @@ package br.com.passage.api.ticket;
 import java.util.UUID;
 
 /**
- * Evento publicado quando uma passagem é vendida.
+ * Publicado quando uma passagem é vendida.
  *
- * <p>Carrega só identificadores: quem consome busca os dados atuais pela {@link TicketApi}.
- * Faz parte do contrato público do módulo, então mudar os campos afeta quem escuta o evento.</p>
+ * <p>Carrega apenas identificadores: os dados da passagem são obtidos
+ * pela {@link TicketApi} no momento do consumo.</p>
+ *
+ * <p>É o contrato público do módulo: alterar seus campos afeta quem
+ * escuta o evento.</p>
  */
 public record TicketSold(UUID ticketId, UUID companyUuid) {}

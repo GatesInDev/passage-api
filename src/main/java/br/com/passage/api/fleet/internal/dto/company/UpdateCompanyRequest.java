@@ -4,6 +4,9 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.*;
 import org.hibernate.validator.constraints.br.CNPJ;
 
+/**
+ * Representa os dados de entrada para a atualização de uma empresa.
+ */
 @Schema(description = "Dados para atualizar uma empresa")
 public record UpdateCompanyRequest(
         @Schema(

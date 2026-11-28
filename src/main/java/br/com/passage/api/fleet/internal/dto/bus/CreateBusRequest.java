@@ -5,6 +5,12 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import java.util.UUID;
 
+/**
+ * Representa os dados de entrada para o cadastro de um ônibus.
+ *
+ * <p>A empresa é obrigatória para o administrador. Para o gestor de frota, é
+ * sempre a própria empresa.</p>
+ */
 @Schema(description = "Dados para cadastrar um ônibus")
 public record CreateBusRequest(
         @Schema(description = "Código interno na operação da empresa", example = "ONB-1020", requiredMode = Schema.RequiredMode.REQUIRED)

@@ -9,7 +9,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * Metadados da documentação OpenAPI e o esquema de autenticação JWT usado pelo Swagger UI.
+ * Configuração da documentação OpenAPI exibida no Swagger UI.
+ *
+ * <p>Define as informações gerais da API e o esquema de autenticação {@code bearerAuth},
+ * que permite informar o token JWT diretamente pela interface do Swagger.</p>
  */
 @Configuration
 public class OpenApiConfig {

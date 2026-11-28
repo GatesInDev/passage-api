@@ -11,7 +11,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Cadastra um usuário com a senha armazenada como hash BCrypt.
+ * Serviço responsável pelo cadastro de usuários.
+ *
+ * <p>O e-mail deve ser único no sistema e a senha é armazenada como hash BCrypt.</p>
  */
 @Service
 @RequiredArgsConstructor
@@ -20,6 +22,13 @@ public class CreateUserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
+    /**
+     * Cadastra um usuário.
+     *
+     * @param request dados do usuário
+     * @return usuário cadastrado
+     * @throws BusinessException se o e-mail já estiver em uso
+     */
     @Transactional
     public UserResponse execute(CreateUserRequest request) {
         if (userRepository.existsByEmail(request.email())) {

@@ -15,7 +15,12 @@ import org.springframework.stereotype.Service;
 
 import java.util.UUID;
 
-/** Atualiza uma empresa; o gestor só pode alterar a própria. */
+/**
+ * Serviço responsável pela atualização de empresas.
+ *
+ * <p>Permite alterar os dados cadastrais da empresa. O administrador pode atualizar qualquer
+ * empresa e o gestor de frota apenas a própria.</p>
+ */
 @Service
 @AllArgsConstructor
 public class UpdateCompanyService
@@ -23,6 +28,16 @@ public class UpdateCompanyService
     private final CompanyRepository companyRepository;
     private final IamApi iamApi;
 
+    /**
+     * Atualiza uma empresa.
+     *
+     * @param id      identificador da empresa
+     * @param request novos dados da empresa
+     * @return empresa atualizada
+     * @throws AccessDeniedException     se o usuário não puder alterar a empresa
+     * @throws ResourceNotFoundException se a empresa não existir ou estiver excluída
+     * @throws BusinessException         se o CNPJ já estiver em uso por outra empresa
+     */
     @Transactional
     public CompanyResponse execute(UUID id, UpdateCompanyRequest request)
     {

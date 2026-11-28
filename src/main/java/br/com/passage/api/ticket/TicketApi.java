@@ -10,7 +10,8 @@ import java.util.UUID;
 /**
  * API pública do módulo de passagens.
  *
- * <p>Não aplica o escopo do usuário logado: quem chama aplica a própria regra de acesso.</p>
+ * <p>Ponto de acesso para que outros módulos consultem passagens sem
+ * depender das classes internas do módulo.</p>
  */
 @Component
 @RequiredArgsConstructor
@@ -18,7 +19,14 @@ public class TicketApi {
 
     private final TicketRepository ticketRepository;
 
-    /** @throws ResourceNotFoundException se a passagem não existir ou estiver excluída */
+    /**
+     * Recupera uma passagem pelo identificador.
+     *
+     * <p>A consulta não aplica isolamento por empresa: quem chama é outro
+     * módulo do sistema, e não um usuário navegando pela bilheteria.</p>
+     *
+     * @throws ResourceNotFoundException se a passagem não existir ou estiver excluída
+     */
     public TicketInfo findTicket(UUID ticketId) {
         return ticketRepository.findVisibleById(ticketId, null)
                 .map(ticket -> new TicketInfo(

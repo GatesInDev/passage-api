@@ -16,10 +16,15 @@ import br.com.passage.api.shared.domain.exceptions.BusinessException;
 import lombok.AllArgsConstructor;
 
 /**
- * Cadastra uma rota.
+ * Serviço responsável pelo cadastro de rotas.
  *
- * <p>O gestor cadastra sempre na própria empresa, ignorando o {@code companyUuid}
- * do payload; o ADMIN precisa informá-lo.</p>
+ * <p>O código deve ser único no sistema e a origem, o destino e a abrangência são validados
+ * pelo {@link RouteConsistencyValidator}.</p>
+ *
+ * <h2>Empresa</h2>
+ *
+ * <p>O gestor de frota cadastra sempre na própria empresa, ignorando o {@code companyUuid}
+ * informado. O administrador deve informar a empresa da rota.</p>
  */
 @Service
 @AllArgsConstructor
@@ -29,6 +34,14 @@ public class CreateRouteService {
     private final RouteRepository routeRepository;
     private final IamApi iamApi;
 
+    /**
+     * Cadastra uma rota.
+     *
+     * @param request dados da rota
+     * @return rota cadastrada
+     * @throws BusinessException se o código já estiver em uso, a empresa não for definida ou a
+     *                           rota for incoerente
+     */
     @Transactional
     public RouteResponse execute(CreateRouteRequest request){
 

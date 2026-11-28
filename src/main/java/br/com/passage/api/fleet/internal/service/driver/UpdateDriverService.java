@@ -11,7 +11,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
-/** Atualiza um motorista visível ao usuário logado; a empresa não muda. */
+/**
+ * Serviço responsável pela atualização de motoristas.
+ *
+ * <p>Permite alterar o nome, a CNH e a situação do motorista. A empresa à qual o motorista está
+ * vinculado não é alterada.</p>
+ */
 @Service
 @RequiredArgsConstructor
 public class UpdateDriverService {
@@ -19,6 +24,15 @@ public class UpdateDriverService {
     private final DriverRepository driverRepository;
     private final FindDriverService findDriverService;
 
+    /**
+     * Atualiza um motorista visível ao usuário autenticado.
+     *
+     * @param id      identificador do motorista
+     * @param request novos dados do motorista
+     * @return motorista atualizado
+     * @throws ResourceNotFoundException se o motorista não existir, estiver excluído ou pertencer a outra empresa
+     * @throws BusinessException         se a CNH já estiver em uso por outro motorista
+     */
     @Transactional
     public DriverResponse execute(UUID id, UpdateDriverRequest request) {
         Driver driver = findDriverService.findEntity(id);

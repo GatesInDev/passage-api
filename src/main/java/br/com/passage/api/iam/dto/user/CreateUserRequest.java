@@ -9,6 +9,9 @@ import jakarta.validation.constraints.Size;
 
 import java.util.UUID;
 
+/**
+ * Representa os dados de entrada para o cadastro de um usuário.
+ */
 @Schema(description = "Dados para cadastrar um usuário")
 public record CreateUserRequest(
 

@@ -21,10 +21,21 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * Endpoints de documentos fiscais (BP-e).
+ * Controlador REST responsável pela consulta e pelos eventos dos documentos fiscais.
  *
- * <p>Os documentos são emitidos automaticamente na venda da passagem; aqui só se consulta,
- * cancela e reenvia. Quem não é ADMIN só acessa os da própria empresa.</p>
+ * <p>Os documentos são emitidos automaticamente na venda da passagem. Este controlador permite
+ * consultar, cancelar e reenviar os documentos à SEFAZ.</p>
+ *
+ * <h2>Permissões</h2>
+ *
+ * <ul>
+ *     <li>listagem e reenvio – ADMIN e TICKET_SELLER;</li>
+ *     <li>consulta por identificador – ADMIN, TICKET_SELLER e INSPECTOR;</li>
+ *     <li>cancelamento – ADMIN.</li>
+ * </ul>
+ *
+ * <p>O escopo de empresa é definido pelo {@link br.com.passage.api.integration.internal.service.FiscalDocumentAccessService}: o administrador
+ * acessa os documentos de todas as empresas e os demais perfis apenas os da própria empresa.</p>
  */
 @Tag(name = "Documentos fiscais", description = "Consulta, cancelamento e reenvio do BP-e das passagens")
 @RestController

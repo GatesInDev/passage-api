@@ -26,9 +26,12 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * Endpoints de motoristas.
+ * Controlador REST responsável pela gestão de motoristas.
  *
- * <p>Restritos a ADMIN e FLEET_MANAGER; o gestor só enxerga e altera os motoristas da própria empresa.</p>
+ * <p>Os endpoints são restritos aos perfis ADMIN e FLEET_MANAGER. O gestor de frota acessa
+ * apenas os motoristas da própria empresa.</p>
+ *
+ * @see br.com.passage.api.fleet.internal.service.FleetAccessService
  */
 @RestController
 @RequestMapping("/api/v1/drivers")

@@ -6,6 +6,12 @@ import org.hibernate.validator.constraints.br.CPF;
 
 import java.util.UUID;
 
+/**
+ * Representa os dados informados na venda de uma passagem.
+ *
+ * <p>O preço, a data de partida e a empresa não constam aqui: são obtidos da
+ * viagem no momento da venda.</p>
+ */
 @Schema(description = "Dados para vender uma passagem; preço, partida e empresa vêm da viagem")
 public record CreateTicketRequest(
 

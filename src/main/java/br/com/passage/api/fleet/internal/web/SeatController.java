@@ -26,9 +26,12 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * Endpoints dos assentos de um ônibus.
+ * Controlador REST responsável pela gestão dos assentos de um ônibus.
  *
- * <p>Restritos a ADMIN e FLEET_MANAGER; o gestor só acessa os ônibus da própria empresa.</p>
+ * <p>Os endpoints são restritos aos perfis ADMIN e FLEET_MANAGER. O gestor de frota acessa
+ * apenas os assentos dos ônibus da própria empresa.</p>
+ *
+ * @see br.com.passage.api.fleet.internal.service.FleetAccessService
  */
 @RestController
 @RequestMapping("/api/v1/buses/{busId}/seats")

@@ -13,7 +13,10 @@ import br.com.passage.api.shared.domain.exceptions.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 
 /**
- * Atualiza uma rota visível ao usuário logado; o código e a empresa não mudam.
+ * Serviço responsável pela atualização de rotas.
+ *
+ * <p>Permite alterar os dados do trajeto e a situação da rota. O código e a empresa não são
+ * alterados, e a coerência da rota é validada novamente pelo {@link RouteConsistencyValidator}.</p>
  */
 @Service
 @RequiredArgsConstructor 
@@ -23,6 +26,15 @@ public class UpdateRouteService {
     private final RouteRepository routeRepository;
     private final RouteAccessService routeAccessService;
 
+    /**
+     * Atualiza uma rota visível ao usuário autenticado.
+     *
+     * @param id      identificador da rota
+     * @param request novos dados da rota
+     * @return rota atualizada
+     * @throws ResourceNotFoundException se a rota não existir, estiver excluída ou pertencer a outra empresa
+     * @throws BusinessException         se a rota for incoerente
+     */
     @Transactional 
     public RouteResponse execute(UUID id, UpdateRouteRequest request){
         Route route = routeRepository.findVisibleById(id, routeAccessService.visibleCompanyUuid())

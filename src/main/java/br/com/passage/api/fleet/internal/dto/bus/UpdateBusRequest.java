@@ -5,6 +5,11 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import jakarta.validation.constraints.NotNull;
 
+/**
+ * Representa os dados de entrada para a atualização de um ônibus.
+ *
+ * <p>A empresa proprietária não é alterada.</p>
+ */
 @Schema(description = "Dados para atualizar um ônibus; a empresa não muda")
 public record UpdateBusRequest(
         @Schema(description = "Código interno na operação da empresa", example = "ONB-1020", requiredMode = Schema.RequiredMode.REQUIRED)

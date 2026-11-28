@@ -8,7 +8,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
-/** Exclui logicamente um motorista visível ao usuário logado. */
+/**
+ * Serviço responsável pela exclusão de motoristas.
+ *
+ * <p>A exclusão é lógica: o motorista é marcado como excluído e inativo e permanece no banco.</p>
+ */
 @Service
 @RequiredArgsConstructor
 public class DeleteDriverService {
@@ -16,6 +20,12 @@ public class DeleteDriverService {
     private final DriverRepository driverRepository;
     private final FindDriverService findDriverService;
 
+    /**
+     * Exclui logicamente um motorista visível ao usuário autenticado.
+     *
+     * @param id identificador do motorista
+     * @throws ResourceNotFoundException se o motorista não existir, estiver excluído ou pertencer a outra empresa
+     */
     @Transactional
     public void execute(UUID id) {
         Driver driver = findDriverService.findEntity(id);

@@ -5,11 +5,7 @@ import java.time.Instant;
 import java.util.UUID;
 
 /**
- * Dados de uma passagem expostos aos demais módulos.
- *
- * @param price             preço pago, copiado da viagem na venda
- * @param companyUuid       empresa dona da passagem, a mesma da viagem
- * @param departureDateTime partida da viagem registrada na venda
+ * Dados de uma passagem expostos a outros módulos.
  */
 public record TicketInfo(
         UUID id,

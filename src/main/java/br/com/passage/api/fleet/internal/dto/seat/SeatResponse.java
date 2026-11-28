@@ -8,6 +8,9 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.Instant;
 import java.util.UUID;
 
+/**
+ * Representa os dados de um assento retornados pela API.
+ */
 @Schema(description = "Dados de um assento")
 public record SeatResponse(
         @Schema(description = "Identificador público (UUID) do assento", example = "c943e4df-618e-4194-8be6-8a43b4d83e17")
@@ -35,7 +38,12 @@ public record SeatResponse(
         @Schema(description = "Se é reservado à acessibilidade", example = "false")
         boolean isAccessible
 ) {
-    /** Converte a entidade na resposta da API. */
+    /**
+     * Converte o assento persistido em sua representação de resposta.
+     *
+     * @param seat assento de origem
+     * @return representação de resposta correspondente
+     */
     public static SeatResponse from(Seat seat) {
         return new SeatResponse(
                 seat.getId(), seat.getCreatedAt(), seat.getUpdatedAt(),

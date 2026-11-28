@@ -6,6 +6,9 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.Instant;
 import java.util.UUID;
 
+/**
+ * Representa os dados de um ônibus retornados pela API.
+ */
 @Schema(description = "Dados de um ônibus")
 public record BusResponse(
         @Schema(description = "Identificador público (UUID) do ônibus", example = "c943e4df-618e-4194-8be6-8a43b4d83e17")
@@ -31,7 +34,12 @@ public record BusResponse(
         @Schema(description = "Quantidade de assentos ativos", example = "46")
         int capacity
 ) {
-    /** Converte a entidade na resposta da API. */
+    /**
+     * Converte o ônibus persistido em sua representação de resposta.
+     *
+     * @param bus ônibus de origem
+     * @return representação de resposta correspondente
+     */
     public static BusResponse from(Bus bus) {
         return new BusResponse(
                 bus.getId(),

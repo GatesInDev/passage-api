@@ -10,13 +10,21 @@ import java.util.Optional;
 import java.util.UUID;
 
 /**
- * Acesso aos motoristas.
+ * Repositório de acesso aos motoristas.
  *
- * <p>As consultas {@code Visible} desconsideram registros excluídos ou de empresa excluída e,
- * quando {@code companyId} é informado, restringem o resultado a essa empresa.</p>
+ * <p>As consultas {@code Visible} desconsideram motoristas excluídos e motoristas de empresas
+ * excluídas. Quando {@code companyId} é informado, o resultado é restrito a essa empresa;
+ * quando é {@code null}, todas as empresas são consideradas.</p>
  */
 public interface DriverRepository extends JpaRepository<Driver, UUID> {
 
+    /**
+     * Busca um motorista visível, carregando a empresa.
+     *
+     * @param id        identificador do motorista
+     * @param companyId empresa à qual a busca é restrita, ou {@code null} para todas
+     * @return motorista encontrado, se existir
+     */
     @Query("""
             select distinct item from Driver item
             join fetch item.company company
@@ -25,6 +33,12 @@ public interface DriverRepository extends JpaRepository<Driver, UUID> {
             """)
     Optional<Driver> findVisibleById(@Param("id") UUID id, @Param("companyId") UUID companyId);
 
+    /**
+     * Lista os motoristas visíveis, carregando a empresa.
+     *
+     * @param companyId empresa à qual a listagem é restrita, ou {@code null} para todas
+     * @return motoristas encontrados
+     */
     @Query("""
             select distinct item from Driver item
             join fetch item.company company
@@ -33,8 +47,22 @@ public interface DriverRepository extends JpaRepository<Driver, UUID> {
             """)
     List<Driver> findAllVisible(@Param("companyId") UUID companyId);
 
-    /** Considera também os motoristas excluídos, já que a CNH continua reservada. */
+    /**
+     * Verifica se já existe um motorista cadastrado com a CNH informada.
+     *
+     * <p>Considera também os motoristas excluídos logicamente.</p>
+     *
+     * @param value número da CNH
+     * @return {@code true} se a CNH já estiver em uso
+     */
     boolean existsByLicenseNumber(String value);
 
+    /**
+     * Verifica se a CNH informada já está em uso por outro motorista.
+     *
+     * @param value número da CNH
+     * @param id    motorista desconsiderado na verificação
+     * @return {@code true} se a CNH já estiver em uso por outro motorista
+     */
     boolean existsByLicenseNumberAndIdNot(String value, UUID id);
 }

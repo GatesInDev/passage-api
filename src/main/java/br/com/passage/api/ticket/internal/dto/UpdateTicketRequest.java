@@ -8,6 +8,11 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.UUID;
 
+/**
+ * Representa os dados de entrada para a atualização de uma passagem.
+ *
+ * <p>O código e a empresa não são alterados.</p>
+ */
 @Schema(description = "Dados para atualizar uma passagem; o código e a empresa não mudam")
 public record UpdateTicketRequest(
 

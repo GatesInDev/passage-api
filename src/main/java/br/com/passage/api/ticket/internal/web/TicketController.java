@@ -27,9 +27,18 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * Endpoints de passagens.
+ * Controlador REST responsável pela venda e gestão de passagens.
  *
- * <p>Quem não é ADMIN só enxerga e altera as passagens da própria empresa.</p>
+ * <h2>Permissões</h2>
+ *
+ * <ul>
+ *     <li>venda, listagem e atualização – ADMIN e TICKET_SELLER;</li>
+ *     <li>consulta por identificador – ADMIN, TICKET_SELLER e INSPECTOR;</li>
+ *     <li>cancelamento – ADMIN.</li>
+ * </ul>
+ *
+ * <p>O escopo de empresa é definido pelo {@link br.com.passage.api.ticket.internal.service.TicketAccessService}: o administrador acessa
+ * as passagens de todas as empresas e os demais perfis apenas as da própria empresa.</p>
  */
 @Tag(name = "Passagens", description = "Venda e consulta de passagens")
 @RestController

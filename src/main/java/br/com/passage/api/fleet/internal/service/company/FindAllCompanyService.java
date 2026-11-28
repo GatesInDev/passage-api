@@ -10,7 +10,12 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.UUID;
 
-/** Lista as empresas não excluídas; o gestor vê apenas a própria. */
+/**
+ * Serviço responsável pela listagem de empresas.
+ *
+ * <p>Empresas excluídas não são retornadas. O administrador recebe todas as empresas e o gestor
+ * de frota apenas a própria.</p>
+ */
 @Service
 @RequiredArgsConstructor
 public class FindAllCompanyService {
@@ -18,6 +23,11 @@ public class FindAllCompanyService {
     private final CompanyRepository companyRepository;
     private final FleetAccessService fleetAccessService;
 
+    /**
+     * Lista as empresas visíveis ao usuário autenticado.
+     *
+     * @return empresas encontradas
+     */
     @Transactional(readOnly = true)
     public List<CompanyResponse> execute() {
         UUID companyId = fleetAccessService.currentCompanyId();

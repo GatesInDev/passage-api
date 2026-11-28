@@ -12,9 +12,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Cadastra um motorista; a CNH é única no sistema.
+ * Serviço responsável pelo cadastro de motoristas.
  *
- * <p>O gestor cadastra sempre na própria empresa; o ADMIN precisa informá-la.</p>
+ * <p>O motorista é cadastrado ativo. O número da CNH deve ser único no sistema.</p>
+ *
+ * <p>O escopo de empresa é definido pelo {@link FleetAccessService}: o administrador acessa
+ * todas as empresas e o gestor de frota apenas a própria.</p>
  */
 @Service
 @RequiredArgsConstructor
@@ -23,6 +26,14 @@ public class CreateDriverService {
     private final DriverRepository driverRepository;
     private final FleetAccessService fleetAccessService;
 
+    /**
+     * Cadastra um motorista.
+     *
+     * @param request dados do motorista
+     * @return motorista cadastrado
+     * @throws BusinessException         se a CNH já estiver em uso ou a empresa não for informada
+     * @throws ResourceNotFoundException se a empresa não existir ou estiver excluída
+     */
     @Transactional
     public DriverResponse execute(CreateDriverRequest request) {
         Company company = fleetAccessService.resolveCompany(request.companyUuid());

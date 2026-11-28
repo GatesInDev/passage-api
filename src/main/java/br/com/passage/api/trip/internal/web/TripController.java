@@ -34,10 +34,13 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 /**
- * Endpoints de viagens.
+ * Controlador REST responsável pela gestão de viagens.
  *
- * <p>A leitura é aberta a qualquer usuário autenticado; a escrita, a ADMIN e FLEET_MANAGER.
- * O gestor só enxerga e altera as viagens da própria empresa.</p>
+ * <p>A consulta é permitida a qualquer usuário autenticado. O agendamento, a atualização e a
+ * exclusão são restritos aos perfis ADMIN e FLEET_MANAGER.</p>
+ *
+ * <p>O escopo de empresa é definido pelo {@link br.com.passage.api.trip.internal.service.TripAccessService}: o gestor de frota acessa
+ * apenas as viagens da própria empresa e os demais perfis acessam as viagens de todas as empresas.</p>
  */
 @Tag(name = "Viagens", description = "Saídas agendadas das rotas, com ônibus, motorista e horários")
 @RestController

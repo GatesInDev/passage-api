@@ -10,6 +10,11 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 
+/**
+ * Representa os dados de entrada para a atualização de uma rota.
+ *
+ * <p>O código e a empresa não são alterados.</p>
+ */
 @Schema(description = "Dados para atualizar uma rota; o código e a empresa não mudam")
 public record UpdateRouteRequest
 (

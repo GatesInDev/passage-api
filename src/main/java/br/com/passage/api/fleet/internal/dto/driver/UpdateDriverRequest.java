@@ -5,6 +5,11 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import jakarta.validation.constraints.NotNull;
 
+/**
+ * Representa os dados de entrada para a atualização de um motorista.
+ *
+ * <p>A empresa à qual o motorista está vinculado não é alterada.</p>
+ */
 @Schema(description = "Dados para atualizar um motorista; a empresa não muda")
 public record UpdateDriverRequest(
         @Schema(description = "Nome completo", example = "João Pereira", requiredMode = Schema.RequiredMode.REQUIRED)

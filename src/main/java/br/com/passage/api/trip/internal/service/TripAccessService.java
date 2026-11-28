@@ -10,7 +10,14 @@ import br.com.passage.api.iam.IamApi;
 import br.com.passage.api.iam.enums.UserRole;
 import lombok.RequiredArgsConstructor;
 
-/** Define o escopo de empresa das consultas de viagens para o usuário logado. */
+/**
+ * Serviço responsável por definir o escopo de empresa das consultas de viagens.
+ *
+ * <ul>
+ *     <li>FLEET_MANAGER – acessa apenas as viagens da empresa à qual está vinculado;</li>
+ *     <li>demais perfis – acessam as viagens de todas as empresas.</li>
+ * </ul>
+ */
 @Service
 @RequiredArgsConstructor
 public class TripAccessService {
@@ -18,9 +25,10 @@ public class TripAccessService {
     private final IamApi iamApi;
 
     /**
-     * @return a empresa do gestor, ou {@code null} (sem restrição) para os demais perfis,
-     *         que consultam as viagens de todas as empresas
-     * @throws AccessDeniedException se o gestor não tiver empresa vinculada
+     * Recupera a empresa à qual as consultas do usuário autenticado são restritas.
+     *
+     * @return empresa do gestor de frota, ou {@code null} para os demais perfis
+     * @throws AccessDeniedException se o gestor de frota não tiver empresa vinculada
      */
     public UUID visibleCompanyUuid() {
         CurrentUser user = iamApi.currentUser();

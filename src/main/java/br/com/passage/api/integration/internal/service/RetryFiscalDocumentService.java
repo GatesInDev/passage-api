@@ -9,7 +9,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
-/** Reenvia à SEFAZ um documento ainda não autorizado. */
+/**
+ * Reenvia à SEFAZ um documento pendente ou recusado.
+ */
 @Service
 @RequiredArgsConstructor
 public class RetryFiscalDocumentService {
@@ -17,6 +19,14 @@ public class RetryFiscalDocumentService {
     private final FindFiscalDocumentService findFiscalDocumentService;
     private final IssueFiscalDocumentService issueFiscalDocumentService;
 
+    /**
+     * Reenvia um documento fiscal à SEFAZ.
+     *
+     * @param id identificador do documento
+     * @return documento com o novo resultado da autorização
+     * @throws ResourceNotFoundException se o documento não existir, estiver excluído ou pertencer a outra empresa
+     * @throws BusinessException         se o documento já estiver autorizado
+     */
     @Transactional
     public FiscalDocumentResponse execute(UUID id) {
         FiscalDocument document = findFiscalDocumentService.findEntity(id);

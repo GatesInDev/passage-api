@@ -9,13 +9,24 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-/** Cadastra uma empresa; o CNPJ é único no sistema. */
+/**
+ * Serviço responsável pelo cadastro de empresas.
+ *
+ * <p>A empresa é cadastrada ativa. O CNPJ deve ser único no sistema.</p>
+ */
 @Service
 @AllArgsConstructor
 public class CreateCompanyService
 {
     private final CompanyRepository companyRepository;
 
+    /**
+     * Cadastra uma empresa.
+     *
+     * @param request dados da empresa
+     * @return empresa cadastrada
+     * @throws BusinessException se o CNPJ já estiver em uso
+     */
     @Transactional
     public CompanyResponse execute(CreateCompanyRequest request)
     {

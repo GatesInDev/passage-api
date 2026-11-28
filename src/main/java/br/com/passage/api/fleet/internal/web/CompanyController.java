@@ -21,9 +21,10 @@ import java.util.UUID;
 import java.util.List;
 
 /**
- * Endpoints de empresas transportadoras.
+ * Controlador REST responsável pela gestão de empresas transportadoras.
  *
- * <p>Cadastro e exclusão são restritos ao ADMIN; o gestor consulta e altera só a própria empresa.</p>
+ * <p>O cadastro e a exclusão são restritos ao perfil ADMIN. O gestor de frota pode consultar e
+ * atualizar apenas a própria empresa.</p>
  */
 @Tag(name = "Empresas", description = "Empresas transportadoras, donas da frota e das rotas")
 @RestController

@@ -8,6 +8,9 @@ import br.com.passage.api.trip.enums.TripStatus;
 import br.com.passage.api.trip.internal.domain.entities.Trip;
 import io.swagger.v3.oas.annotations.media.Schema;
 
+/**
+ * Representa os dados de uma viagem retornados pela API.
+ */
 @Schema(description = "Dados de uma viagem")
 public record TripResponse(
 
@@ -96,7 +99,12 @@ public record TripResponse(
         BigDecimal price
 )
 {
-    /** Converte a entidade na resposta da API. */
+    /**
+     * Converte a viagem persistida em sua representação de resposta.
+     *
+     * @param trip viagem de origem
+     * @return representação de resposta correspondente
+     */
     public static TripResponse from(Trip trip){
         return new TripResponse(
             trip.getId(),

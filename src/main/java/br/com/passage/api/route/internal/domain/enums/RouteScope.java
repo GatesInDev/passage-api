@@ -1,20 +1,37 @@
 package br.com.passage.api.route.internal.domain.enums;
 
 /**
- * Abrangência geográfica da rota.
+ * Representa o escopo da rota.
+ *
+ * <p>O escopo da rota indica a abrangência geográfica da rota, podendo ser:</p>
+ *
+ * <ul>
+ *     <li>{@link #INTERSTATE} - Rota que atravessa diferentes estados.</li>
+ *     <li>{@link #INTRASTATE} - Rota que ocorre dentro de um único estado.</li>
+ *     <li>{@link #INTERNATIONAL} - Rota que atravessa fronteiras internacionais.</li>
+ *     <li>{@link #METROPOLITAN} - Rota que ocorre dentro de uma área metropolitana.</li>
+ * </ul>
  */
 public enum RouteScope {
 
-    /** Entre estados diferentes; regulada pela ANTT. */
+    /**
+     * Rota que atravessa diferentes estados.
+     */
     INTERSTATE,
 
-    /** Dentro de um mesmo estado; regulada pelo órgão estadual. */
+    /**
+     * Rota que ocorre dentro de um único estado.
+     */
     INTRASTATE,
 
-    /** Cruza a fronteira do país; regulada pela ANTT. */
+    /**
+     * Rota que atravessa fronteiras internacionais.
+     */
     INTERNATIONAL,
 
-    /** Dentro de uma região metropolitana, no mesmo estado. */
+    /**
+     * Rota que ocorre dentro de uma área metropolitana.
+     */
     METROPOLITAN
 
 }

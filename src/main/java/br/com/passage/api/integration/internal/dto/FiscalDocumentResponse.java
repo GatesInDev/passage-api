@@ -9,6 +9,9 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.UUID;
 
+/**
+ * Representa os dados de um documento fiscal retornados pela API.
+ */
 @Schema(description = "Dados de um BP-e (Bilhete de Passagem Eletrônico)")
 public record FiscalDocumentResponse(
 
@@ -72,7 +75,12 @@ public record FiscalDocumentResponse(
         String rejectionReason
 ) {
 
-    /** Converte a entidade na resposta da API. */
+    /**
+     * Converte o documento fiscal persistido em sua representação de resposta.
+     *
+     * @param document documento fiscal de origem
+     * @return representação de resposta correspondente
+     */
     public static FiscalDocumentResponse from(FiscalDocument document) {
         return new FiscalDocumentResponse(
                 document.getId(),

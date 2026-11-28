@@ -22,10 +22,14 @@ import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 
 /**
- * Saída de uma rota em data e horário definidos, com ônibus e motorista alocados.
+ * Representa uma viagem agendada de uma rota.
  *
- * <p>A viagem herda a empresa da rota. Rota, ônibus e motorista pertencem a outros
- * módulos e são referenciados apenas pelo identificador.</p>
+ * <p>Enquanto a rota descreve o trajeto fixo de uma linha, a viagem é uma
+ * saída específica desse trajeto, em uma data e horário definidos, operada
+ * por um ônibus e um motorista.</p>
+ *
+ * <p>Uma rota pode possuir várias viagens. A viagem pertence à mesma
+ * empresa da rota.</p>
  */
 @Entity
 @Table(name = "trip")
@@ -38,47 +42,92 @@ import lombok.experimental.SuperBuilder;
 @EqualsAndHashCode(callSuper = true)
 public class Trip extends EntityBase {
 
-    /** Código único, imutável após o cadastro. */
+    /**
+     * Código da viagem.
+     *
+     * <p>Identificador único da viagem, utilizado para referência e identificação.</p>
+     */
     @Column(name = "code", nullable = false, length = 64, unique = true)
     private String code;
 
-    /** Rota percorrida, imutável após o cadastro. */
+    /**
+     * Identificador da rota da viagem.
+     *
+     * <p>Representa o UUID da rota percorrida. A rota pertence ao
+     * módulo de rotas e é referenciada apenas pelo identificador.</p>
+     */
     @Column(name = "route_id", nullable = false)
     private UUID routeId;
 
-    /** Empresa operadora, copiada da rota no cadastro. */
+    /**
+     * Identificador da empresa responsável pela viagem.
+     *
+     * <p>Representa o UUID da empresa que opera a viagem. Corresponde à
+     * empresa da rota associada.</p>
+     */
     @Column(name = "company_uuid", nullable = false)
     private UUID companyUuid;
 
-    /** Ônibus alocado, da mesma empresa e sem outra viagem no período. */
+    /**
+     * Identificador do ônibus da viagem.
+     *
+     * <p>Representa o UUID do ônibus alocado para realizar a viagem.</p>
+     */
     @Column(name = "bus_id", nullable = false)
     private UUID busId;
 
-    /** Motorista alocado, da mesma empresa e sem outra viagem no período. */
+    /**
+     * Identificador do motorista da viagem.
+     *
+     * <p>Representa o UUID do motorista responsável por conduzir a viagem.</p>
+     */
     @Column(name = "driver_id", nullable = false)
     private UUID driverId;
 
-    /** Partida prevista (UTC). */
+    /**
+     * Data e hora de partida da viagem.
+     *
+     * <p>Representa o momento previsto para a saída do ônibus, em UTC.</p>
+     */
     @Column(name = "departure_time", nullable = false)
     private Instant departureTime;
 
-    /** Chegada prevista (UTC), sempre posterior à partida. */
+    /**
+     * Data e hora de chegada prevista da viagem.
+     *
+     * <p>Representa o momento previsto para a chegada ao destino, em UTC.
+     * Deve ser posterior à data de partida.</p>
+     */
     @Column(name = "arrival_time", nullable = false)
     private Instant arrivalTime;
 
-    /** Situação atual; alterada apenas por {@link #changeStatus}. */
+    /**
+     * Situação atual da viagem.
+     *
+     * <p>Indica em qual etapa do ciclo de vida a viagem se encontra, como
+     * agendada, em embarque, em andamento, concluída ou cancelada.</p>
+     */
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, length = 20)
     @Setter(AccessLevel.NONE)
     private TripStatus status;
 
-    /** Preço base da passagem, usado na venda. */
+    /**
+     * Preço base da passagem da viagem.
+     *
+     * <p>Representa o valor de referência da passagem, utilizado na venda
+     * dos bilhetes.</p>
+     */
     @Column(name = "price", nullable = false, precision = 10, scale = 2)
     private BigDecimal price;
 
     /**
-     * Altera a situação, respeitando as transições de {@link TripStatus#canTransitionTo}.
+     * Altera a situação da viagem, validando se a transição é permitida.
      *
+     * <p>É a única forma de alterar a situação depois do cadastro. As
+     * transições válidas são definidas por {@link TripStatus#canTransitionTo}.</p>
+     *
+     * @param next nova situação da viagem
      * @throws BusinessException se a transição não for permitida
      */
     public void changeStatus(TripStatus next) {
@@ -88,7 +137,14 @@ public class Trip extends EntityBase {
         this.status = next;
     }
 
-    /** @throws BusinessException se a viagem estiver concluída ou cancelada */
+    /**
+     * Verifica se a viagem ainda pode ser alterada.
+     *
+     * <p>Viagens nas situações {@link TripStatus#COMPLETED} e {@link TripStatus#CANCELED} são
+     * finais e não aceitam alterações.</p>
+     *
+     * @throws BusinessException se a viagem estiver concluída ou cancelada
+     */
     public void ensureEditable() {
         if (this.status.isFinal()){
             throw new BusinessException("Não é possível alterar uma viagem que já foi concluída ou cancelada.");

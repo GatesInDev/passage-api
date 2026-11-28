@@ -12,10 +12,10 @@ import java.time.Instant;
 import java.util.UUID;
 
 /**
- * Cancela um documento fiscal autorizado.
+ * Cancela um documento fiscal junto à SEFAZ.
  *
- * <p>O cancelamento é um evento fiscal, não uma exclusão: o documento mantém a chave de acesso e o
- * protocolo.</p>
+ * <p>O cancelamento é um evento fiscal, não uma exclusão: o documento
+ * permanece com sua chave de acesso e protocolo originais.</p>
  */
 @Service
 @RequiredArgsConstructor
@@ -24,6 +24,14 @@ public class CancelFiscalDocumentService {
     private final FiscalDocumentRepository fiscalDocumentRepository;
     private final FindFiscalDocumentService findFiscalDocumentService;
 
+    /**
+     * Cancela um documento fiscal autorizado.
+     *
+     * @param id identificador do documento
+     * @return documento cancelado
+     * @throws ResourceNotFoundException se o documento não existir, estiver excluído ou pertencer a outra empresa
+     * @throws BusinessException         se o documento não estiver autorizado
+     */
     @Transactional
     public FiscalDocumentResponse execute(UUID id) {
         FiscalDocument document = findFiscalDocumentService.findEntity(id);

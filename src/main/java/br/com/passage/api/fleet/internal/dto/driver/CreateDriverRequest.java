@@ -5,6 +5,12 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import java.util.UUID;
 
+/**
+ * Representa os dados de entrada para o cadastro de um motorista.
+ *
+ * <p>A empresa é obrigatória para o administrador. Para o gestor de frota, é
+ * sempre a própria empresa.</p>
+ */
 @Schema(description = "Dados para cadastrar um motorista")
 public record CreateDriverRequest(
         @Schema(description = "Nome completo", example = "João Pereira", requiredMode = Schema.RequiredMode.REQUIRED)

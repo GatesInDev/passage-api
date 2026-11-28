@@ -1,14 +1,22 @@
 package br.com.passage.api.fleet.internal.domain.enums;
 
-/** Posição do assento na fileira. */
+/**
+ * Representa a posição física do assento dentro da fileira.
+ */
 public enum SeatPosition {
 
-    /** Junto à janela. */
+    /**
+     * Assento localizado junto à janela.
+     */
     WINDOW,
 
-    /** Junto ao corredor. */
+    /**
+     * Assento localizado junto ao corredor.
+     */
     AISLE,
 
-    /** Entre outros assentos. */
+    /**
+     * Assento localizado entre outros assentos.
+     */
     MIDDLE
 }

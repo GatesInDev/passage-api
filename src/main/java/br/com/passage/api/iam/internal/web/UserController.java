@@ -27,7 +27,9 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * Gestão de usuários, restrita ao ADMIN.
+ * Controlador REST responsável pela gestão de usuários.
+ *
+ * <p>Todos os endpoints são restritos ao perfil ADMIN.</p>
  */
 @Tag(name = "Usuários", description = "Gestão de usuários e perfis de acesso (somente ADMIN)")
 @SecurityRequirement(name = "bearerAuth")

@@ -12,7 +12,12 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.UUID;
 
-/** Consulta os assentos de um ônibus visível ao usuário logado. */
+/**
+ * Serviço responsável pela consulta de assentos.
+ *
+ * <p>Os assentos são consultados a partir de um ônibus visível ao usuário autenticado.
+ * Assentos excluídos não são retornados.</p>
+ */
 @Service
 @RequiredArgsConstructor
 public class FindSeatService {
@@ -21,8 +26,13 @@ public class FindSeatService {
     private final FindBusService findBusService;
 
     /**
-     * @throws ResourceNotFoundException se o ônibus não for visível ao usuário, ou se o assento não existir,
-     *                                    estiver excluído ou for de outro ônibus
+     * Busca a entidade de um assento de um ônibus visível ao usuário autenticado.
+     *
+     * @param busId identificador do ônibus
+     * @param id    identificador do assento
+     * @return assento encontrado
+     * @throws ResourceNotFoundException se o ônibus não for visível ao usuário, ou se o assento não
+     *                                   existir, estiver excluído ou pertencer a outro ônibus
      */
     @Transactional(readOnly = true)
     public Seat findEntity(UUID busId, UUID id) {
@@ -31,11 +41,26 @@ public class FindSeatService {
                 .orElseThrow(() -> new ResourceNotFoundException("Assento não encontrado com o identificador: " + id));
     }
 
+    /**
+     * Busca um assento de um ônibus.
+     *
+     * @param busId identificador do ônibus
+     * @param id    identificador do assento
+     * @return assento encontrado
+     * @see #findEntity(UUID, UUID)
+     */
     @Transactional(readOnly = true)
     public SeatResponse execute(UUID busId, UUID id) {
         return SeatResponse.from(findEntity(busId, id));
     }
 
+    /**
+     * Lista os assentos de um ônibus.
+     *
+     * @param busId identificador do ônibus
+     * @return assentos encontrados
+     * @throws ResourceNotFoundException se o ônibus não existir, estiver excluído ou pertencer a outra empresa
+     */
     @Transactional(readOnly = true)
     public List<SeatResponse> executeAll(UUID busId) {
         findBusService.findEntity(busId);

@@ -9,6 +9,12 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 
+/**
+ * Representa os dados de entrada para a atualização de uma viagem.
+ *
+ * <p>O código e a rota não são alterados. Ao informar a situação {@code CANCELED},
+ * os demais campos são ignorados.</p>
+ */
 @Schema(description = "Dados para atualizar uma viagem; o código e a rota não mudam")
 public record UpdateTripRequest
 (

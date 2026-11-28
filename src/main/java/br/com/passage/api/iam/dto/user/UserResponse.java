@@ -6,6 +6,9 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.Instant;
 import java.util.UUID;
 
+/**
+ * Representa os dados de um usuário retornados pela API.
+ */
 @Schema(description = "Dados de um usuário")
 public record UserResponse(
 

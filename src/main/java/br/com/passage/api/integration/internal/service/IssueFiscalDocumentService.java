@@ -17,14 +17,16 @@ import java.util.UUID;
 /**
  * Emite o BP-e de uma passagem vendida.
  *
- * <p>O documento é gravado antes do envio à SEFAZ, para que uma recusa ou indisponibilidade deixe
- * rastro em vez de perder a emissão.</p>
+ * <p>O documento é gravado com a situação {@code PENDING} antes do envio à
+ * SEFAZ e atualizado com o resultado da autorização.</p>
  */
 @Service
 @RequiredArgsConstructor
 public class IssueFiscalDocumentService {
 
-    /** Série única enquanto não há configuração por empresa. */
+    /**
+     * Série única enquanto não há configuração por empresa.
+     */
     private static final int DEFAULT_SERIES = 1;
 
     private static final String BPE_MODEL = "63";
@@ -33,7 +35,15 @@ public class IssueFiscalDocumentService {
     private final SefazGateway sefazGateway;
     private final TicketApi ticketApi;
 
-    /** Idempotente: se a passagem já tiver documento, devolve o existente. */
+    /**
+     * Emite o documento fiscal da passagem.
+     *
+     * <p>Se a passagem já possuir documento, o existente é retornado sem nova emissão.</p>
+     *
+     * @param ticketId identificador da passagem
+     * @return documento fiscal da passagem
+     * @throws ResourceNotFoundException se a passagem não existir ou estiver excluída
+     */
     @Transactional
     public FiscalDocument execute(UUID ticketId) {
 
@@ -61,7 +71,12 @@ public class IssueFiscalDocumentService {
         return submit(document);
     }
 
-    /** Envia o documento à SEFAZ e registra o resultado. */
+    /**
+     * Envia o documento à SEFAZ e registra o desfecho.
+     *
+     * @param document documento a ser autorizado
+     * @return documento autorizado ou recusado
+     */
     @Transactional
     public FiscalDocument submit(FiscalDocument document) {
         SefazResponse response = sefazGateway.authorize(document);

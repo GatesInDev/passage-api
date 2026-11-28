@@ -11,7 +11,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
-/** Atualiza uma passagem visível ao usuário logado; o código e a empresa não mudam. */
+/**
+ * Serviço responsável pela atualização de passagens.
+ *
+ * <p>Permite alterar os dados do passageiro, o assento, o preço, a partida, a viagem e a
+ * situação da passagem. O código e a empresa não são alterados.</p>
+ */
 @Service
 @RequiredArgsConstructor
 public class UpdateTicketService {
@@ -19,6 +24,14 @@ public class UpdateTicketService {
     private final TicketRepository ticketRepository;
     private final TicketAccessService ticketAccessService;
 
+    /**
+     * Atualiza uma passagem visível ao usuário autenticado.
+     *
+     * @param id      identificador da passagem
+     * @param request novos dados da passagem
+     * @return passagem atualizada
+     * @throws ResourceNotFoundException se a passagem não existir, estiver excluída ou pertencer a outra empresa
+     */
     @Transactional
     public TicketResponse execute(UUID id, UpdateTicketRequest request) {
 

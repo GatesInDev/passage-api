@@ -11,7 +11,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
-/** Atualiza um assento de um ônibus visível ao usuário logado. */
+/**
+ * Serviço responsável pela atualização de assentos.
+ *
+ * <p>Permite alterar o número, a posição, as características e a situação do assento. O número
+ * e a posição continuam únicos no ônibus.</p>
+ */
 @Service
 @RequiredArgsConstructor
 public class UpdateSeatService {
@@ -19,6 +24,16 @@ public class UpdateSeatService {
     private final SeatRepository seatRepository;
     private final FindSeatService findSeatService;
 
+    /**
+     * Atualiza um assento de um ônibus.
+     *
+     * @param busId   identificador do ônibus
+     * @param id      identificador do assento
+     * @param request novos dados do assento
+     * @return assento atualizado
+     * @throws ResourceNotFoundException se o ônibus ou o assento não forem encontrados
+     * @throws BusinessException         se o número ou a posição já estiverem em uso no ônibus
+     */
     @Transactional
     public SeatResponse execute(UUID busId, UUID id, UpdateSeatRequest request) {
         Seat seat = findSeatService.findEntity(busId, id);

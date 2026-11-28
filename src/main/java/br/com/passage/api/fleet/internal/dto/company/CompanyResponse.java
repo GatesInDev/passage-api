@@ -5,6 +5,9 @@ import br.com.passage.api.fleet.internal.domain.entities.Company;
 import java.time.Instant;
 import java.util.UUID;
 
+/**
+ * Representa os dados de uma empresa retornados pela API.
+ */
 @Schema(description = "Dados de uma empresa")
 public record CompanyResponse(
 
@@ -68,7 +71,12 @@ public record CompanyResponse(
         )
         String stateRegulatoryAgency
 ) {
-    /** Converte a entidade na resposta da API. */
+    /**
+     * Converte a empresa persistida em sua representação de resposta.
+     *
+     * @param company empresa de origem
+     * @return representação de resposta correspondente
+     */
     public static CompanyResponse from(Company company) {
         return new CompanyResponse(
                 company.getId(), company.getCreatedAt(), company.getUpdatedAt(),

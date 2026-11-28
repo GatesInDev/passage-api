@@ -10,13 +10,21 @@ import java.util.Optional;
 import java.util.UUID;
 
 /**
- * Acesso às passagens.
+ * Repositório de acesso às passagens.
  *
- * <p>As consultas {@code Visible} desconsideram registros excluídos e, quando
- * {@code companyId} é informado, restringem o resultado a essa empresa.</p>
+ * <p>As consultas {@code Visible} desconsideram passagens excluídas. Quando {@code companyId} é
+ * informado, o resultado é restrito a essa empresa; quando é {@code null}, todas as empresas
+ * são consideradas.</p>
  */
 public interface TicketRepository extends JpaRepository<Ticket, UUID> {
 
+    /**
+     * Busca uma passagem visível.
+     *
+     * @param id        identificador da passagem
+     * @param companyId empresa à qual a busca é restrita, ou {@code null} para todas
+     * @return passagem encontrada, se existir
+     */
     @Query("""
             select item from Ticket item
             where item.id = :id and item.isDeleted = false
@@ -24,6 +32,12 @@ public interface TicketRepository extends JpaRepository<Ticket, UUID> {
             """)
     Optional<Ticket> findVisibleById(@Param("id") UUID id, @Param("companyId") UUID companyId);
 
+    /**
+     * Lista as passagens visíveis.
+     *
+     * @param companyId empresa à qual a listagem é restrita, ou {@code null} para todas
+     * @return passagens encontradas
+     */
     @Query("""
             select item from Ticket item
             where item.isDeleted = false
@@ -31,9 +45,24 @@ public interface TicketRepository extends JpaRepository<Ticket, UUID> {
             """)
     List<Ticket> findAllVisible(@Param("companyId") UUID companyId);
 
-    /** Considera também as passagens excluídas, já que o código continua reservado. */
+    /**
+     * Verifica se já existe uma passagem cadastrada com o código informado.
+     *
+     * <p>Considera também as passagens excluídas logicamente.</p>
+     *
+     * @param code código da passagem
+     * @return {@code true} se o código já estiver em uso
+     */
     boolean existsByCode(String code);
 
-    /** Indica se o assento já foi vendido para a viagem; passagens excluídas liberam o assento. */
+    /**
+     * Indica se o assento já está vendido para a viagem.
+     *
+     * <p>Passagens canceladas liberam o assento novamente.</p>
+     *
+     * @param tripId identificador da viagem
+     * @param seatId identificador do assento
+     * @return {@code true} se o assento já estiver vendido
+     */
     boolean existsByTripIdAndSeatIdAndIsDeletedFalse(UUID tripId, UUID seatId);
 }

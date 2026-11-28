@@ -14,9 +14,14 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.UUID;
 
 /**
- * Define o escopo de empresa das operações de frota para o usuário logado.
+ * Serviço responsável por definir o escopo de empresa das operações de frota.
  *
- * <p>Só ADMIN e FLEET_MANAGER acessam a frota; o gestor fica restrito à própria empresa.</p>
+ * <p>A frota é acessada apenas pelos perfis ADMIN e FLEET_MANAGER:</p>
+ *
+ * <ul>
+ *     <li>ADMIN – acessa a frota de todas as empresas;</li>
+ *     <li>FLEET_MANAGER – acessa apenas a frota da empresa à qual está vinculado.</li>
+ * </ul>
  */
 @Service
 @RequiredArgsConstructor
@@ -26,8 +31,10 @@ public class FleetAccessService {
     private final CompanyRepository companyRepository;
 
     /**
-     * @return a empresa do gestor, ou {@code null} (sem restrição) para o ADMIN
-     * @throws AccessDeniedException se o usuário não for ADMIN nem gestor com empresa vinculada
+     * Recupera a empresa à qual as operações do usuário autenticado são restritas.
+     *
+     * @return empresa do gestor de frota, ou {@code null} para o administrador
+     * @throws AccessDeniedException se o usuário não for ADMIN nem um gestor vinculado a uma empresa
      */
     public UUID currentCompanyId() {
         var user = iamApi.currentUser();
@@ -41,10 +48,12 @@ public class FleetAccessService {
     }
 
     /**
-     * Carrega a empresa, validando se o usuário logado pode acessá-la.
+     * Recupera uma empresa validando o acesso do usuário autenticado.
      *
+     * @param companyId identificador da empresa
+     * @return empresa encontrada
      * @throws AccessDeniedException     se o gestor tentar acessar outra empresa
-     * @throws BusinessException         se o identificador for {@code null}
+     * @throws BusinessException         se o identificador não for informado
      * @throws ResourceNotFoundException se a empresa não existir ou estiver excluída
      */
     @Transactional(readOnly = true)
@@ -61,8 +70,13 @@ public class FleetAccessService {
     }
 
     /**
-     * Empresa dona de um novo cadastro: a do gestor, ignorando a informada, ou a informada pelo ADMIN.
+     * Define a empresa proprietária de um novo cadastro da frota.
      *
+     * <p>Para o gestor de frota, é sempre a própria empresa, ignorando a informada. Para o
+     * administrador, é a empresa informada.</p>
+     *
+     * @param requestedCompanyId empresa informada na requisição
+     * @return empresa proprietária do cadastro
      * @see #requireCompany(UUID)
      */
     @Transactional(readOnly = true)

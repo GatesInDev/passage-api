@@ -8,6 +8,9 @@ import br.com.passage.api.route.internal.domain.entities.Route;
 import br.com.passage.api.route.internal.domain.enums.RouteScope;
 import io.swagger.v3.oas.annotations.media.Schema;
 
+/**
+ * Representa os dados de uma rota retornados pela API.
+ */
 @Schema(description = "Dados de uma rota")
 public record RouteResponse(
 
@@ -108,7 +111,12 @@ public record RouteResponse(
         String regulatoryAgency
 
 ) {
-        /** Converte a entidade na resposta da API. */
+        /**
+         * Converte a rota persistida em sua representação de resposta.
+         *
+         * @param route rota de origem
+         * @return representação de resposta correspondente
+         */
         public static RouteResponse from(Route route){
                 return new RouteResponse(
             route.getId(),

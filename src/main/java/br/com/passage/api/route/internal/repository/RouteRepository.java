@@ -11,13 +11,21 @@ import org.springframework.data.repository.query.Param;
 import br.com.passage.api.route.internal.domain.entities.Route;
 
 /**
- * Acesso às rotas.
+ * Repositório de acesso às rotas.
  *
- * <p>As consultas {@code Visible} desconsideram rotas excluídas e, quando
- * {@code companyUuid} é informado, restringem o resultado a essa empresa.</p>
+ * <p>As consultas {@code Visible} desconsideram rotas excluídas. Quando {@code companyUuid} é
+ * informado, o resultado é restrito a essa empresa; quando é {@code null}, todas as empresas
+ * são consideradas.</p>
  */
 public interface RouteRepository extends JpaRepository<Route, UUID>{
 
+    /**
+     * Busca uma rota visível.
+     *
+     * @param id          identificador da rota
+     * @param companyUuid empresa à qual a busca é restrita, ou {@code null} para todas
+     * @return rota encontrada, se existir
+     */
     @Query("""
         select r from Route r
         where r.id = :id and r.isDeleted = false
@@ -25,6 +33,12 @@ public interface RouteRepository extends JpaRepository<Route, UUID>{
         """)
     Optional<Route> findVisibleById(@Param("id") UUID id, @Param("companyUuid") UUID companyUuid);
 
+    /**
+     * Lista as rotas visíveis.
+     *
+     * @param companyUuid empresa à qual a listagem é restrita, ou {@code null} para todas
+     * @return rotas encontradas
+     */
     @Query("""
         select r from Route r
         where r.isDeleted = false
@@ -32,6 +46,13 @@ public interface RouteRepository extends JpaRepository<Route, UUID>{
         """)
     List<Route> findAllVisible(@Param("companyUuid") UUID companyUuid);
 
-    /** Considera também as rotas excluídas, já que o código continua reservado. */
+    /**
+     * Verifica se já existe uma rota cadastrada com o código informado.
+     *
+     * <p>Considera também as rotas excluídas logicamente.</p>
+     *
+     * @param code código da rota
+     * @return {@code true} se o código já estiver em uso
+     */
     boolean existsByCode(String code);
 }

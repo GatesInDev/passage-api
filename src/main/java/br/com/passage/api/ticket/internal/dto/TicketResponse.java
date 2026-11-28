@@ -7,6 +7,9 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.UUID;
 
+/**
+ * Representa os dados de uma passagem retornados pela API.
+ */
 @Schema(description = "Dados de uma passagem")
 public record TicketResponse(
 
@@ -63,7 +66,12 @@ public record TicketResponse(
         UUID companyUuid
 ) {
 
-    /** Converte a entidade na resposta da API. */
+    /**
+     * Converte a passagem persistida em sua representação de resposta.
+     *
+     * @param ticket passagem de origem
+     * @return representação de resposta correspondente
+     */
     public static TicketResponse from(Ticket ticket) {
         return new TicketResponse(
                 ticket.getId(),

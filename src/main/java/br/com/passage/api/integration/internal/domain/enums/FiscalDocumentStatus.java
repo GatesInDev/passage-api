@@ -5,15 +5,23 @@ package br.com.passage.api.integration.internal.domain.enums;
  */
 public enum FiscalDocumentStatus {
 
-    /** Gerado, aguardando a resposta da SEFAZ. */
+    /**
+     * Gerado, aguardando envio ou resposta da SEFAZ.
+     */
     PENDING,
 
-    /** Autorizado, com protocolo. */
+    /**
+     * Autorizado: possui protocolo e pode circular.
+     */
     AUTHORIZED,
 
-    /** Recusado pela SEFAZ; o motivo fica registrado. */
+    /**
+     * Recusado pela SEFAZ; o motivo fica registrado.
+     */
     REJECTED,
 
-    /** Cancelado depois de autorizado. */
+    /**
+     * Cancelado por evento posterior à autorização.
+     */
     CANCELED
 }

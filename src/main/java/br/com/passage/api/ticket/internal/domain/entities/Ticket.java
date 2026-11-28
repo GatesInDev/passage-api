@@ -10,9 +10,22 @@ import java.time.Instant;
 import java.util.UUID;
 
 /**
- * Passagem vendida para um assento de uma viagem.
+ * Representa uma passagem vendida para um assento de uma viagem.
  *
- * <p>Preço, partida e empresa são copiados da viagem na venda.</p>
+ * <p>A passagem registra os dados do passageiro e o assento ocupado. O preço, a data de
+ * partida e a empresa são copiados da viagem no momento da venda.</p>
+ *
+ * <h2>Assento</h2>
+ *
+ * <p>Um assento só pode ser vendido uma vez por viagem. Passagens canceladas liberam o
+ * assento novamente.</p>
+ *
+ * <h2>Relacionamentos</h2>
+ *
+ * <p>A viagem e o assento pertencem a outros módulos e são referenciados apenas pelos
+ * identificadores.</p>
+ *
+ * @see EntityBase
  */
 @Entity
 @Table(name = "tickets")
@@ -25,33 +38,54 @@ import java.util.UUID;
 @EqualsAndHashCode(callSuper = true)
 public class Ticket extends EntityBase {
 
-    /** Código da passagem, único no sistema. */
+    /**
+     * Código único da passagem.
+     *
+     * <p>Identificador utilizado para referência externa da passagem.</p>
+     */
     @Column(name = "code", nullable = false, length = 64, unique = true)
     private String code;
 
+    /**
+     * Nome completo do passageiro.
+     */
     @Column(name = "passenger_name", nullable = false, length = 100)
     private String passengerName;
 
-    /** CPF do passageiro, sem pontuação. */
+    /**
+     * CPF do passageiro.
+     */
     @Column(name = "passenger_document", nullable = false, length = 11)
     private String passengerDocument;
 
-    /** Assento vendido, do ônibus da viagem. */
+    /**
+     * Identificador do assento reservado para a passagem.
+     *
+     */
     @Column(name = "seat_id", nullable = false)
     private UUID seatId;
 
-    /** Preço pago, em reais. */
+    /**
+     * Valor da passagem em reais.
+     */
     @Column(name = "price", nullable = false, precision = 10, scale = 2)
     private BigDecimal price;
 
-    /** Partida da viagem no momento da venda. */
+    /**
+     * Data e hora de partida registradas na venda.
+     */
     @Column(name = "departure_date_time", nullable = false)
     private Instant departureDateTime;
 
-    /** Empresa dona da passagem, a mesma da viagem. */
+    /**
+     * Empresa dona da passagem.
+     */
     @Column(name = "company_uuid", nullable = false)
     private UUID companyUuid;
 
+    /**
+     * Identificador da viagem para a qual a passagem foi vendida.
+     */
     @Column(name = "trip_id", nullable = false)
     private UUID tripId;
 }

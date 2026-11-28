@@ -7,13 +7,17 @@ import org.springframework.stereotype.Component;
 
 /**
  * API pública do módulo de identidade e acesso.
+ *
+ * <p>Ponto de acesso para que outros módulos consultem o usuário autenticado sem depender
+ * das classes internas do módulo.</p>
  */
 @Component
 public class IamApi {
 
     /**
-     * Retorna o usuário autenticado na requisição atual.
+     * Recupera o usuário autenticado na requisição atual.
      *
+     * @return usuário autenticado
      * @throws AuthenticationCredentialsNotFoundException se não houver usuário autenticado
      */
     public CurrentUser currentUser() {

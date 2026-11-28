@@ -8,13 +8,25 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
-/** Busca uma empresa visível ao usuário logado. */
+/**
+ * Serviço responsável pela consulta de uma empresa.
+ *
+ * <p>O gestor de frota pode consultar apenas a própria empresa.</p>
+ */
 @Service
 @RequiredArgsConstructor
 public class FindByIdCompanyService {
 
     private final FleetAccessService fleetAccessService;
 
+    /**
+     * Busca uma empresa pelo identificador.
+     *
+     * @param id identificador da empresa
+     * @return empresa encontrada
+     * @throws AccessDeniedException     se o gestor tentar acessar outra empresa
+     * @throws ResourceNotFoundException se a empresa não existir ou estiver excluída
+     */
     @Transactional(readOnly = true)
     public CompanyResponse execute(UUID id) {
         return CompanyResponse.from(fleetAccessService.requireCompany(id));

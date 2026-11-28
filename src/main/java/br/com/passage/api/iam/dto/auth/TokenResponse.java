@@ -2,6 +2,12 @@ package br.com.passage.api.iam.dto.auth;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
+/**
+ * Representa o token de acesso gerado no login.
+ *
+ * <p>O token deve ser enviado nas demais requisições no cabeçalho
+ * {@code Authorization: Bearer}.</p>
+ */
 @Schema(description = "Token de acesso gerado no login")
 public record TokenResponse(
 

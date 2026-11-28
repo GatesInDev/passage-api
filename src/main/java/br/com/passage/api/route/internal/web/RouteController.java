@@ -34,10 +34,13 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 /**
- * Endpoints de rotas.
+ * Controlador REST responsável pela gestão de rotas.
  *
- * <p>A leitura é aberta a qualquer usuário autenticado; a escrita, a ADMIN e FLEET_MANAGER.
- * O gestor só enxerga e altera as rotas da própria empresa.</p>
+ * <p>A consulta é permitida a qualquer usuário autenticado. O cadastro, a atualização e a
+ * exclusão são restritos aos perfis ADMIN e FLEET_MANAGER.</p>
+ *
+ * <p>O escopo de empresa é definido pelo {@link br.com.passage.api.route.internal.service.RouteAccessService}: o gestor de frota acessa
+ * apenas as rotas da própria empresa e os demais perfis acessam as rotas de todas as empresas.</p>
  */
 @Tag(name = "Rotas", description = "Linhas operadas pelas empresas")
 @RestController

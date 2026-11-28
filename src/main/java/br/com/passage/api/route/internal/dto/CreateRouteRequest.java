@@ -11,6 +11,12 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 
+/**
+ * Representa os dados de entrada para o cadastro de uma rota.
+ *
+ * <p>A empresa é obrigatória para o administrador. Para o gestor de frota, é
+ * sempre a própria empresa.</p>
+ */
 @Schema(description = "Dados para cadastrar uma rota")
 public record CreateRouteRequest
 (

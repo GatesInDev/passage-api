@@ -11,6 +11,11 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 
+/**
+ * Representa os dados de entrada para o agendamento de uma viagem.
+ *
+ * <p>A empresa da viagem não é informada: é obtida da rota.</p>
+ */
 @Schema(description = "Dados para agendar uma viagem")
 public record CreateTripRequest
 (
