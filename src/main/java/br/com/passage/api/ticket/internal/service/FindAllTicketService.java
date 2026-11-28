@@ -13,12 +13,12 @@ import java.util.List;
 public class FindAllTicketService {
 
     private final TicketRepository ticketRepository;
+    private final TicketAccessService ticketAccessService;
 
     @Transactional(readOnly = true)
     public List<TicketResponse> execute() {
 
-        return ticketRepository.findAll().stream()
-                .filter(ticket -> !ticket.isDeleted())
+        return ticketRepository.findAllVisible(ticketAccessService.currentCompanyId()).stream()
                 .map(TicketResponse::from)
                 .toList();
     }

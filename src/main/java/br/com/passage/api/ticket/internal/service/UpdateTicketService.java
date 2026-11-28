@@ -16,12 +16,12 @@ import java.util.UUID;
 public class UpdateTicketService {
 
     private final TicketRepository ticketRepository;
+    private final TicketAccessService ticketAccessService;
 
     @Transactional
     public TicketResponse execute(UUID id, UpdateTicketRequest request) {
 
-        Ticket ticket = ticketRepository.findById(id)
-                .filter(found -> !found.isDeleted())
+        Ticket ticket = ticketRepository.findVisibleById(id, ticketAccessService.currentCompanyId())
                 .orElseThrow(() -> new ResourceNotFoundException("Passagem não encontrada com o identificador: " + id));
 
         ticket.setPassengerName(request.passengerName());

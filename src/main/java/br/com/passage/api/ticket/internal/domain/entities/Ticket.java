@@ -43,11 +43,6 @@ public class Ticket extends EntityBase {
     /**
      * Identificador do assento reservado para a passagem.
      *
-     * <p>Referenciado por UUID para manter o desacoplamento entre módulos.</p>
-     *
-     * <p>A classe do serviço da viagem não é armazenada aqui: ela é determinada
-     * pela qualidade do assento reservado, evitando manter o mesmo dado em dois
-     * lugares com risco de divergência.</p>
      */
     @Column(name = "seat_id", nullable = false)
     private UUID seatId;
@@ -60,21 +55,18 @@ public class Ticket extends EntityBase {
 
     /**
      * Data e hora de partida registradas na venda.
-     *
-     * <p>Mantido na passagem de propósito: representa o horário contratado
-     * pelo passageiro. Um atraso ou remarcação altera a viagem, mas não o
-     * que foi vendido.</p>
      */
     @Column(name = "departure_date_time", nullable = false)
     private Instant departureDateTime;
 
     /**
+     * Empresa dona da passagem.
+     */
+    @Column(name = "company_uuid", nullable = false)
+    private UUID companyUuid;
+
+    /**
      * Identificador da viagem para a qual a passagem foi vendida.
-     *
-     * <p>Referenciado por UUID para manter o desacoplamento entre módulos.</p>
-     *
-     * <p>A viagem conhece a rota, o ônibus e o motorista: a passagem guarda
-     * apenas o vínculo, sem repetir esses dados.</p>
      */
     @Column(name = "trip_id", nullable = false)
     private UUID tripId;

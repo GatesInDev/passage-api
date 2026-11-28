@@ -44,8 +44,17 @@ abstract class TicketIntegrationTestSupport {
     @Autowired protected TicketRepository tickets;
     @Autowired protected EntityManager entityManager;
 
-    /** Passagem disponível em todos os testes. */
+    /** Empresa do operador autenticado nos testes. */
+    protected final UUID ownCompany = UUID.randomUUID();
+
+    /** Empresa concorrente, usada para verificar o isolamento. */
+    protected final UUID otherCompany = UUID.randomUUID();
+
+    /** Passagem da própria empresa, disponível em todos os testes. */
     protected Ticket existingTicket;
+
+    /** Passagem de outra empresa, que o operador não deve enxergar. */
+    protected Ticket otherCompanyTicket;
 
     /** Partida sempre no futuro, exigida pela validação do payload. */
     protected Instant departure;
@@ -54,19 +63,25 @@ abstract class TicketIntegrationTestSupport {
     void seedTicket() {
         departure = Instant.now().plus(30, ChronoUnit.DAYS).truncatedTo(ChronoUnit.SECONDS);
 
-        existingTicket = tickets.save(Ticket.builder()
-                .code("PASS-SEED-001")
-                .passengerName("Maria Seed")
+        existingTicket = saveTicket("PASS-SEED-001", "Maria Seed", ownCompany);
+        otherCompanyTicket = saveTicket("PASS-SEED-002", "Carlos Rival", otherCompany);
+
+        entityManager.flush();
+        entityManager.clear();
+    }
+
+    protected Ticket saveTicket(String code, String passengerName, UUID companyUuid) {
+        return tickets.save(Ticket.builder()
+                .code(code)
+                .passengerName(passengerName)
                 .passengerDocument("12345678909")
                 .seatId(UUID.randomUUID())
                 .price(new BigDecimal("150.00"))
                 .departureDateTime(departure)
                 .tripId(UUID.randomUUID())
+                .companyUuid(companyUuid)
                 .isActive(true)
                 .build());
-
-        entityManager.flush();
-        entityManager.clear();
     }
 
     protected String createPayload(String code) {
@@ -84,7 +99,13 @@ abstract class TicketIntegrationTestSupport {
     }
 
     protected RequestPostProcessor principal(UserRole role) {
-        User user = new User("Test User", role.name().toLowerCase() + "@example.com", "unused", role, null);
+        // O administrador não é vinculado a empresa: enxerga todas.
+        UUID companyUuid = role == UserRole.ADMIN ? null : ownCompany;
+        return principal(role, companyUuid);
+    }
+
+    protected RequestPostProcessor principal(UserRole role, UUID companyUuid) {
+        User user = new User("Test User", role.name().toLowerCase() + "@example.com", "unused", role, companyUuid);
         ReflectionTestUtils.setField(user, "id", UUID.randomUUID());
         return authentication(
                 UsernamePasswordAuthenticationToken.authenticated(user, null, user.getAuthorities()));

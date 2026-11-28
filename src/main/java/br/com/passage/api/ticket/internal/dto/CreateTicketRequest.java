@@ -73,5 +73,13 @@ public record CreateTicketRequest(
                 requiredMode = Schema.RequiredMode.REQUIRED
         )
         @NotNull(message = "O identificador da viagem é obrigatório.")
-        UUID tripId
+        UUID tripId,
+
+        @Schema(
+                description = "Identificador UUID da empresa dona da passagem. "
+                        + "Informado apenas por ADMIN: para os demais perfis a empresa "
+                        + "vem do usuário autenticado e este campo é ignorado.",
+                example = "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11"
+        )
+        UUID companyUuid
 ) {}
