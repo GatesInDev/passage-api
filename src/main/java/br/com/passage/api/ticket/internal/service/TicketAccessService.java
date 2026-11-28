@@ -2,7 +2,6 @@ package br.com.passage.api.ticket.internal.service;
 
 import br.com.passage.api.iam.IamApi;
 import br.com.passage.api.iam.enums.UserRole;
-import br.com.passage.api.shared.domain.exceptions.BusinessException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
@@ -42,27 +41,4 @@ public class TicketAccessService {
         return user.companyUuid();
     }
 
-    /**
-     * Empresa que deve ser gravada em uma passagem nova.
-     *
-     * <p>O operador vende sempre pela própria empresa, independentemente do
-     * que vier no payload. O administrador precisa informar a empresa.</p>
-     *
-     * <p>TODO: quando a {@code TripApi} expuser a viagem, derivar a empresa
-     * dela e remover o campo do payload.</p>
-     */
-    public UUID resolveCompanyForCreation(UUID requestedCompanyId) {
-        UUID currentCompanyId = currentCompanyId();
-
-        if (currentCompanyId != null) {
-            return currentCompanyId;
-        }
-
-        if (requestedCompanyId == null) {
-            throw new BusinessException(
-                    "Para usuários ADMIN, o UUID da empresa deve ser informado no payload.");
-        }
-
-        return requestedCompanyId;
-    }
 }
