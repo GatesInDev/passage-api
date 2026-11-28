@@ -136,4 +136,10 @@ public class Trip extends EntityBase {
         }
         this.status = next;
     }
+
+    public void ensureEditable() {
+        if (this.status.isFinal()){
+            throw new BusinessException("Não é possível alterar uma viagem que já foi concluída ou cancelada.");
+        }
+    }
 }
