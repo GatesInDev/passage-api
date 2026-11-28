@@ -6,6 +6,7 @@ import br.com.passage.api.fleet.internal.domain.entities.Driver;
 import br.com.passage.api.fleet.internal.domain.entities.Seat;
 import br.com.passage.api.fleet.internal.repository.BusRepository;
 import br.com.passage.api.fleet.internal.repository.DriverRepository;
+import br.com.passage.api.fleet.internal.repository.SeatRepository;
 import br.com.passage.api.shared.domain.exceptions.ResourceNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -21,7 +22,8 @@ class FleetApiTests {
 
     private final BusRepository busRepository = mock(BusRepository.class);
     private final DriverRepository driverRepository = mock(DriverRepository.class);
-    private final FleetApi api = new FleetApi(busRepository, driverRepository);
+    private final SeatRepository seatRepository = mock(SeatRepository.class);
+    private final FleetApi api = new FleetApi(busRepository, driverRepository, seatRepository);
     private final UUID companyId = UUID.randomUUID();
     private final UUID busId = UUID.randomUUID();
     private final UUID driverId = UUID.randomUUID();

@@ -293,7 +293,9 @@ internal
 
 `FleetApi.findBus(busId)` retorna `BusInfo(id, companyUuid, active, capacity)`, e `FleetApi.findDriver(driverId)` retorna `DriverInfo(id, companyUuid, active)`. Os records pertencem ao pacote público `fleet`. Essa API de consulta entre módulos não depende da role nem do contexto de autenticação do usuário. O caso de uso chamador deve autorizar a operação e comparar o `companyUuid` retornado com a empresa da rota, viagem ou outro recurso já autorizado antes de utilizar os dados. Os endpoints de gestão de fleet continuam restritos por role e tenant através dos serviços de aplicação e do `FleetAccessService`.
 
-As consultas entre módulos não retornam recursos excluídos nem recursos de empresa excluída; nesses casos, lançam `ResourceNotFoundException`. Recursos inativos retornam com `active = false`, e a capacidade considera apenas assentos ativos e não excluídos.
+`findBus` e `findDriver` não retornam recursos excluídos nem recursos de empresa excluída; nesses casos, lançam `ResourceNotFoundException`. Recursos inativos retornam com `active = false`, e a capacidade considera apenas assentos ativos e não excluídos.
+
+`FleetApi.seatBelongsToBus(seatId, busId)` verifica se o assento existe, pertence ao ônibus informado e não está excluído. Retorna `false` para assento inexistente, excluído ou de outro ônibus. A consulta reutiliza `SeatRepository.findByIdAndBus_IdAndIsDeletedFalse`, sem depender da role do usuário; verifica somente o vínculo e a exclusão do assento, sem validar estado ativo ou exclusão do ônibus/empresa.
 
 ## Convenções de código
 
