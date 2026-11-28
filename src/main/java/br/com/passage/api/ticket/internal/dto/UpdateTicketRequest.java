@@ -4,10 +4,14 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.*;
 import org.hibernate.validator.constraints.br.CPF;
 
-import java.math.BigDecimal;
-import java.time.Instant;
 import java.util.UUID;
 
+/**
+ * Dados alteráveis de uma passagem.
+ *
+ * <p>Preço e horário de partida não constam aqui: vêm da viagem, como na
+ * emissão, para que não possam ser escolhidos por quem altera o bilhete.</p>
+ */
 @Schema(description = "Payload com os dados atualizáveis de uma passagem já cadastrada")
 public record UpdateTicketRequest(
 
@@ -38,24 +42,6 @@ public record UpdateTicketRequest(
         )
         @NotNull(message = "O identificador do assento é obrigatório.")
         UUID seatId,
-
-        @Schema(
-                description = "Valor da passagem em reais",
-                example = "189.90",
-                requiredMode = Schema.RequiredMode.REQUIRED
-        )
-        @NotNull(message = "O valor da passagem é obrigatório.")
-        @Positive(message = "O valor da passagem deve ser um valor positivo.")
-        BigDecimal price,
-
-        @Schema(
-                description = "Data e hora da partida (UTC)",
-                example = "2026-10-01T08:00:00Z",
-                requiredMode = Schema.RequiredMode.REQUIRED
-        )
-        @NotNull(message = "A data e hora de partida são obrigatórias.")
-        @Future(message = "A data de partida deve ser uma data futura.")
-        Instant departureDateTime,
 
         @Schema(
                 description = "Identificador UUID da viagem da passagem",

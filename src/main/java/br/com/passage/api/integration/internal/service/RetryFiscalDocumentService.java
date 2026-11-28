@@ -11,6 +11,9 @@ import java.util.UUID;
 
 /**
  * Reenvia à SEFAZ um documento pendente ou recusado.
+ *
+ * <p>Documentos autorizados ou cancelados não são reenviados: o
+ * cancelamento é definitivo e não deve ser desfeito por um reenvio.</p>
  */
 @Service
 @RequiredArgsConstructor
@@ -23,8 +26,10 @@ public class RetryFiscalDocumentService {
     public FiscalDocumentResponse execute(UUID id) {
         FiscalDocument document = findFiscalDocumentService.findEntity(id);
 
-        if (document.isAuthorized()) {
-            throw new BusinessException("O documento já está autorizado.");
+        if (!document.canBeResubmitted()) {
+            throw new BusinessException(
+                    "Somente documentos pendentes ou recusados podem ser reenviados. Situação atual: "
+                            + document.getStatus() + ".");
         }
 
         return FiscalDocumentResponse.from(issueFiscalDocumentService.submit(document));

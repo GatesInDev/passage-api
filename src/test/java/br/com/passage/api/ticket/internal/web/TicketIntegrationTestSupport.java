@@ -68,11 +68,17 @@ abstract class TicketIntegrationTestSupport {
     /** Ônibus que fará as viagens da própria empresa. */
     protected Bus ownBus;
 
-    /** Assento válido do ônibus da própria empresa. */
+    /** Assento livre do ônibus da própria empresa, usado nas vendas. */
     protected Seat ownSeat;
 
-    /** Assento válido do ônibus da outra empresa. */
+    /** Assento ocupado pela passagem do seed. */
+    protected Seat seedSeat;
+
+    /** Assento livre do ônibus da outra empresa. */
     protected Seat otherSeat;
+
+    /** Assento ocupado pela passagem de seed da outra empresa. */
+    protected Seat otherSeedSeat;
 
     /** Viagem aberta para venda, da própria empresa. */
     protected Trip ownTrip;
@@ -109,14 +115,18 @@ abstract class TicketIntegrationTestSupport {
         ownBus = saveBus(own);
         Bus otherBus = saveBus(other);
         ownSeat = saveSeat(ownBus, "01");
+        seedSeat = saveSeat(ownBus, "02");
         otherSeat = saveSeat(otherBus, "01");
+        otherSeedSeat = saveSeat(otherBus, "02");
 
         ownTrip = saveTrip("TRIP-OWN-", ownCompany, ownBus.getId(), TripStatus.SCHEDULED);
         otherCompanyTrip = saveTrip("TRIP-OTHER-", otherCompany, otherBus.getId(), TripStatus.SCHEDULED);
         finishedTrip = saveTrip("TRIP-DONE-", ownCompany, ownBus.getId(), TripStatus.COMPLETED);
 
-        existingTicket = saveTicket("PASS-SEED-001", "Maria Seed", ownCompany);
-        otherCompanyTicket = saveTicket("PASS-SEED-002", "Carlos Rival", otherCompany);
+        existingTicket = saveTicket("PASS-SEED-001", "Maria Seed", ownCompany,
+                ownTrip.getId(), seedSeat.getId());
+        otherCompanyTicket = saveTicket("PASS-SEED-002", "Carlos Rival", otherCompany,
+                otherCompanyTrip.getId(), otherSeedSeat.getId());
 
         entityManager.flush();
         entityManager.clear();
@@ -180,15 +190,16 @@ abstract class TicketIntegrationTestSupport {
                 .build());
     }
 
-    protected Ticket saveTicket(String code, String passengerName, UUID companyUuid) {
+    protected Ticket saveTicket(String code, String passengerName, UUID companyUuid,
+                                UUID tripId, UUID seatId) {
         return tickets.save(Ticket.builder()
                 .code(code)
                 .passengerName(passengerName)
                 .passengerDocument("12345678909")
-                .seatId(UUID.randomUUID())
+                .seatId(seatId)
                 .price(new BigDecimal("150.00"))
                 .departureDateTime(departure)
-                .tripId(UUID.randomUUID())
+                .tripId(tripId)
                 .companyUuid(companyUuid)
                 .isActive(true)
                 .build());
@@ -207,10 +218,15 @@ abstract class TicketIntegrationTestSupport {
     }
 
     protected String updatePayload(String passengerName, boolean isActive) {
+        return updatePayload(passengerName, ownTrip.getId(), ownSeat.getId(), isActive);
+    }
+
+    /** Preço e horário vêm da viagem também na alteração. */
+    protected String updatePayload(String passengerName, UUID tripId, UUID seatId, boolean isActive) {
         return """
-                {"passengerName":"%s","passengerDocument":"12345678909","seatId":"%s",
-                 "price":210.50,"departureDateTime":"%s","tripId":"%s","isActive":%s}
-                """.formatted(passengerName, UUID.randomUUID(), departure, UUID.randomUUID(), isActive);
+                {"passengerName":"%s","passengerDocument":"12345678909",
+                 "seatId":"%s","tripId":"%s","isActive":%s}
+                """.formatted(passengerName, seatId, tripId, isActive);
     }
 
     protected RequestPostProcessor principal(UserRole role) {

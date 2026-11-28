@@ -1,41 +1,25 @@
 package br.com.passage.api.ticket.internal.service;
 
-import br.com.passage.api.fleet.FleetApi;
 import br.com.passage.api.shared.domain.exceptions.BusinessException;
 import br.com.passage.api.ticket.TicketSold;
 import br.com.passage.api.ticket.internal.domain.entities.Ticket;
 import br.com.passage.api.ticket.internal.dto.CreateTicketRequest;
 import br.com.passage.api.ticket.internal.dto.TicketResponse;
 import br.com.passage.api.ticket.internal.repository.TicketRepository;
-import br.com.passage.api.trip.TripApi;
 import br.com.passage.api.trip.TripInfo;
-import br.com.passage.api.trip.enums.TripStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Set;
 import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 public class CreateTicketService {
 
-    /**
-     * Situações em que a viagem ainda admite venda.
-     *
-     * <p>Uma viagem em andamento, concluída ou cancelada não recebe
-     * passageiros novos.</p>
-     */
-    private static final Set<TripStatus> OPEN_FOR_SALE =
-            Set.of(TripStatus.SCHEDULED, TripStatus.BOARDING);
-
     private final TicketRepository ticketRepository;
-    private final TicketAccessService ticketAccessService;
-    private final TripApi tripApi;
-    private final FleetApi fleetApi;
+    private final TicketSaleValidator ticketSaleValidator;
     private final ApplicationEventPublisher events;
 
     @Transactional
@@ -47,26 +31,7 @@ public class CreateTicketService {
 
         // A viagem é a fonte do preço, do horário e da empresa: nenhum
         // desses dados é aceito do cliente.
-        TripInfo trip = tripApi.findTrip(request.tripId());
-
-        if (!OPEN_FOR_SALE.contains(trip.status())) {
-            throw new BusinessException(
-                    "A viagem não está disponível para venda. Situação atual: " + trip.status() + ".");
-        }
-
-        UUID operatorCompany = ticketAccessService.currentCompanyId();
-        if (operatorCompany != null && !operatorCompany.equals(trip.companyUuid())) {
-            throw new AccessDeniedException("Não é possível vender passagens de viagens de outra empresa.");
-        }
-
-        // O assento precisa existir no ônibus que fará a viagem.
-        if (!fleetApi.seatBelongsToBus(request.seatId(), trip.busId())) {
-            throw new BusinessException("O assento informado não pertence ao ônibus da viagem.");
-        }
-
-        if (ticketRepository.existsByTripIdAndSeatIdAndIsDeletedFalse(request.tripId(), request.seatId())) {
-            throw new BusinessException("O assento informado já está vendido para esta viagem.");
-        }
+        TripInfo trip = ticketSaleValidator.validate(request.tripId(), request.seatId(), null);
 
         Ticket ticket = Ticket.builder()
                 .code(request.code())
