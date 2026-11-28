@@ -54,9 +54,9 @@ public record TicketResponse(
                 example = "2026-10-01T08:00:00Z")
         Instant departureDateTime,
 
-        @Schema(description = "Identificador UUID da rota associada",
+        @Schema(description = "Identificador UUID da viagem da passagem",
                 example = "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11")
-        UUID routeId
+        UUID tripId
 ) {
 
     /**
@@ -78,7 +78,7 @@ public record TicketResponse(
                 ticket.getSeatId(),
                 ticket.getPrice(),
                 ticket.getDepartureDateTime(),
-                ticket.getRouteId()
+                ticket.getTripId()
         );
     }
 }

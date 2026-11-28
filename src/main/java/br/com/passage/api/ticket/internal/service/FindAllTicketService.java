@@ -2,14 +2,14 @@ package br.com.passage.api.ticket.internal.service;
 
 import br.com.passage.api.ticket.internal.dto.TicketResponse;
 import br.com.passage.api.ticket.internal.repository.TicketRepository;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class FindAllTicketService {
 
     private final TicketRepository ticketRepository;

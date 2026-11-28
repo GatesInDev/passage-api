@@ -58,12 +58,12 @@ public record UpdateTicketRequest(
         Instant departureDateTime,
 
         @Schema(
-                description = "Identificador UUID da rota associada à passagem",
+                description = "Identificador UUID da viagem da passagem",
                 example = "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11",
                 requiredMode = Schema.RequiredMode.REQUIRED
         )
-        @NotNull(message = "O identificador da rota é obrigatório.")
-        UUID routeId,
+        @NotNull(message = "O identificador da viagem é obrigatório.")
+        UUID tripId,
 
         @Schema(
                 description = "Define se a passagem está ativa no sistema",

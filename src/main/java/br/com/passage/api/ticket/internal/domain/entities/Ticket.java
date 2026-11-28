@@ -59,16 +59,23 @@ public class Ticket extends EntityBase {
     private BigDecimal price;
 
     /**
-     * Data e hora de partida da viagem.
+     * Data e hora de partida registradas na venda.
+     *
+     * <p>Mantido na passagem de propósito: representa o horário contratado
+     * pelo passageiro. Um atraso ou remarcação altera a viagem, mas não o
+     * que foi vendido.</p>
      */
     @Column(name = "departure_date_time", nullable = false)
     private Instant departureDateTime;
 
     /**
-     * Identificador da rota associada à passagem.
+     * Identificador da viagem para a qual a passagem foi vendida.
      *
      * <p>Referenciado por UUID para manter o desacoplamento entre módulos.</p>
+     *
+     * <p>A viagem conhece a rota, o ônibus e o motorista: a passagem guarda
+     * apenas o vínculo, sem repetir esses dados.</p>
      */
-    @Column(name = "route_id", nullable = false)
-    private UUID routeId;
+    @Column(name = "trip_id", nullable = false)
+    private UUID tripId;
 }

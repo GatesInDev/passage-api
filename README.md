@@ -255,7 +255,7 @@ br.com.passage.api
 ├── iam                     # IamApi e CurrentUser (API pública)
 │   ├── enums               # UserRole
 │   └── internal            # autenticação, JWT, usuários
-├── fleet                   # FleetApi
+├── fleet                   # FleetApi, BusInfo e DriverInfo (API pública)
 │   └── internal
 ├── route                   # RouteApi (consulta da empresa de uma rota)
 │   └── internal
@@ -290,6 +290,10 @@ internal
 4. **Relacionamentos entre módulos são feitos por UUID**, não por `@ManyToOne` (ex.: `User.companyUuid`, `Route.companyUuid`, `Trip.routeId`, `Ticket.routeId`).
 5. **Usuário logado:** use `IamApi.currentUser()`, que devolve id, perfil e empresa. Nunca confie em empresa ou usuário enviados no corpo da requisição.
 6. **Dados de outro módulo** são obtidos pela API pública dele, sem expor entidades internas. Ex.: a `trip` descobre a empresa de uma rota com `RouteApi.findCompanyUuid(routeId)`, que devolve só o UUID (ou 404 se a rota não existir).
+
+`FleetApi.findBus(busId)` retorna `BusInfo(id, companyUuid, active, capacity)`, e `FleetApi.findDriver(driverId)` retorna `DriverInfo(id, companyUuid, active)`. Os records pertencem ao pacote público `fleet`. Essa API de consulta entre módulos não depende da role nem do contexto de autenticação do usuário. O caso de uso chamador deve autorizar a operação e comparar o `companyUuid` retornado com a empresa da rota, viagem ou outro recurso já autorizado antes de utilizar os dados. Os endpoints de gestão de fleet continuam restritos por role e tenant através dos serviços de aplicação e do `FleetAccessService`.
+
+As consultas entre módulos não retornam recursos excluídos nem recursos de empresa excluída; nesses casos, lançam `ResourceNotFoundException`. Recursos inativos retornam com `active = false`, e a capacidade considera apenas assentos ativos e não excluídos.
 
 ## Convenções de código
 
@@ -354,6 +358,8 @@ A infraestrutura do Docker precisa estar no ar.
 | `ApiApplicationTests` | A aplicação inicia por completo |
 | `ModularityTests` | As fronteiras entre módulos do Spring Modulith (`ApplicationModules.verify()`) |
 | `IamApiTests` | A API pública do usuário logado |
+| `FleetApiTests` | Contratos públicos de ônibus e motoristas, capacidade, estado ativo e recurso inexistente |
+| `FleetApiIntegrationTests` | Consultas entre módulos independentes de role/autenticação, propriedade do recurso e filtros de exclusão |
 | `UserSoftDeleteTests` | Exclusão lógica de usuários |
 | `UpdateCompanyServiceTests` | Regras de atualização de empresas |
 | `CompanyCrudIntegrationTests` | CRUD de empresas, acesso do gerente e ocultação da frota de empresas excluídas |
