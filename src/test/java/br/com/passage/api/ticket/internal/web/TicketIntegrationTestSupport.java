@@ -3,6 +3,14 @@ package br.com.passage.api.ticket.internal.web;
 import br.com.passage.api.iam.enums.UserRole;
 import br.com.passage.api.iam.internal.domain.entities.User;
 import br.com.passage.api.ticket.internal.domain.entities.Ticket;
+import br.com.passage.api.fleet.internal.domain.entities.Bus;
+import br.com.passage.api.fleet.internal.domain.entities.Company;
+import br.com.passage.api.fleet.internal.domain.entities.Seat;
+import br.com.passage.api.fleet.internal.domain.enums.SeatPosition;
+import br.com.passage.api.fleet.internal.domain.enums.SeatQuality;
+import br.com.passage.api.fleet.internal.repository.BusRepository;
+import br.com.passage.api.fleet.internal.repository.CompanyRepository;
+import br.com.passage.api.fleet.internal.repository.SeatRepository;
 import br.com.passage.api.ticket.internal.repository.TicketRepository;
 import br.com.passage.api.trip.enums.TripStatus;
 import br.com.passage.api.trip.internal.domain.entities.Trip;
@@ -46,13 +54,25 @@ abstract class TicketIntegrationTestSupport {
     @Autowired protected MockMvc mvc;
     @Autowired protected TicketRepository tickets;
     @Autowired protected TripRepository trips;
+    @Autowired protected CompanyRepository companies;
+    @Autowired protected BusRepository buses;
+    @Autowired protected SeatRepository seats;
     @Autowired protected EntityManager entityManager;
 
     /** Empresa do operador autenticado nos testes. */
-    protected final UUID ownCompany = UUID.randomUUID();
+    protected UUID ownCompany;
 
     /** Empresa concorrente, usada para verificar o isolamento. */
-    protected final UUID otherCompany = UUID.randomUUID();
+    protected UUID otherCompany;
+
+    /** Ônibus que fará as viagens da própria empresa. */
+    protected Bus ownBus;
+
+    /** Assento válido do ônibus da própria empresa. */
+    protected Seat ownSeat;
+
+    /** Assento válido do ônibus da outra empresa. */
+    protected Seat otherSeat;
 
     /** Viagem aberta para venda, da própria empresa. */
     protected Trip ownTrip;
@@ -79,9 +99,21 @@ abstract class TicketIntegrationTestSupport {
     void seedTicket() {
         departure = Instant.now().plus(30, ChronoUnit.DAYS).truncatedTo(ChronoUnit.SECONDS);
 
-        ownTrip = saveTrip("TRIP-OWN-", ownCompany, TripStatus.SCHEDULED);
-        otherCompanyTrip = saveTrip("TRIP-OTHER-", otherCompany, TripStatus.SCHEDULED);
-        finishedTrip = saveTrip("TRIP-DONE-", ownCompany, TripStatus.COMPLETED);
+        // A venda confere o assento contra o ônibus da viagem, então a frota
+        // precisa existir de verdade.
+        Company own = saveCompany("Viação Própria", "11222333000181");
+        Company other = saveCompany("Viação Concorrente", "11444777000161");
+        ownCompany = own.getId();
+        otherCompany = other.getId();
+
+        ownBus = saveBus(own);
+        Bus otherBus = saveBus(other);
+        ownSeat = saveSeat(ownBus, "01");
+        otherSeat = saveSeat(otherBus, "01");
+
+        ownTrip = saveTrip("TRIP-OWN-", ownCompany, ownBus.getId(), TripStatus.SCHEDULED);
+        otherCompanyTrip = saveTrip("TRIP-OTHER-", otherCompany, otherBus.getId(), TripStatus.SCHEDULED);
+        finishedTrip = saveTrip("TRIP-DONE-", ownCompany, ownBus.getId(), TripStatus.COMPLETED);
 
         existingTicket = saveTicket("PASS-SEED-001", "Maria Seed", ownCompany);
         otherCompanyTicket = saveTicket("PASS-SEED-002", "Carlos Rival", otherCompany);
@@ -90,12 +122,55 @@ abstract class TicketIntegrationTestSupport {
         entityManager.clear();
     }
 
-    protected Trip saveTrip(String codePrefix, UUID companyUuid, TripStatus status) {
+    /** O CNPJ é validado de verdade pela entidade, então precisa ser real. */
+    protected Company saveCompany(String name, String cnpj) {
+        return companies.save(Company.builder()
+                .corporateName(name)
+                .documentId(cnpj)
+                .stateRegistration("ISENTO")
+                .stateRegulatoryAgency("ANTT")
+                .isActive(true)
+                .build());
+    }
+
+    protected Bus saveBus(Company company) {
+        String plate = "AAA" + randomDigits(4);
+        return buses.save(Bus.builder()
+                .company(company)
+                .code(plate)
+                .model("Model")
+                .manufacturer("Manufacturer")
+                .licensePlate(plate)
+                .isActive(true)
+                .build());
+    }
+
+    protected Seat saveSeat(Bus bus, String seatNumber) {
+        return seats.save(Seat.builder()
+                .bus(bus)
+                .seatNumber(seatNumber)
+                .row(Integer.parseInt(seatNumber))
+                .column(1)
+                .position(SeatPosition.WINDOW)
+                .quality(SeatQuality.STANDARD)
+                .isActive(true)
+                .build());
+    }
+
+    /** Dígitos aleatórios para documentos e placas únicos entre execuções. */
+    protected String randomDigits(int length) {
+        String digits = Long.toString(Math.abs(System.nanoTime()));
+        return digits.length() >= length
+                ? digits.substring(digits.length() - length)
+                : "0".repeat(length - digits.length()) + digits;
+    }
+
+    protected Trip saveTrip(String codePrefix, UUID companyUuid, UUID busId, TripStatus status) {
         return trips.save(Trip.builder()
                 .code(codePrefix + System.nanoTime())
                 .routeId(UUID.randomUUID())
                 .companyUuid(companyUuid)
-                .busId(UUID.randomUUID())
+                .busId(busId)
                 .driverId(UUID.randomUUID())
                 .departureTime(departure)
                 .arrivalTime(departure.plus(8, ChronoUnit.HOURS))
@@ -120,7 +195,7 @@ abstract class TicketIntegrationTestSupport {
     }
 
     protected String createPayload(String code) {
-        return createPayload(code, ownTrip.getId(), UUID.randomUUID());
+        return createPayload(code, ownTrip.getId(), ownSeat.getId());
     }
 
     /** Preço e horário vêm da viagem, não do payload. */

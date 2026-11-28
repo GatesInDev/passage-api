@@ -1,5 +1,6 @@
 package br.com.passage.api.ticket.internal.service;
 
+import br.com.passage.api.fleet.FleetApi;
 import br.com.passage.api.shared.domain.exceptions.BusinessException;
 import br.com.passage.api.ticket.TicketSold;
 import br.com.passage.api.ticket.internal.domain.entities.Ticket;
@@ -34,6 +35,7 @@ public class CreateTicketService {
     private final TicketRepository ticketRepository;
     private final TicketAccessService ticketAccessService;
     private final TripApi tripApi;
+    private final FleetApi fleetApi;
     private final ApplicationEventPublisher events;
 
     @Transactional
@@ -55,6 +57,11 @@ public class CreateTicketService {
         UUID operatorCompany = ticketAccessService.currentCompanyId();
         if (operatorCompany != null && !operatorCompany.equals(trip.companyUuid())) {
             throw new AccessDeniedException("Não é possível vender passagens de viagens de outra empresa.");
+        }
+
+        // O assento precisa existir no ônibus que fará a viagem.
+        if (!fleetApi.seatBelongsToBus(request.seatId(), trip.busId())) {
+            throw new BusinessException("O assento informado não pertence ao ônibus da viagem.");
         }
 
         if (ticketRepository.existsByTripIdAndSeatIdAndIsDeletedFalse(request.tripId(), request.seatId())) {
