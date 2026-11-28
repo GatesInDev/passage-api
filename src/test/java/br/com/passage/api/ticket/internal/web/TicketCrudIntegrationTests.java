@@ -86,7 +86,7 @@ class TicketCrudIntegrationTests extends TicketIntegrationTestSupport {
 
     @Test
     void seatIsSoldOnlyOncePerTrip() throws Exception {
-        UUID seat = UUID.randomUUID();
+        UUID seat = ownSeat.getId();
 
         seller(post(PATH).content(createPayload("PASS-SEAT-1", ownTrip.getId(), seat)))
                 .andExpect(status().isCreated());
@@ -120,13 +120,24 @@ class TicketCrudIntegrationTests extends TicketIntegrationTestSupport {
 
     @Test
     void sellerCannotSellTripsOfAnotherCompany() throws Exception {
-        seller(post(PATH).content(createPayload("PASS-FOREIGN", otherCompanyTrip.getId(), UUID.randomUUID())))
+        seller(post(PATH).content(createPayload("PASS-FOREIGN", otherCompanyTrip.getId(), otherSeat.getId())))
                 .andExpect(status().isForbidden());
 
         // O administrador opera qualquer empresa, e a passagem herda a da viagem.
-        admin(post(PATH).content(createPayload("PASS-ADMIN", otherCompanyTrip.getId(), UUID.randomUUID())))
+        admin(post(PATH).content(createPayload("PASS-ADMIN", otherCompanyTrip.getId(), otherSeat.getId())))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("companyUuid").value(otherCompany.toString()));
+    }
+
+    @Test
+    void seatFromAnotherBusIsRejected() throws Exception {
+        // O assento existe, mas pertence ao ônibus da outra empresa.
+        seller(post(PATH).content(createPayload("PASS-WRONGSEAT", ownTrip.getId(), otherSeat.getId())))
+                .andExpect(status().isConflict());
+
+        // Um identificador que não corresponde a assento algum também é recusado.
+        seller(post(PATH).content(createPayload("PASS-NOSEAT", ownTrip.getId(), UUID.randomUUID())))
+                .andExpect(status().isConflict());
     }
 
     @Test
