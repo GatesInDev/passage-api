@@ -4,6 +4,7 @@ import br.com.passage.api.fleet.internal.domain.entities.Bus;
 import br.com.passage.api.fleet.internal.domain.entities.Driver;
 import br.com.passage.api.fleet.internal.repository.BusRepository;
 import br.com.passage.api.fleet.internal.repository.DriverRepository;
+import br.com.passage.api.fleet.internal.repository.SeatRepository;
 import br.com.passage.api.shared.domain.exceptions.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -17,6 +18,7 @@ public class FleetApi {
 
     private final BusRepository busRepository;
     private final DriverRepository driverRepository;
+    private final SeatRepository seatRepository;
 
     @Transactional(readOnly = true)
     public BusInfo findBus(UUID busId) {
@@ -30,5 +32,10 @@ public class FleetApi {
         Driver driver = driverRepository.findVisibleById(driverId, null)
                 .orElseThrow(() -> new ResourceNotFoundException("Driver not found: " + driverId));
         return new DriverInfo(driver.getId(), driver.getCompany().getId(), driver.isActive());
+    }
+
+    @Transactional(readOnly = true)
+    public boolean seatBelongsToBus(UUID seatId, UUID busId) {
+        return seatRepository.findByIdAndBus_IdAndIsDeletedFalse(seatId, busId).isPresent();
     }
 }

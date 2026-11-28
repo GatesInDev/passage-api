@@ -38,6 +38,7 @@ class FleetApiIntegrationTests extends FleetIntegrationTestSupport {
                 fleetApi.findBus(ownBus.getId()));
         assertEquals(new DriverInfo(ownDriver.getId(), ownCompany.getId(), true),
                 fleetApi.findDriver(ownDriver.getId()));
+        assertTrue(fleetApi.seatBelongsToBus(ownSeat.getId(), ownBus.getId()));
     }
 
     @ParameterizedTest
@@ -49,6 +50,7 @@ class FleetApiIntegrationTests extends FleetIntegrationTestSupport {
                 fleetApi.findBus(otherBus.getId()));
         assertEquals(new DriverInfo(otherDriver.getId(), otherCompany.getId(), true),
                 fleetApi.findDriver(otherDriver.getId()));
+        assertTrue(fleetApi.seatBelongsToBus(otherSeat.getId(), otherBus.getId()));
     }
 
     @ParameterizedTest
@@ -58,6 +60,34 @@ class FleetApiIntegrationTests extends FleetIntegrationTestSupport {
 
         assertEquals(ownCompany.getId(), fleetApi.findBus(ownBus.getId()).companyUuid());
         assertEquals(ownCompany.getId(), fleetApi.findDriver(ownDriver.getId()).companyUuid());
+        assertTrue(fleetApi.seatBelongsToBus(ownSeat.getId(), ownBus.getId()));
+    }
+
+    @Test
+    void seatMembershipRequiresAnExistingSeatAssignedToTheRequestedBus() {
+        assertTrue(fleetApi.seatBelongsToBus(ownSeat.getId(), ownBus.getId()));
+        assertFalse(fleetApi.seatBelongsToBus(ownSeat.getId(), otherBus.getId()));
+        assertFalse(fleetApi.seatBelongsToBus(UUID.randomUUID(), ownBus.getId()));
+        assertFalse(fleetApi.seatBelongsToBus(ownSeat.getId(), UUID.randomUUID()));
+    }
+
+    @Test
+    void deletedSeatsDoNotBelongToTheBus() {
+        seats.findById(ownSeat.getId()).orElseThrow().setDeleted(true);
+        entityManager.flush();
+        entityManager.clear();
+
+        assertFalse(fleetApi.seatBelongsToBus(ownSeat.getId(), ownBus.getId()));
+        assertTrue(fleetApi.seatBelongsToBus(otherSeat.getId(), otherBus.getId()));
+    }
+
+    @Test
+    void inactiveSeatsStillBelongToTheBus() {
+        seats.findById(ownSeat.getId()).orElseThrow().setActive(false);
+        entityManager.flush();
+        entityManager.clear();
+
+        assertTrue(fleetApi.seatBelongsToBus(ownSeat.getId(), ownBus.getId()));
     }
 
     @Test
