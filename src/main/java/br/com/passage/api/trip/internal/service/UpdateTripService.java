@@ -7,6 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import br.com.passage.api.shared.domain.exceptions.BusinessException;
 import br.com.passage.api.shared.domain.exceptions.ResourceNotFoundException;
+import br.com.passage.api.trip.enums.TripStatus;
 import br.com.passage.api.trip.internal.domain.entities.Trip;
 import br.com.passage.api.trip.internal.dto.TripResponse;
 import br.com.passage.api.trip.internal.dto.UpdateTripRequest;
@@ -18,6 +19,7 @@ import lombok.RequiredArgsConstructor;
 public class UpdateTripService {
     
     private final TripFleetValidator tripFleetValidator;
+    private final TripScheduleValidator tripScheduleValidator;
     private final TripRepository tripRepository;
     private final TripAccessService tripAccessService;
     
@@ -27,12 +29,20 @@ public class UpdateTripService {
             .orElseThrow(() -> new ResourceNotFoundException("Viagem não encontrada com o identificador: " + id));
 
         trip.ensureEditable();
+
+        if (request.status() == TripStatus.CANCELED) {
+            trip.changeStatus(TripStatus.CANCELED);
+            return TripResponse.from(tripRepository.save(trip));
+        }
         
         tripFleetValidator.validate(trip.getCompanyUuid(), request.busId(), request.driverId());
 
         if(!request.arrivalTime().isAfter(request.departureTime())){
             throw new BusinessException("O horário de chegada deve ser posterior ao horário de partida.");
         }
+
+        tripScheduleValidator.validate(request.busId(), request.driverId(),
+                request.departureTime(), request.arrivalTime(), trip.getId());
 
         trip.changeStatus(request.status());
         trip.setBusId(request.busId());

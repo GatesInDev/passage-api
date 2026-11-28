@@ -23,6 +23,7 @@ import lombok.AllArgsConstructor;
 public class CreateTripService {
     
     private final TripFleetValidator tripFleetValidator;
+    private final TripScheduleValidator tripScheduleValidator;
     private final TripRepository tripRepository;
     private final IamApi iamApi;
     private final RouteApi routeApi;
@@ -47,6 +48,9 @@ public class CreateTripService {
             throw new BusinessException("O horário de chegada deve ser posterior ao horário de partida.");
         }
         
+        tripScheduleValidator.validate(request.busId(), request.driverId(),
+                request.departureTime(), request.arrivalTime(), null);
+
         Trip trip = new Trip(
             request.code(),
             request.routeId(),
