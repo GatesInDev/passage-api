@@ -1,11 +1,13 @@
 package br.com.passage.api.ticket.internal.service;
 
 import br.com.passage.api.shared.domain.exceptions.BusinessException;
+import br.com.passage.api.ticket.TicketSold;
 import br.com.passage.api.ticket.internal.domain.entities.Ticket;
 import br.com.passage.api.ticket.internal.dto.CreateTicketRequest;
 import br.com.passage.api.ticket.internal.dto.TicketResponse;
 import br.com.passage.api.ticket.internal.repository.TicketRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,6 +19,7 @@ public class CreateTicketService {
 
     private final TicketRepository ticketRepository;
     private final TicketAccessService ticketAccessService;
+    private final ApplicationEventPublisher events;
 
     @Transactional
     public TicketResponse execute(CreateTicketRequest request) {
@@ -46,6 +49,10 @@ public class CreateTicketService {
                 .build();
 
         Ticket saved = ticketRepository.save(ticket);
+
+        // A emissão do documento fiscal corre fora desta transação: a venda
+        // não deve falhar nem esperar caso a SEFAZ esteja indisponível.
+        events.publishEvent(new TicketSold(saved.getId(), saved.getCompanyUuid()));
 
         return TicketResponse.from(saved);
     }
