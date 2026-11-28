@@ -5,12 +5,14 @@ import java.time.Instant;
 import java.util.UUID;
 
 import br.com.passage.api.shared.domain.entities.EntityBase;
+import br.com.passage.api.shared.domain.exceptions.BusinessException;
 import br.com.passage.api.trip.internal.domain.enums.TripStatus;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Table;
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -107,6 +109,7 @@ public class Trip extends EntityBase {
      */
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, length = 20)
+    @Setter(AccessLevel.NONE)
     private TripStatus status;
 
     /**
@@ -119,19 +122,18 @@ public class Trip extends EntityBase {
     private BigDecimal price;
 
     /**
-     * Indica se a viagem pertence à empresa informada.
+     * Altera a situação da viagem, validando se a transição é permitida.
      *
-     * <p>Utilizado para restringir alterações às viagens da própria empresa
-     * do usuário. Retorna {@code false} quando o identificador informado é
-     * nulo, como no caso de usuários sem empresa vinculada.</p>
+     * <p>É a única forma de alterar a situação depois do cadastro. As
+     * transições válidas são definidas por {@link TripStatus#canTransitionTo}.</p>
      *
-     * @param companyUuid UUID da empresa a ser verificada
-     * @return {@code true} se a viagem pertence à empresa informada
+     * @param next nova situação da viagem
+     * @throws BusinessException se a transição não for permitida
      */
-    public boolean belongsTo(UUID companyUuid) {
-        if (companyUuid == null) {
-            return false;
+    public void changeStatus(TripStatus next) {
+        if (!this.status.canTransitionTo(next)) {
+            throw new BusinessException("Não é possível alterar a situação da viagem de " + this.status + " para " + next + ".");
         }
-        return companyUuid.equals(this.companyUuid);
+        this.status = next;
     }
 }

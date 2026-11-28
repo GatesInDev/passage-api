@@ -137,7 +137,7 @@ public class TripController {
             ),
             @ApiResponse(
                     responseCode = "403",
-                    description = "Usuário sem permissão ou viagem pertencente a outra empresa",
+                    description = "Usuário sem permissão para alterar viagens",
                     content = @Content
             ),
             @ApiResponse(

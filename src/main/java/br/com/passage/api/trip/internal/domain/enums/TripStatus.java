@@ -39,5 +39,26 @@ public enum TripStatus {
     /**
      * Viagem cancelada.
      */
-    CANCELED
+    CANCELED;
+
+    /**
+     * Indica se a viagem pode passar da situação atual para a informada.
+     *
+     * <p>Permanecer na mesma situação é sempre permitido. As situações
+     * {@link #COMPLETED} e {@link #CANCELED} são finais.</p>
+     *
+     * @param next situação de destino
+     * @return {@code true} se a transição for permitida
+     */
+    public boolean canTransitionTo(TripStatus next) {
+        if (this == next) {
+            return true;
+        }
+        return switch (this) {
+            case SCHEDULED -> next == BOARDING || next == CANCELED;
+            case BOARDING -> next == IN_PROGRESS || next == CANCELED;
+            case IN_PROGRESS -> next == COMPLETED || next == CANCELED;
+            case COMPLETED, CANCELED -> false;
+        };
+    }
 }
