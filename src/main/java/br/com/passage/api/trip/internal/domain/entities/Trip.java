@@ -6,7 +6,7 @@ import java.util.UUID;
 
 import br.com.passage.api.shared.domain.entities.EntityBase;
 import br.com.passage.api.shared.domain.exceptions.BusinessException;
-import br.com.passage.api.trip.internal.domain.enums.TripStatus;
+import br.com.passage.api.trip.enums.TripStatus;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;

@@ -4,8 +4,8 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.UUID;
 
+import br.com.passage.api.trip.enums.TripStatus;
 import br.com.passage.api.trip.internal.domain.entities.Trip;
-import br.com.passage.api.trip.internal.domain.enums.TripStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 @Schema(description = "Representação detalhada dos dados de resposta de uma viagem")
