@@ -4,10 +4,15 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.*;
 import org.hibernate.validator.constraints.br.CPF;
 
-import java.math.BigDecimal;
-import java.time.Instant;
 import java.util.UUID;
 
+/**
+ * Dados informados na venda de uma passagem.
+ *
+ * <p>Preço, horário de partida e empresa não constam aqui: são obtidos da
+ * viagem no momento da venda, para que não possam ser escolhidos por quem
+ * emite o bilhete.</p>
+ */
 @Schema(description = "Payload com os dados necessários para o cadastro de uma nova passagem")
 public record CreateTicketRequest(
 
@@ -50,36 +55,10 @@ public record CreateTicketRequest(
         UUID seatId,
 
         @Schema(
-                description = "Valor da passagem em reais",
-                example = "189.90",
-                requiredMode = Schema.RequiredMode.REQUIRED
-        )
-        @NotNull(message = "O valor da passagem é obrigatório.")
-        @Positive(message = "O valor da passagem deve ser um valor positivo.")
-        BigDecimal price,
-
-        @Schema(
-                description = "Data e hora da partida (UTC)",
-                example = "2026-10-01T08:00:00Z",
-                requiredMode = Schema.RequiredMode.REQUIRED
-        )
-        @NotNull(message = "A data e hora de partida são obrigatórias.")
-        @Future(message = "A data de partida deve ser uma data futura.")
-        Instant departureDateTime,
-
-        @Schema(
                 description = "Identificador UUID da viagem da passagem",
                 example = "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11",
                 requiredMode = Schema.RequiredMode.REQUIRED
         )
         @NotNull(message = "O identificador da viagem é obrigatório.")
-        UUID tripId,
-
-        @Schema(
-                description = "Identificador UUID da empresa dona da passagem. "
-                        + "Informado apenas por ADMIN: para os demais perfis a empresa "
-                        + "vem do usuário autenticado e este campo é ignorado.",
-                example = "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11"
-        )
-        UUID companyUuid
+        UUID tripId
 ) {}

@@ -85,25 +85,54 @@ class TicketCrudIntegrationTests extends TicketIntegrationTestSupport {
     }
 
     @Test
-    void sellerCompanyWinsOverPayloadAndSeatIsSoldOnlyOnce() throws Exception {
-        // Mesmo informando outra empresa, a venda fica na empresa do vendedor.
-        String spoofed = createPayload("PASS-SPOOF")
-                .replaceFirst("\\{", "{\"companyUuid\":\"" + otherCompany + "\",");
+    void seatIsSoldOnlyOncePerTrip() throws Exception {
+        UUID seat = UUID.randomUUID();
 
-        var created = seller(post(PATH).content(spoofed))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("companyUuid").value(ownCompany.toString()));
-
-        UUID id = responseId(created);
-        var sold = tickets.findById(id).orElseThrow();
+        seller(post(PATH).content(createPayload("PASS-SEAT-1", ownTrip.getId(), seat)))
+                .andExpect(status().isCreated());
 
         // O mesmo assento na mesma viagem não pode ser vendido de novo.
-        String sameSeat = """
-                {"code":"PASS-OTHER","passengerName":"Outro Passageiro","passengerDocument":"12345678909",
-                 "seatId":"%s","price":189.90,"departureDateTime":"%s","tripId":"%s"}
-                """.formatted(sold.getSeatId(), departure, sold.getTripId());
+        seller(post(PATH).content(createPayload("PASS-SEAT-2", ownTrip.getId(), seat)))
+                .andExpect(status().isConflict());
+    }
 
-        seller(post(PATH).content(sameSeat)).andExpect(status().isConflict());
+    @Test
+    void priceAndDepartureComeFromTheTripAndNotFromTheClient() throws Exception {
+        // O payload traz preço e horário forjados; ambos devem ser descartados.
+        String forged = createPayload("PASS-FORGED")
+                .replaceFirst("\\{", "{\"price\":0.01,\"departureDateTime\":\"2030-01-01T00:00:00Z\",");
+
+        var created = seller(post(PATH).content(forged))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("price").value(TRIP_PRICE.doubleValue()))
+                .andExpect(jsonPath("companyUuid").value(ownCompany.toString()));
+
+        var sold = tickets.findById(responseId(created)).orElseThrow();
+        assertEquals(0, TRIP_PRICE.compareTo(sold.getPrice()), "o preço vem da viagem");
+        assertEquals(ownTrip.getDepartureTime(), sold.getDepartureDateTime(), "o horário vem da viagem");
+    }
+
+    @Test
+    void tripClosedForSaleIsRejected() throws Exception {
+        seller(post(PATH).content(createPayload("PASS-DONE", finishedTrip.getId(), UUID.randomUUID())))
+                .andExpect(status().isConflict());
+    }
+
+    @Test
+    void sellerCannotSellTripsOfAnotherCompany() throws Exception {
+        seller(post(PATH).content(createPayload("PASS-FOREIGN", otherCompanyTrip.getId(), UUID.randomUUID())))
+                .andExpect(status().isForbidden());
+
+        // O administrador opera qualquer empresa, e a passagem herda a da viagem.
+        admin(post(PATH).content(createPayload("PASS-ADMIN", otherCompanyTrip.getId(), UUID.randomUUID())))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("companyUuid").value(otherCompany.toString()));
+    }
+
+    @Test
+    void unknownTripIsReportedAsNotFound() throws Exception {
+        seller(post(PATH).content(createPayload("PASS-NOTRIP", UUID.randomUUID(), UUID.randomUUID())))
+                .andExpect(status().isNotFound());
     }
 
     @Test
@@ -129,8 +158,8 @@ class TicketCrudIntegrationTests extends TicketIntegrationTestSupport {
     void invalidPayloadIsRejectedWithFieldDetails() throws Exception {
         String invalid = """
                 {"code":"","passengerName":"Jo","passengerDocument":"00000000000",
-                 "seatId":"%s","price":-50,"departureDateTime":"2020-01-01T08:00:00Z","tripId":"%s"}
-                """.formatted(UUID.randomUUID(), UUID.randomUUID());
+                 "seatId":"%s","tripId":"%s"}
+                """.formatted(UUID.randomUUID(), ownTrip.getId());
 
         seller(post(PATH).content(invalid))
                 .andExpect(status().isBadRequest())
