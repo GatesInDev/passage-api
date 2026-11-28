@@ -31,7 +31,8 @@ class TicketCrudIntegrationTests extends TicketIntegrationTestSupport {
         seller(put(PATH + "/{id}", id).content(updatePayload("João da Silva Santos", true)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("passengerName").value("João da Silva Santos"))
-                .andExpect(jsonPath("price").value(210.50));
+                // O preço continua sendo o da viagem, mesmo numa alteração.
+                .andExpect(jsonPath("price").value(TRIP_PRICE.doubleValue()));
 
         admin(delete(PATH + "/{id}", id)).andExpect(status().isNoContent());
     }
@@ -138,6 +139,45 @@ class TicketCrudIntegrationTests extends TicketIntegrationTestSupport {
         // Um identificador que não corresponde a assento algum também é recusado.
         seller(post(PATH).content(createPayload("PASS-NOSEAT", ownTrip.getId(), UUID.randomUUID())))
                 .andExpect(status().isConflict());
+    }
+
+    @Test
+    void updateCannotForgePriceNorEscapeTheTripRules() throws Exception {
+        UUID id = existingTicket.getId();
+
+        // Preço forjado no payload é descartado: vale o da viagem.
+        String forged = updatePayload("Maria Atualizada", true)
+                .replaceFirst("\\{", "{\"price\":0.01,\"departureDateTime\":\"2030-01-01T00:00:00Z\",");
+
+        seller(put(PATH + "/{id}", id).content(forged))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("price").value(TRIP_PRICE.doubleValue()));
+
+        // Remarcar para viagem encerrada é recusado.
+        seller(put(PATH + "/{id}", id)
+                .content(updatePayload("Maria", finishedTrip.getId(), ownSeat.getId(), true)))
+                .andExpect(status().isConflict());
+
+        // Assento de outro ônibus é recusado também na alteração.
+        seller(put(PATH + "/{id}", id)
+                .content(updatePayload("Maria", ownTrip.getId(), otherSeat.getId(), true)))
+                .andExpect(status().isConflict());
+
+        // Remarcar para viagem de outra empresa é bloqueado.
+        seller(put(PATH + "/{id}", id)
+                .content(updatePayload("Maria", otherCompanyTrip.getId(), otherSeat.getId(), true)))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void updateKeepsTheSameSeatWithoutClashingWithItself() throws Exception {
+        UUID id = existingTicket.getId();
+
+        // Manter o próprio assento não pode ser lido como assento ocupado.
+        seller(put(PATH + "/{id}", id)
+                .content(updatePayload("Maria Mesma Poltrona", ownTrip.getId(), existingTicket.getSeatId(), true)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("seatId").value(existingTicket.getSeatId().toString()));
     }
 
     @Test

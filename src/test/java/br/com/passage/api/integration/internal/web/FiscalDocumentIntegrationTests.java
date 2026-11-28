@@ -124,6 +124,22 @@ class FiscalDocumentIntegrationTests {
     }
 
     @Test
+    void canceledDocumentCannotBeResubmitted() throws Exception {
+        UUID id = issueService.execute(ownTicket.getId()).getId();
+        entityManager.flush();
+
+        admin(post(PATH + "/{id}/cancel", id)).andExpect(status().isOk())
+                .andExpect(jsonPath("status").value("CANCELED"));
+
+        // Reenviar um documento cancelado o faria voltar a valer.
+        seller(post(PATH + "/{id}/retry", id)).andExpect(status().isConflict());
+
+        assertEquals(FiscalDocumentStatus.CANCELED,
+                documents.findById(id).orElseThrow().getStatus(),
+                "o cancelamento é definitivo");
+    }
+
+    @Test
     void unknownDocumentIsReportedAsNotFound() throws Exception {
         UUID unknown = UUID.randomUUID();
 
