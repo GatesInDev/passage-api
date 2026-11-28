@@ -1,4 +1,4 @@
-package br.com.passage.api.trip.internal.domain.enums;
+package br.com.passage.api.trip.enums;
 
 /**
  * Representa a situação de uma viagem.
